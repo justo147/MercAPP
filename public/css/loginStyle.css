@@ -1,0 +1,72 @@
+/* Ajuste general del modelo de caja */
+* {
+    box-sizing: border-box; /* Evita que el padding y borde alteren el tamaño total del elemento */
+}
+
+/* Efecto al hacer clic (ligero encogimiento) */
+.buttom:active {
+    transform: scale(0.95);
+}
+
+.buttom:focus {
+    outline: none; /* Quita el borde al enfocar */
+}
+
+body.dark-mode {
+  background-color: var(--color-background-dark);
+}
+
+.toggle-btn:hover {
+  transform: scale(1.05);
+}
+
+/*Contenedor principal*/
+.container {
+    background-color: var(--color-background);
+    border-radius: 10px; /* Bordes redondeados */
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25),
+                0 10px 10px rgba(0, 0, 0, 0.22); /* Sombra para efecto de tarjeta */
+    width: 360px !important;
+    height: 500px;
+    max-width: 100%;
+    min-height: 380px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/*Redes sociales*/
+.social-container {
+    margin: 20px 0;
+}
+
+/* Botones circulares de redes */
+.social-container a {
+    border: 1px solid #DDD;
+    border-radius: 50%;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 5px;
+    height: 40px;
+    width: 40px;
+}
+
+/* Colores de iconos de redes */
+.bi-facebook {
+    color: #1877f2; /* Azul Facebook */
+}
+
+.bi-google {
+    color: #FFA500; /* Naranja Google */
+}
+
+.bi-linkedin {
+    color: #0a66c2; /* Azul LinkedIn */
+}
+
+/* Efecto hover (suave) */
+.social-container a:hover {
+    transition: 0.3s; /* Falta la unidad 's' */
+}
+

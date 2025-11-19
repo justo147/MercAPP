@@ -1,0 +1,34 @@
+/* Estilos landing-page*/
+
+body.landing-page {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.5), rgba(2, 165, 111, 0.5)),
+    url("../img/imagenportada.jpg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  height: 100vh;
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between; /* separa contenido arriba y botones abajo */
+  text-align: center;
+}
+
+/* Contenido superior */
+.contenidoLandingPage{
+  margin-top: 2vh;
+}
+
+/* Botones al fondo */
+.botonesLandingPage{
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 100px;
+}
+
