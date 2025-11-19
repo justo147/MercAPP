@@ -36,7 +36,6 @@ if (isset($_POST["register"]) && !empty($_POST["name"]) && !empty($_POST["passwo
   <link rel="stylesheet" href="../css/reset.css">
   <link rel="stylesheet" href="../css/style-guide.css">
   <link rel="stylesheet" href="../css/style.css">
-  <script src="../js/registro.js" defer></script>
   <script src="../js/theme.js" defer></script>
 </head>
 
