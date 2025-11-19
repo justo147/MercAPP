@@ -28,7 +28,7 @@ if (usuarioLogueado) {
 } else {
     // Si no hay usuario logueado, redirigir al login
     alert('No has iniciado sesión');
-    window.location.href = 'login.html';
+    window.location.href = 'login.php';
 }
 
 /**

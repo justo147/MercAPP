@@ -14,7 +14,7 @@ session_start();
             $usuario = $consulta->fetch();
 
             if ($usuario && password_verify($password, $usuario['contraseña_hash'])) { 
-                    header("Location: home.html");
+                    header("Location: home.php");
 
             } 
         } catch (PDOException $e) {
@@ -36,7 +36,6 @@ session_start();
   <link rel="shortcut icon" href="../ico/logo_sinfondo.ico" type="image/x-icon">
 
   
-  <script src="../js/login.js" defer></script>
   <link rel="stylesheet" href="../css/loginStyle.css">
   <link rel="stylesheet" href="../css/reset.css">
   <link rel="stylesheet" href="../css/style-guide.css">
