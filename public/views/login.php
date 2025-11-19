@@ -55,7 +55,7 @@ session_start();
     </div>
   <div class="container" id="container">
     <div class="form-container sign-in-container">
-      <form id="formLogin">
+      <form id="formLogin" method="post">
         <h1>Iniciar Sesión</h1>
         <div class="social-container">
           <a href="#" class="social"><i class="bi bi-facebook"></i></a>
@@ -71,7 +71,7 @@ session_start();
     </div>
   </div>
 <br>
-  <a href="register.html">¿No tienes cuenta? Registrate aqui</a>
+  <a href="register.php">¿No tienes cuenta? Registrate aqui</a>
   </div>
 </body>
 </html>

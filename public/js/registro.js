@@ -47,5 +47,5 @@ document.getElementById('formRegistro').addEventListener('submit', function (e) 
   localStorage.setItem('usuarios', JSON.stringify(usuarios));
 
   alert('¡Registro exitoso!');
-  window.location.href = 'login.html';
+  window.location.href = 'login.php';
 });

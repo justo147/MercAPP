@@ -1,3 +1,4 @@
+
 /**
  * Maneja el evento de envío del formulario de login.
  * Valida las credenciales del usuario contra los datos almacenados en localStorage.
@@ -51,3 +52,4 @@ document.getElementById('formLogin').addEventListener('submit', function (e) {
         alert('Email o contraseña incorrectos');
     }
 });
+

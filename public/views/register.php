@@ -47,7 +47,7 @@ if (isset($_POST["register"]) && !empty($_POST["name"]) && !empty($_POST["passwo
   </div>
 
   <div class="form container">
-    <form id="formRegistro">
+    <form id="formRegistro" method="post">
       <h1>Registrar Cuenta</h1>
       Nombre: <input type="text" name="name" /><br />
       Correo electronico: <input type="email" name="email" /><br />
@@ -59,7 +59,7 @@ if (isset($_POST["register"]) && !empty($_POST["name"]) && !empty($_POST["passwo
 
   <br />
 
-  <a href="login.html">¿Ya estás registrado? Inicia sesión aqui</a>
+  <a href="login.php">¿Ya estás registrado? Inicia sesión aqui</a>
 </body>
 
 </html>
