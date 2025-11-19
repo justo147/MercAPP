@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,12 +18,13 @@
     <h2>Compra y venta de segunda mano</h2>
   </div>
 
- <div class="botonesLandingPage">
-  <button id="btn-login" class="button-primary">Iniciar sesión</button>
-  <button id="btn-register" class="button-primary">Regístrate</button>
-</div>
+  <div class="botonesLandingPage">
+    <button id="btn-login" class="button-primary">Iniciar sesión</button>
+    <button id="btn-register" class="button-primary">Regístrate</button>
+  </div>
 
-<script src="../../controlllers/landing-controllers.js"></script>
+  <script src="../../controlllers/landing-controllers.js"></script>
 
 </body>
+
 </html>

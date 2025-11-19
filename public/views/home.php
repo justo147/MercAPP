@@ -16,7 +16,7 @@
 <body>
     <button id="themeToggle" class="toggle-btn" aria-label="Cambiar tema">🌙</button>
     <div class="welcome sinFondo">
-    <h1>Pagina de inicio</h1>
+        <h1>Pagina de inicio</h1>
     </div>
     <h2 id="welcomeMessage"></h2>
     <br>
