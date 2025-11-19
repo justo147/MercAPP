@@ -1,3 +1,30 @@
+<?php
+session_start();
+
+
+    if (isset($_POST["login"]) && !empty($_POST['email']) && !empty($_POST['password'])) {
+        $email = $_POST['email'];
+        $password = $_POST['password'];
+
+        try {
+            $bd = new PDO('mysql:host=localhost;dbname=mercapp;charset=utf8', 'root', '');
+
+            $consulta = $bd->prepare("SELECT * FROM usuario WHERE email = ?");
+            $consulta->execute([$email]);
+            $usuario = $consulta->fetch();
+
+            if ($usuario && password_verify($password, $usuario['contraseña_hash'])) { 
+                    header("Location: home.html");
+
+            } 
+        } catch (PDOException $e) {
+           die($e->getMessage());
+        }
+    }
+
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 
