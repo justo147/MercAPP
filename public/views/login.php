@@ -2,25 +2,25 @@
 session_start();
 
 
-    if (isset($_POST["login"]) && !empty($_POST['email']) && !empty($_POST['password'])) {
-        $email = $_POST['email'];
-        $password = $_POST['password'];
+if (isset($_POST["login"]) && !empty($_POST['email']) && !empty($_POST['password'])) {
+  $email = $_POST['email'];
+  $password = $_POST['password'];
 
-        try {
-            $bd = new PDO('mysql:host=localhost;dbname=mercapp;charset=utf8', 'root', '');
+  try {
+    $bd = new PDO('mysql:host=localhost;dbname=mercapp;charset=utf8', 'root', '');
 
-            $consulta = $bd->prepare("SELECT * FROM usuario WHERE email = ?");
-            $consulta->execute([$email]);
-            $usuario = $consulta->fetch();
+    $consulta = $bd->prepare("SELECT * FROM usuario WHERE email = ?");
+    $consulta->execute([$email]);
+    $usuario = $consulta->fetch();
 
             if ($usuario && password_verify($password, $usuario['contraseña_hash'])) { 
                     header("Location: home.php");
 
-            } 
-        } catch (PDOException $e) {
-           die($e->getMessage());
-        }
     }
+  } catch (PDOException $e) {
+    die($e->getMessage());
+  }
+}
 
 ?>
 
@@ -46,31 +46,32 @@ session_start();
 
 
 <body>
-<header>
-  <button id="themeToggle" class="toggle-btn" aria-label="Cambiar tema">🌙</button>
+  <header>
+    <button id="themeToggle" class="toggle-btn" aria-label="Cambiar tema">🌙</button>
 
-  <div class="imageLogo sinFondo">
+    <div class="imageLogo sinFondo">
       <img src="../img/logo_sinfondo.png" alt="Logo de MercaAPP" class="imageLogo">
     </div>
-  <div class="container" id="container">
-    <div class="form-container sign-in-container">
-      <form id="formLogin" method="post">
-        <h1>Iniciar Sesión</h1>
-        <div class="social-container">
-          <a href="#" class="social"><i class="bi bi-facebook"></i></a>
-          <a href="#" class="social"><i class="bi bi-google"></i></a>
-          <a href="#" class="social"><i class="bi bi-linkedin"></i></a>
-        </div>
-        <span>Use su cuenta</span>
-        <input  type="email" name="email" placeholder="Escriba su correo" />
-        <input type="password" name="password" placeholder="Contraseña" />
-        <a href="#">¿Olvidaste tu contraseña?</a>
-        <input type="submit" name="login" value="Iniciar Sesión" class="button-primary" />
-      </form>
+    <div class="container" id="container">
+      <div class="form-container sign-in-container">
+        <form id="formLogin" method="post">
+          <h1>Iniciar Sesión</h1>
+          <div class="social-container">
+            <a href="#" class="social"><i class="bi bi-facebook"></i></a>
+            <a href="#" class="social"><i class="bi bi-google"></i></a>
+            <a href="#" class="social"><i class="bi bi-linkedin"></i></a>
+          </div>
+          <span>Use su cuenta</span>
+          <input type="email" name="email" placeholder="Escriba su correo" />
+          <input type="password" name="password" placeholder="Contraseña" />
+          <a href="#">¿Olvidaste tu contraseña?</a>
+          <input type="submit" name="login" value="Iniciar Sesión" class="button-primary" />
+        </form>
+      </div>
     </div>
-  </div>
-<br>
-  <a href="register.php">¿No tienes cuenta? Registrate aqui</a>
-  </div>
+    <br>
+    <a href="register.php">¿No tienes cuenta? Registrate aqui</a>
+    </div>
 </body>
+
 </html>

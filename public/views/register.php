@@ -48,7 +48,7 @@ if (isset($_POST["register"]) && !empty($_POST["name"]) && !empty($_POST["passwo
   <div class="form container">
     <form id="formRegistro" method="post">
       <h1>Registrar Cuenta</h1>
-      Nombre: <input type="text" name="name" /><br />
+      Nick: <input type="text" name="name" /><br />
       Correo electronico: <input type="email" name="email" /><br />
       Contraseña: <input type="password" name="password" /><br />
       Confirmar contraseña: <input type="password" name="confirmPass" /><br /><br />
