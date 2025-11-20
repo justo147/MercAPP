@@ -23,7 +23,7 @@
     <button id="btn-register" class="button-primary">Regístrate</button>
   </div>
 
-  <script src="../../controlllers/landing-controllers.js"></script>
+  <script src="../../controllers/landing-controllers.js"></script>
 
 </body>
 
