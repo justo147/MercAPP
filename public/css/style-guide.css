@@ -15,6 +15,14 @@
   --color-muted: #777777;            /* Texto desactivado o menos importante */
   --color-text-dark: #f9f9f9;
   --color-background-dark: #1b1b1b; /* Fondo oscuro */
+  
+  /* modificar colores por defecto de bootstrap*/
+  --bs-primary: #04aa86; /* tu verde */
+  --bs-secondary: #e9d9c2; /* tu beige */
+  --bs-link-color: var(--bs-primary);
+  --bs-link-hover-color: #03503f;
+
+
 }
 
 /* ------------------------------
@@ -220,21 +228,21 @@ span {
   margin: 0 auto;                         /* Centra el contenido horizontalmente */
 }  
 
-.container {
+/*.container {
   background-color: var(--color-background);
   border-radius: 10px;
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25),
               0 10px 10px rgba(0, 0, 0, 0.22);
   width: 90%;
-  max-width: 400px;     /* tamaño máximo en pantallas grandes */
-  padding: 30px 20px;    /* espacio interno para que los inputs no se peguen a los bordes */
+  max-width: 400px;     
+  padding: 30px 20px;    
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
 }
-
+*/
 
 .section {
   padding: 3rem 0;                        /* Espaciado vertical para secciones */
