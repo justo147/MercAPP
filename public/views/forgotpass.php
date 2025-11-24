@@ -54,11 +54,11 @@ if (isset($_POST["reset"]) && !empty($_POST["email"])) {
   </div>
 
   <!-- Contenedor del formulario -->
-  <div class="card shadow p-4 rounded-3 " style="max-width: 400px; width: 100%;">
-    <form id="formReset" method="post" action="process_forgot.php">
+  <div class="container shadow p-4 rounded-3 sinFondo" style="max-width: 400px; width: 100%;">
+    <form id="formReset" method="post" action="process_forgot.php" class="form">
       <h1 class="text-center mb-4">Recuperar Contraseña</h1>
 
-      <div class="mb-3">
+      <div class="mb-3 sinFondo">
         <label for="email" class="form-label">Correo electrónico</label>
         <input type="email" class="form-control border border-primary rounded" id="email" name="email" required>
       </div>
@@ -74,7 +74,7 @@ if (isset($_POST["reset"]) && !empty($_POST["email"])) {
   </div>
 
   <!-- Enlace inferior -->
-  <div class="text-center mt-3">
+  <div class="text-center mt-3 sinFondo">
     <a href="login.php" >Volver al inicio de sesión</a>
   </div>
 </body>

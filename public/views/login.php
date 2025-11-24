@@ -1,6 +1,8 @@
 <?php
 require_once '../../controllers/AuthController.php';
 
+
+
 $error_message = "";
 
 if (isset($_POST["login"])) {
@@ -14,6 +16,10 @@ if (isset($_POST["login"])) {
   if (is_string($result)) {
     $error_message = $result;
   }
+}
+//comprobamos que la session no estaba iniciada
+if(isset($_SESSION["user_id"])){
+  header("location:home.php");
 }
 ?>
 <!DOCTYPE html>
@@ -32,7 +38,6 @@ if (isset($_POST["login"])) {
   <link rel="stylesheet" href="../css/loginStyle.css">
   <link rel="stylesheet" href="../css/reset.css">
   <link rel="stylesheet" href="../css/style-guide.css">
-  <link rel="stylesheet" href="../css/style.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
   <script src="../js/theme.js" defer></script>
   <style>
@@ -56,11 +61,11 @@ if (isset($_POST["login"])) {
     </div>
   </header>
 
-  <div class="container d-flex justify-content-center align-items-center min-vh-80" id="container">
-    <form id="formLogin" method="post">
+  <div class="container d-flex justify-content-center align-items-center sinFondo" id="container">
+    <form id="formLogin" method="post" class="form">
       <h1>Iniciar Sesión</h1>
   <!--bootstrap para los iconos y redondearlo-->
-      <div class="d-flex justify-content-center gap-2 my-3">
+      <div class="d-flex justify-content-center gap-2 my-3 sinFondo">
         <a href="#" class="btn btn-outline-primary rounded-circle d-flex align-items-center justify-content-center" style="width:40px; height:40px;">
           <i class="bi bi-facebook"></i>
         </a>
@@ -89,7 +94,7 @@ if (isset($_POST["login"])) {
   </div>
 
   <br>
-  <div style="text-align: center;">
+  <div style="text-align: center;" class="sinFondo">
     <a href="register.php">¿No tienes cuenta? Regístrate aquí</a>
   </div>
 

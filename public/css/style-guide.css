@@ -5,25 +5,28 @@
    - Así puedes reutilizarlos fácilmente en todo tu sitio.
 --------------------------------*/
 :root {
-  --color-primary: #04aa86;          /* Verde principal para enlaces y botones */
-  --color-primary-dark: #03503f;     /* Verde más oscuro para hover o énfasis */
-  --color-secondary: #e9d9c2;        /* Beige secundario para acentos */
-  --color-secondary-dark: rgb(170, 149, 117);   /* Variante oscura del beige */
-  --color-background: #ffffff;       /* Fondo principal blanco */
-  --color-surface: #f5f5f5;          /* Fondo gris claro para secciones */
-  --color-text: #333333;             /* Texto principal oscuro */
-  --color-muted: #777777;            /* Texto desactivado o menos importante */
+  --color-primary: #04aa86;
+  --color-primary-dark: #03503f;
+  --color-secondary: #e9d9c2;
+  --color-secondary-dark: rgb(170, 149, 117);
+  --color-background: #ffffff;
+  --color-surface: #f5f5f5;
+  --color-text: #333333;
+  --color-muted: #777777;
   --color-text-dark: #f9f9f9;
-  --color-background-dark: #1b1b1b; /* Fondo oscuro */
-  
-  /* modificar colores por defecto de bootstrap*/
+  --color-background-dark: #1b1b1b;
+
+  /* modificar colores por defecto de bootstrap */
   --bs-primary: #04aa86; /* tu verde */
+  --bs-primary-rgb: 4, 170, 134; /* versión RGB */
+  
   --bs-secondary: #e9d9c2; /* tu beige */
+  --bs-secondary-rgb: 233, 217, 194;
+
   --bs-link-color: var(--bs-primary);
   --bs-link-hover-color: #03503f;
-
-
 }
+
 
 /* ------------------------------
    2. TIPOGRAFÍA GLOBAL
@@ -32,25 +35,32 @@
    - Los títulos tienen un color primario y pesos fuertes.
 --------------------------------*/
 body {
-  font-family: "Inter", Arial, sans-serif; /* Fuente moderna, con fallback */
-  font-size: 16px;                         /* Tamaño base del texto */
-  line-height: 1.6;                        /* Espaciado entre líneas legible */
-  background-color: var(--color-background); /* Fondo general */
-  color: var(--color-text);                /* Color del texto */
-  display: flex; /* Activa flexbox para alinear el contenido */
-  justify-content: center; /* Centra horizontalmente */
-  align-items: center; /* Centra verticalmente */
-  flex-direction: column; /* Coloca los elementos uno debajo del otro */
-  height: auto; /* Ocupa toda la altura de la ventana */
-  margin: -20px 0 50px; /* Ajuste del margen exterior */
+  font-family: "Inter", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  margin: 0;
 }
 
 
 /* Modo oscuro aplicado solo a body, inputs */
+
 body.dark-mode {
   background-color: var(--color-background-dark); /* Fondo general */
   color: var(--color-text-dark);                  /* Texto claro */
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+body.dark-mode .list-group-item {
+  background-color: var(--color-background-dark); /* Fondo general */
+  color: var(--color-text-dark);                  /* Texto claro */
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body.dark-mode .form {
+  background-color: var(--color-background-dark); /* mismo fondo que el body */
+  color: var(--color-text-dark);         /* mismo color de texto */
+  border-color: var(--bs-border-color);/* borde adaptado */
 }
 
 
@@ -78,16 +88,7 @@ body.dark-mode form {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-form {
-    background-color: var(--color-background); /* Usa el color de fondo definido en las variables del style guide */
-    display: flex; /* Activa flexbox para organizar los elementos internos */
-    align-items: center; /* Centra los elementos verticalmente dentro del formulario */
-    justify-content: center; /* Centra los elementos horizontalmente */
-    flex-direction: column; /* Coloca los elementos del formulario uno debajo del otro */
-    padding: 0 40px; /* Añade espacio a los lados del formulario */
-    height: 100%; /* Hace que el formulario ocupe toda la altura de su contenedor */
-    text-align: center; /* Centra el texto de los elementos internos */
-}
+
 
 input {
     background-color: var(--color-surface); /* Da un fondo gris claro a los campos de entrada */
@@ -215,6 +216,16 @@ span {
   background-color: var(--color-primary-dark);
 }
 
+/* Botón toggle */
+#themeToggle {
+  width: 40px;
+  height: 40px;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 
 /* ------------------------------
    4. ELEMENTOS DE CONTENEDOR
@@ -222,27 +233,6 @@ span {
    - Clases para estructurar contenido con márgenes consistentes.
 --------------------------------*/
 
- .containerdw {
-  width: 90%;                             /* Ocupa 90% del ancho de la pantalla */
-  max-width: 1200px;                      /* Máximo ancho para no estirarse demasiado */
-  margin: 0 auto;                         /* Centra el contenido horizontalmente */
-}  
-
-/*.container {
-  background-color: var(--color-background);
-  border-radius: 10px;
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25),
-              0 10px 10px rgba(0, 0, 0, 0.22);
-  width: 90%;
-  max-width: 400px;     
-  padding: 30px 20px;    
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-}
-*/
 
 .section {
   padding: 3rem 0;                        /* Espaciado vertical para secciones */
@@ -273,4 +263,26 @@ span {
 }
 .text-muted {
   color: var(--color-muted);              /* Texto gris suave */
+}
+
+
+/* ------------------------------
+   6. cards
+   ------------------------------
+   - Clases de card.
+--------------------------------*/
+
+/* Cards */
+.card {
+  border: none;
+  border-radius: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+.card-title {
+  font-weight: 600;
+  color: var(--color-primary);
 }

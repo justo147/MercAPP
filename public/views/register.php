@@ -1,5 +1,10 @@
 <?php
 session_start();
+//comprobamos que la session no esta iniciada
+if(isset($_SESSION["user_id"])){
+  header("location:home.php");
+}
+
 
 if (isset($_POST["register"]) && !empty($_POST["name"]) && !empty($_POST["password"]) && !empty($_POST["confirmPass"]) && !empty($_POST["email"]) && $_POST["password"] === $_POST["confirmPass"]) {
   $name = $_POST["name"];
@@ -78,26 +83,26 @@ if (isset($_POST["register"]) && !empty($_POST["name"]) && !empty($_POST["passwo
   </div>
 
   <!-- Contenedor del formulario -->
-  <div class="card shadow p-4" style="max-width: 400px; width: 100%;">
-    <form id="formRegistro" method="post">
+  <div class="container shadow p-4 sinFondo" style="max-width: 400px; width: 100%;">
+    <form id="formRegistro" method="post" class="form">
       <h1 class="text-center mb-4">Registrar Cuenta</h1>
 
-      <div class="mb-3 ">
+      <div class="mb-3 sinFondo">
         <label for="name" class="form-label">Nombre</label>
         <input type="text" class="form-control border border-primary rounded" id="name" name="name" required>
       </div>
 
-      <div class="mb-3">
+      <div class="mb-3 sinFondo">
         <label for="email" class="form-label">Correo electrónico</label>
         <input type="email" class="form-control border border-primary rounded" id="email" name="email" required>
       </div>
 
-      <div class="mb-3">
+      <div class="mb-3 sinFondo">
         <label for="password" class="form-label">Contraseña</label>
         <input type="password" class="form-control border border-primary rounded" id="password" name="password" required>
       </div>
 
-      <div class="mb-3">
+      <div class="mb-3 sinFondo">
         <label for="confirmPass" class="form-label">Confirmar contraseña</label>
         <input type="password" class="form-control border border-primary rounded" id="confirmPass" name="confirmPass" required>
       </div>
@@ -107,7 +112,7 @@ if (isset($_POST["register"]) && !empty($_POST["name"]) && !empty($_POST["passwo
   </div>
 
   <!-- Enlace inferior -->
-  <div class="text-center mt-3">
+  <div class="text-center mt-3 sinFondo">
     <a href="login.php" >¿Ya estás registrado? Inicia sesión aquí</a>
   </div>
 </body>

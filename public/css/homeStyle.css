@@ -29,13 +29,21 @@
     text-align: center;
 }
 
-.welcome{
-    margin-top:5vh;
-}
 
 body.dark-mode p {
   color: var(--color-text-dark);
 }
-.welcome{
-  background-color: transparent;
+
+.perfil-box {
+  display: block;          /* ocupa su propio bloque */
+  min-width: 250px;        /* tamaño mínimo */
+  max-width: 400px;        /* tamaño máximo más compacto */
+  width: auto;             /* se ajusta al contenido */
 }
+
+.perfil-box .list-group-item {
+  min-height: 50px;
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+}
+
