@@ -55,7 +55,7 @@ if (isset($_POST["reset"]) && !empty($_POST["email"])) {
 
   <!-- Contenedor del formulario -->
   <div class="card shadow p-4 rounded-3 " style="max-width: 400px; width: 100%;">
-    <form id="formReset" method="post">
+    <form id="formReset" method="post" action="process_forgot.php">
       <h1 class="text-center mb-4">Recuperar Contraseña</h1>
 
       <div class="mb-3">
