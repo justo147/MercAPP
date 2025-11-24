@@ -83,7 +83,7 @@ if (isset($_POST["login"])) {
       <input type="email" name="email" class="form-control border border-primary rounded" placeholder="Escriba su correo" required value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>" />
       <input type="password" name="password" class="form-control border border-primary rounded" placeholder="Contraseña" required />
 
-      <a href="#">¿Olvidaste tu contraseña?</a>
+      <a href="forgotpass.php">¿Olvidaste tu contraseña?</a>
       <input type="submit" name="login" value="Iniciar Sesión" class="button-primary" />
     </form>
   </div>

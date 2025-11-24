@@ -14,7 +14,7 @@ if (isset($_POST["register"]) && !empty($_POST["name"]) && !empty($_POST["passwo
     $bd = new PDO("mysql:host=localhost;dbname=mercapp", "root", "");
 
     $consulta = $bd->prepare("INSERT INTO usuario(email,contraseña_hash,nombre) VALUES (?,?,?)");
-    $consulta->execute([$email, $name, $password_encripted]);
+    $consulta->execute([$email,  $password_encripted,$name]);
 
     if ($consulta->rowCount() == 1) {
       header("Location: login.php");
@@ -31,7 +31,7 @@ if (isset($_POST["register"]) && !empty($_POST["name"]) && !empty($_POST["passwo
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Document</title>
+  <title>Registro de MercApp</title>
    <!-- enlaces a bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
@@ -84,7 +84,7 @@ if (isset($_POST["register"]) && !empty($_POST["name"]) && !empty($_POST["passwo
 
   <!-- Enlace inferior -->
   <div class="text-center mt-3">
-    <a href="login.php">¿Ya estás registrado? Inicia sesión aquí</a>
+    <a href="login.php" >¿Ya estás registrado? Inicia sesión aquí</a>
   </div>
 </body>
 
