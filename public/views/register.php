@@ -13,7 +13,7 @@ if (isset($_POST["register"]) && !empty($_POST["name"]) && !empty($_POST["passwo
     // conectar a la bbdd
     $bd = new PDO("mysql:host=localhost;dbname=mercapp", "root", "");
 
-    $consulta = $bd->prepare("INSERT INTO usuario(email, nick, contraseña_hash) VALUES (?,?,?)");
+    $consulta = $bd->prepare("INSERT INTO usuario(email,contraseña_hash,nombre) VALUES (?,?,?)");
     $consulta->execute([$email, $name, $password_encripted]);
 
     if ($consulta->rowCount() == 1) {
@@ -59,7 +59,7 @@ if (isset($_POST["register"]) && !empty($_POST["name"]) && !empty($_POST["passwo
       <h1 class="text-center mb-4">Registrar Cuenta</h1>
 
       <div class="mb-3 ">
-        <label for="name" class="form-label">Nick</label>
+        <label for="name" class="form-label">Nombre</label>
         <input type="text" class="form-control border border-primary rounded" id="name" name="name" required>
       </div>
 

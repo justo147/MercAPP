@@ -34,9 +34,8 @@ VALUES ('activo'), ('pausado'), ('vendido');
 CREATE TABLE Usuario (
   id INT AUTO_INCREMENT PRIMARY KEY,
   email VARCHAR(100) UNIQUE NOT NULL,
-  nick VARCHAR(50) UNIQUE NOT NULL,
   contraseña_hash VARCHAR(255) NOT NULL,
-  nombre VARCHAR(100),
+  nombre VARCHAR(100) UNIQUE NOT NULL,
   apellidos VARCHAR(100),
   telefono VARCHAR(20),
   foto_perfil VARCHAR(255),
