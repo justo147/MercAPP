@@ -10,12 +10,12 @@ try {
   $mail->isSMTP();
   $mail->Host = 'smtp.office365.com';
   $mail->SMTPAuth = true;
-  $mail->Username = 'justo@outlook.com';
-  $mail->Password = 'tu_contraseña_de_aplicación';
+  $mail->Username = 'sergiodaw2025@outlook.com';
+  $mail->Password = 'tuzvwpiimnwtgbrz';
   $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
   $mail->Port = 587;
 
-  $mail->setFrom('justo@outlook.com', 'MercaAPP');
+  $mail->setFrom('sergiodaw2025@outlook.com', 'MercaAPP');
   $mail->addAddress($toEmail, $toName);
 
   $mail->isHTML(true);
