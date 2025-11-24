@@ -16,9 +16,33 @@ if (isset($_POST["register"]) && !empty($_POST["name"]) && !empty($_POST["passwo
     $consulta = $bd->prepare("INSERT INTO usuario(email,contraseña_hash,nombre) VALUES (?,?,?)");
     $consulta->execute([$email,  $password_encripted,$name]);
 
-    if ($consulta->rowCount() == 1) {
-      header("Location: login.php");
-    }
+    if ($consulta->rowCount() === 1) {
+  // Generar token seguro
+  $verifyToken = bin2hex(random_bytes(32));
+
+  // Guardar token en la BD
+  $upd = $bd->prepare("UPDATE usuario SET verify_token = ? WHERE email = ?");
+  $upd->execute([$verifyToken, $email]);
+
+  // Crear enlace de verificación
+  $verifyLink = "http://localhost/MercApp/public/views/verify_email.php?token={$verifyToken}&email=" . urlencode($email);
+
+  // Enviar correo
+  require __DIR__ . '/../../config/mail_config.php';
+  $subject = "Confirma tu correo en MercaAPP";
+  $body = "
+    <h2>¡Bienvenido, {$name}!</h2>
+    <p>Confirma tu correo para activar tu cuenta:</p>
+    <p><a href='{$verifyLink}' style='background:#0d6efd;color:#fff;padding:10px 12px;border-radius:6px;text-decoration:none;'>Confirmar correo</a></p>
+    <p>Si el botón no funciona, copia este enlace:<br>{$verifyLink}</p>
+  ";
+
+  sendMail($email, $name, $subject, $body);
+
+  header("Location: pending_verification.php");
+  exit;
+}
+
   } catch (PDOException $e) {
     die($e->getMessage());
   }

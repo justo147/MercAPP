@@ -34,6 +34,10 @@ VALUES ('activo'), ('pausado'), ('vendido');
 CREATE TABLE Usuario (
   id INT AUTO_INCREMENT PRIMARY KEY,
   email VARCHAR(100) UNIQUE NOT NULL,
+  email_verificado TINYINT(1) DEFAULT 0,
+  verify_token VARCHAR(64) NULL,
+  reset_token VARCHAR(64) NULL,
+  reset_expires DATETIME NULL,
   contraseña_hash VARCHAR(255) NOT NULL,
   nombre VARCHAR(100) UNIQUE NOT NULL,
   apellidos VARCHAR(100),

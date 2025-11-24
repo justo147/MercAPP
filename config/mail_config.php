@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -26,8 +26,9 @@ try {
   $mail->send();
   return true;
 } catch (Exception $e) {
-  error_log('Mailer Error: ' . $mail->ErrorInfo);
-  return false;
+    echo "Error al enviar correo: {$mail->ErrorInfo}";
+    return false;
 }
+
 
 }
