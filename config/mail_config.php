@@ -4,22 +4,19 @@ require __DIR__ . '/../vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-function sendMail($toEmail, $toName, $subject, $htmlBody, $altBody = ''): bool
-{
+function sendMail($toEmail, $toName, $subject, $htmlBody, $altBody = ''): bool {
   $mail = new PHPMailer(true);
-  $mail->SMTPDebug = 2; // o 3 para más detalle
-  $mail->Debugoutput = 'html';
 
   try {
     $mail->isSMTP();
-    $mail->Host = 'smtp.office365.com';
+    $mail->Host = 'smtp.gmail.com';
     $mail->SMTPAuth = true;
-    $mail->Username = 'sergiodaw2025@outlook.es';
-    $mail->Password = 'eashfpuivgoiwksq';
+    $mail->Username = 'mercappbusiness@gmail.com';          // tu correo Gmail completo
+    $mail->Password = 'hchz ujlz uxsu tvih';  // contraseña de aplicación
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port = 587;
 
-    $mail->setFrom('sergiodaw2025@outlook.es', 'MercaAPP');
+    $mail->setFrom('mercappbusiness@gmail.com', 'MercaAPP');
     $mail->addAddress($toEmail, $toName);
 
     $mail->isHTML(true);
