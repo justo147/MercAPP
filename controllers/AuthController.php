@@ -26,6 +26,12 @@ class AuthController {
                 $row = $stmt->fetch(PDO::FETCH_ASSOC);
                 
                 if (password_verify($password, $row['contraseña_hash'])) {
+                    
+                    // Comprobar si la cuenta está verificada
+                    if ($row['email_verificado'] != 1) {
+                        return "Su cuenta aún no está verificada. Por favor, revise su correo electrónico.";
+                    }
+
                     // Login exitoso
                     session_regenerate_id(true); // Seguridad: prevenir fijación de sesión
                     $_SESSION['user_id'] = $row['id']; // Asumiendo que hay un campo id
