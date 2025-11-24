@@ -15,7 +15,7 @@ function sendMail($toEmail, $toName, $subject, $htmlBody, $altBody = ''): bool
     $mail->Host = 'smtp.office365.com';
     $mail->SMTPAuth = true;
     $mail->Username = 'sergiodaw2025@outlook.es';
-    $mail->Password = 'tuzvwpiimnwtgbrz';
+    $mail->Password = 'eashfpuivgoiwksq';
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port = 587;
 
