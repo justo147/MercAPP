@@ -17,7 +17,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($_POST["password"] !== $_POST["confirmPass"]) {
         echo json_encode(["status" => "error", "message" => "Las contraseñas no coinciden."]);
         exit;
-    } else {
+
+    } elseif (!filter_var($_POST["email"],FILTER_VALIDATE_EMAIL)) {
+    echo json_encode(["status" => "error", "message" => "El correo tiene que ser valido."]);
+  }
+     else {
         // Si pasa las validaciones básicas, recogemos los datos
         $name = $_POST["name"];
         $password = $_POST["password"];
