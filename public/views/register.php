@@ -68,6 +68,7 @@ if (isset($_POST["register"]) && !empty($_POST["name"]) && !empty($_POST["passwo
 
   <link rel="stylesheet" href="../css/reset.css">
   <link rel="stylesheet" href="../css/style-guide.css">
+  <script src="../js/registerValidation.js" defer></script>
   <script src="../js/theme.js" defer></script>
  
 
