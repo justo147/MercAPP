@@ -14,7 +14,7 @@ const pass2 = document.getElementById('confirmPass');       // input de confirma
 // Escuchamos el evento submit y evitamos el envío automático.
 // En su lugar, llamamos a la función de validación.
 formRegister.addEventListener('submit', function (e) {
-    // e.preventDefault(); // evita que el formulario se envíe antes de validar
+    e.preventDefault(); // evita que el formulario se envíe antes de validar
     validationForm();   // llama a la función que valida todos los campos
 });
 
@@ -57,16 +57,54 @@ function validationForm() {
 
     // Comprobación de que ambas contraseñas coinciden
     if (pass1.value != pass2.value) {
-        showError(pass2,'Las contraseñas tienen que ser iguales');
+        showError(pass2, 'Las contraseñas tienen que ser iguales');
         valid = false;
     }
 
     // Si todos los campos son válidos, se puede enviar el formulario
     if (valid) {
-        console.log("Formulario válido");
-        formRegister.submit(); // envía el formulario
+        enviarFormulario();
     }
 }
+
+
+/* ==============================================
+   ENVIO DE DATOS AL SERVIDOR DE FORMA ASINCRONA
+   ============================================== */
+async function enviarFormulario() {
+    const datos = new FormData(formRegister);
+
+    try {
+        const respuesta = await fetch('../views/register.php', {
+            method: 'POST',
+            body: datos
+        });
+
+        if (!respuesta.ok) throw new Error("Error en la petición");
+
+        // Aquí asumimos que PHP devuelve JSON con {status, message}
+        const resultado = await respuesta.json();
+
+        if (resultado.status === "ok") {
+            document.getElementById('respuesta').innerHTML = `
+                <div class="alert alert-success">${resultado.message}</div>
+            `;
+            // opcional: redirigir si PHP lo indica
+            if (resultado.redirect) {
+                window.location.href = resultado.redirect;
+            }
+        } else {
+            document.getElementById('respuesta').innerHTML = `
+                <div class="alert alert-danger">${resultado.message}</div>
+            `;
+        }
+    } catch (error) {
+        document.getElementById('respuesta').innerHTML = `
+            <div class="alert alert-danger">Hubo un problema: ${error.message}</div>
+        `;
+    }
+}
+
 
 /* ===============================
    FUNCIÓN DE VALIDACIÓN DE EMAIL

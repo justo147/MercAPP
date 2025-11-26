@@ -1,82 +1,77 @@
 <?php
-session_start();
-//comprobamos que la session no esta iniciada
-if (isset($_SESSION["user_id"])) {
-  header("location:home.php");
-}
+session_start(); // Iniciamos la sesión para poder comprobar si el usuario ya está logueado
 
+// Si la petición es POST (es decir, el formulario se envía con fetch)
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    header('Content-Type: application/json'); 
+    // Esto indica al navegador/JS que la respuesta será JSON, no HTML
 
-if (isset($_POST["register"])) {
-  if (empty($_POST["name"]) || empty($_POST["password"]) || empty($_POST["confirmPass"]) || empty($_POST["email"])) {
-    $error = "Todos los campos son obligatorios.";
-  } elseif (strlen($_POST["password"]) < 8) {
-    $error = "La contraseña debe tener al menos 8 caracteres.";
-    $passwordError = true; // bandera para marcar el input de contraseña
-  } elseif ($_POST["password"] !== $_POST["confirmPass"]) {
-    $error = "Las contraseñas no coinciden.";
-    $passError = true; // bandera para marcar el input de confirmación
-  } else {
-    // resto de tu lógica (comprobar email, insertar, etc.)
-
-    $name = $_POST["name"];
-    $password = $_POST["password"];
-    $email = $_POST["email"];
-
-
-    $password_encripted = password_hash($password, PASSWORD_DEFAULT);
-
-    try {
-      // conectar a la bbdd
-      $bd = new PDO("mysql:host=localhost;dbname=mercapp", "root", "");
-
-      $consulta = $bd->prepare("SELECT * FROM usuario WHERE email=?");
-      $consulta->execute([$email]);
-    } catch (Exception $e) {
-      die($e->getMessage());
-    }
-    if ($consulta->rowCount() == 1) {
-      $error = "El correo electrónico ya está registrado.";
-      $emailError = true; // bandera para marcar el input
+    // Validaciones básicas en servidor
+    if (empty($_POST["name"]) || empty($_POST["password"]) || empty($_POST["confirmPass"]) || empty($_POST["email"])) {
+        // Si falta algún campo, devolvemos un JSON con estado "error"
+        echo json_encode(["status" => "error", "message" => "Todos los campos son obligatorios."]);
+        exit; // Terminamos aquí para no seguir ejecutando
+    } elseif (strlen($_POST["password"]) < 8) {
+        echo json_encode(["status" => "error", "message" => "La contraseña debe tener al menos 8 caracteres."]);
+        exit;
+    } elseif ($_POST["password"] !== $_POST["confirmPass"]) {
+        echo json_encode(["status" => "error", "message" => "Las contraseñas no coinciden."]);
+        exit;
     } else {
-      try {
-        // conectar a la bbdd
-        $bd = new PDO("mysql:host=localhost;dbname=mercapp", "root", "");
+        // Si pasa las validaciones básicas, recogemos los datos
+        $name = $_POST["name"];
+        $password = $_POST["password"];
+        $email = $_POST["email"];
+        $password_encripted = password_hash($password, PASSWORD_DEFAULT); // Encriptamos la contraseña
 
-        $consulta = $bd->prepare("INSERT INTO usuario(email,contraseña_hash,nombre) VALUES (?,?,?)");
-        $consulta->execute([$email,  $password_encripted, $name]);
+        try {
+            // Conexión a la base de datos
+            $bd = new PDO("mysql:host=localhost;dbname=mercapp", "root", "");
 
-        if ($consulta->rowCount() === 1) {
-          // Generar token seguro
-          $verifyToken = bin2hex(random_bytes(32));
+            // Comprobamos si el email ya existe
+            $consulta = $bd->prepare("SELECT * FROM usuario WHERE email=?");
+            $consulta->execute([$email]);
 
-          // Guardar token en la BD
-          $upd = $bd->prepare("UPDATE usuario SET verify_token = ? WHERE email = ?");
-          $upd->execute([$verifyToken, $email]);
+            if ($consulta->rowCount() == 1) {
+                // Si ya existe, devolvemos JSON con error
+                echo json_encode(["status" => "error", "message" => "El correo electrónico ya está registrado."]);
+                exit;
+            }
 
-          // Crear enlace de verificación
-          $verifyLink = "http://localhost/MercApp/public/views/verify_email.php?token={$verifyToken}&email=" . urlencode($email);
+            // Insertamos el nuevo usuario
+            $consulta = $bd->prepare("INSERT INTO usuario(email,contraseña_hash,nombre) VALUES (?,?,?)");
+            $consulta->execute([$email, $password_encripted, $name]);
 
-          // Enviar correo
-          require __DIR__ . '/../../config/mail_config.php';
-          $subject = "Confirma tu correo en MercaAPP";
-          $body = "
-    <h2>¡Bienvenido, {$name}!</h2>
-    <p>Confirma tu correo para activar tu cuenta:</p>
-    <p><a href='{$verifyLink}' style='background:#0d6efd;color:#fff;padding:10px 12px;border-radius:6px;text-decoration:none;'>Confirmar correo</a></p>
-    <p>Si el botón no funciona, copia este enlace:<br>{$verifyLink}</p>
-  ";
+            if ($consulta->rowCount() === 1) {
+                // Generamos un token de verificación
+                $verifyToken = bin2hex(random_bytes(32));
+                $upd = $bd->prepare("UPDATE usuario SET verify_token = ? WHERE email = ?");
+                $upd->execute([$verifyToken, $email]);
 
-          sendMail($email, $name, $subject, $body);
+                // Enviamos correo de verificación
+                require __DIR__ . '/../../config/mail_config.php';
+                $subject = "Confirma tu correo en MercaAPP";
+                $body = "Bienvenido {$name}, confirma tu correo: http://localhost/MercApp/public/views/verify_email.php?token={$verifyToken}&email=" . urlencode($email);
+                sendMail($email, $name, $subject, $body);
 
-          header("Location: pending_verification.php");
-          exit;
+                // Si todo va bien, devolvemos JSON con éxito y opcionalmente una redirección
+                echo json_encode([
+                    "status" => "ok",
+                    "message" => "Registro correcto. Revisa tu correo para confirmar.",
+                    "redirect" => "pending_verification.php"
+                ]);
+                exit;
+            }
+        } catch (Exception $e) {
+            // Si hay error en la BD, devolvemos JSON con el mensaje
+            echo json_encode(["status" => "error", "message" => $e->getMessage()]);
+            exit;
         }
-      } catch (PDOException $e) {
-        die($e->getMessage());
-      }
     }
-  }
 }
+
+// Si la petición es GET (el usuario entra a la página desde el navegador),
+// mostramos el formulario normalmente en HTML.
 ?>
 
 <!DOCTYPE html>
@@ -174,6 +169,8 @@ if (isset($_POST["register"])) {
 
       <button type="submit" name="register" class="btn button-primary w-100">Registrarse</button>
     </form>
+    <!-- contenedor para mostrar mensajes -->
+    <div id="respuesta" class="mt-3"></div>
   </div>
 
   <!-- Enlace inferior -->
