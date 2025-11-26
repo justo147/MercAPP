@@ -15,7 +15,13 @@ if (isset($_POST["register"])) {
   } elseif ($_POST["password"] !== $_POST["confirmPass"]) {
     $error = "Las contraseñas no coinciden.";
     $passError = true; // bandera para marcar el input de confirmación
-  } else {
+  } elseif (!filter_var($_POST["email"],FILTER_VALIDATE_EMAIL)) {
+    $error = "El correo tiene que ser válido";
+    $emailError = true;
+  }
+  
+  
+  else {
     // resto de tu lógica (comprobar email, insertar, etc.)
 
     $name = $_POST["name"];
