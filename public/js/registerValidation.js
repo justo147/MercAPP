@@ -123,10 +123,10 @@ function validarEmail(email) {
  * - message: el texto que se mostrará como mensaje de error.
  *
  * Funcionalidad:
- * 1. Añade la clase 'input-error' al input para cambiar su estilo (borde rojo, por ejemplo).
+ * 1. Añade la clase 'is-invalid' al input para cambiar su estilo .
  * 2. Comprueba si ya existe un mensaje de error en el contenedor del input:
  *    - Si existe, actualiza el texto.
- *    - Si no existe, crea un <p> con clase 'error-message' y lo agrega debajo del input.
+ *    - Si no existe, crea un <p> con clase 'invalid-feedback' y lo agrega debajo del input.
  * 3. Esto evita que se creen mensajes duplicados cada vez que se valida el formulario.
  *
  * Uso: showError(inputName, "El nombre es obligatorio");
@@ -157,8 +157,8 @@ function showError(input, message) {
  * Elimina todos los mensajes de error y restaura el estilo normal de los inputs.
  *
  * Funcionalidad:
- * 1. Busca todos los elementos con la clase 'error-message' y los elimina del DOM.
- * 2. Busca todos los inputs con la clase 'input-error' y la elimina, quitando el borde rojo u otro estilo.
+ * 1. Busca todos los elementos con la clase 'invalid-feedback' y los elimina del DOM.
+ * 2. Busca todos los inputs con la clase 'is-invalid' y la elimina, quitando el borde rojo u otro estilo.
  *
  * Uso: clearError();
  * Esto se suele llamar al inicio de la validación de un formulario para limpiar errores previos.
