@@ -39,7 +39,7 @@ CREATE TABLE Usuario (
   reset_token VARCHAR(64) NULL,
   reset_expires DATETIME NULL,
   contraseña_hash VARCHAR(255) NOT NULL,
-  nombre VARCHAR(100) UNIQUE NOT NULL,
+  nombre VARCHAR(100) NOT NULL,
   apellidos VARCHAR(100),
   telefono VARCHAR(20),
   foto_perfil VARCHAR(255),
