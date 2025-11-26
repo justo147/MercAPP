@@ -1,55 +1,80 @@
 <?php
 session_start();
 //comprobamos que la session no esta iniciada
-if(isset($_SESSION["user_id"])){
+if (isset($_SESSION["user_id"])) {
   header("location:home.php");
 }
 
 
-if (isset($_POST["register"]) && !empty($_POST["name"]) && !empty($_POST["password"]) && !empty($_POST["confirmPass"]) && !empty($_POST["email"]) && $_POST["password"] === $_POST["confirmPass"]) {
-  $name = $_POST["name"];
-  $password = $_POST["password"];
-  $email = $_POST["email"];
+if (isset($_POST["register"])) {
+  if (empty($_POST["name"]) || empty($_POST["password"]) || empty($_POST["confirmPass"]) || empty($_POST["email"])) {
+    $error = "Todos los campos son obligatorios.";
+  } elseif (strlen($_POST["password"]) < 8) {
+    $error = "La contraseña debe tener al menos 8 caracteres.";
+    $passwordError = true; // bandera para marcar el input de contraseña
+  } elseif ($_POST["password"] !== $_POST["confirmPass"]) {
+    $error = "Las contraseñas no coinciden.";
+    $passError = true; // bandera para marcar el input de confirmación
+  } else {
+    // resto de tu lógica (comprobar email, insertar, etc.)
+
+    $name = $_POST["name"];
+    $password = $_POST["password"];
+    $email = $_POST["email"];
 
 
-  $password_encripted = password_hash($password, PASSWORD_DEFAULT);
+    $password_encripted = password_hash($password, PASSWORD_DEFAULT);
 
-  try {
-    // conectar a la bbdd
-    $bd = new PDO("mysql:host=localhost;dbname=mercapp", "root", "");
+    try {
+      // conectar a la bbdd
+      $bd = new PDO("mysql:host=localhost;dbname=mercapp", "root", "");
 
-    $consulta = $bd->prepare("INSERT INTO usuario(email,contraseña_hash,nombre) VALUES (?,?,?)");
-    $consulta->execute([$email,  $password_encripted,$name]);
+      $consulta = $bd->prepare("SELECT * FROM usuario WHERE email=?");
+      $consulta->execute([$email]);
+    } catch (Exception $e) {
+      die($e->getMessage());
+    }
+    if ($consulta->rowCount() == 1) {
+      $error = "El correo electrónico ya está registrado.";
+      $emailError = true; // bandera para marcar el input
+    } else {
+      try {
+        // conectar a la bbdd
+        $bd = new PDO("mysql:host=localhost;dbname=mercapp", "root", "");
 
-    if ($consulta->rowCount() === 1) {
-  // Generar token seguro
-  $verifyToken = bin2hex(random_bytes(32));
+        $consulta = $bd->prepare("INSERT INTO usuario(email,contraseña_hash,nombre) VALUES (?,?,?)");
+        $consulta->execute([$email,  $password_encripted, $name]);
 
-  // Guardar token en la BD
-  $upd = $bd->prepare("UPDATE usuario SET verify_token = ? WHERE email = ?");
-  $upd->execute([$verifyToken, $email]);
+        if ($consulta->rowCount() === 1) {
+          // Generar token seguro
+          $verifyToken = bin2hex(random_bytes(32));
 
-  // Crear enlace de verificación
-  $verifyLink = "http://localhost/MercApp/public/views/verify_email.php?token={$verifyToken}&email=" . urlencode($email);
+          // Guardar token en la BD
+          $upd = $bd->prepare("UPDATE usuario SET verify_token = ? WHERE email = ?");
+          $upd->execute([$verifyToken, $email]);
 
-  // Enviar correo
-  require __DIR__ . '/../../config/mail_config.php';
-  $subject = "Confirma tu correo en MercaAPP";
-  $body = "
+          // Crear enlace de verificación
+          $verifyLink = "http://localhost/MercApp/public/views/verify_email.php?token={$verifyToken}&email=" . urlencode($email);
+
+          // Enviar correo
+          require __DIR__ . '/../../config/mail_config.php';
+          $subject = "Confirma tu correo en MercaAPP";
+          $body = "
     <h2>¡Bienvenido, {$name}!</h2>
     <p>Confirma tu correo para activar tu cuenta:</p>
     <p><a href='{$verifyLink}' style='background:#0d6efd;color:#fff;padding:10px 12px;border-radius:6px;text-decoration:none;'>Confirmar correo</a></p>
     <p>Si el botón no funciona, copia este enlace:<br>{$verifyLink}</p>
   ";
 
-  sendMail($email, $name, $subject, $body);
+          sendMail($email, $name, $subject, $body);
 
-  header("Location: pending_verification.php");
-  exit;
-}
-
-  } catch (PDOException $e) {
-    die($e->getMessage());
+          header("Location: pending_verification.php");
+          exit;
+        }
+      } catch (PDOException $e) {
+        die($e->getMessage());
+      }
+    }
   }
 }
 ?>
@@ -61,7 +86,7 @@ if (isset($_POST["register"]) && !empty($_POST["name"]) && !empty($_POST["passwo
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Registro de MercApp</title>
-   <!-- enlaces a bootstrap -->
+  <!-- enlaces a bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
@@ -69,7 +94,7 @@ if (isset($_POST["register"]) && !empty($_POST["name"]) && !empty($_POST["passwo
   <link rel="stylesheet" href="../css/reset.css">
   <link rel="stylesheet" href="../css/style-guide.css">
   <script src="../js/theme.js" defer></script>
- 
+
 
 </head>
 
@@ -84,32 +109,67 @@ if (isset($_POST["register"]) && !empty($_POST["name"]) && !empty($_POST["passwo
 
   <!-- Contenedor del formulario -->
   <div class="container shadow p-4 sinFondo" style="max-width: 400px; width: 100%;">
+
+
     <form id="formRegistro" method="post" class="form">
       <h1 class="text-center mb-4">Registrar Cuenta</h1>
 
       <div class="mb-3 sinFondo">
         <label for="name" class="form-label">Nombre</label>
-        <input type="text" class="form-control border border-primary rounded" id="name" name="name" value="<?php  if (isset($_POST["register"])) {
-            echo  htmlspecialchars($_POST['name']);
-        } ?>" required>
+        <input type="text" class="form-control border border-primary rounded" id="name" name="name" value="<?php if (isset($_POST["register"])) {
+                                                                                                              echo  htmlspecialchars($_POST['name']);
+                                                                                                            } ?>" required>
       </div>
 
       <div class="mb-3 sinFondo">
         <label for="email" class="form-label">Correo electrónico</label>
-        <input type="email" class="form-control border border-primary rounded" id="email" name="email" value="<?php if (isset($_POST["register"])) {
-          echo  htmlspecialchars($_POST['email']);
-        } ?>" required>
+        <input
+          type="email"
+          class="form-control border border-primary rounded <?php if (isset($emailError)) echo 'is-invalid'; ?>"
+          id="email"
+          name="email"
+          value="<?php if (isset($_POST["register"])) {
+                    echo htmlspecialchars($_POST['email']);
+                  } ?>"
+          required>
+        <?php if (isset($emailError)): ?>
+          <div class="invalid-feedback">
+            <?php echo $error; ?>
+          </div>
+        <?php endif; ?>
       </div>
+
 
       <div class="mb-3 sinFondo">
         <label for="password" class="form-label">Contraseña</label>
-        <input type="password" class="form-control border border-primary rounded" id="password" name="password" required>
+        <input
+          type="password"
+          class="form-control border border-primary rounded <?php if (isset($passwordError)) echo 'is-invalid'; ?>"
+          id="password"
+          name="password"
+          required>
+        <?php if (isset($passwordError)): ?>
+          <div class="invalid-feedback">
+            <?php echo $error; ?>
+          </div>
+        <?php endif; ?>
       </div>
 
       <div class="mb-3 sinFondo">
         <label for="confirmPass" class="form-label">Confirmar contraseña</label>
-        <input type="password" class="form-control border border-primary rounded" id="confirmPass" name="confirmPass" required>
+        <input
+          type="password"
+          class="form-control border border-primary rounded <?php if (isset($passError)) echo 'is-invalid'; ?>"
+          id="confirmPass"
+          name="confirmPass"
+          required>
+        <?php if (isset($passError)): ?>
+          <div class="invalid-feedback">
+            <?php echo $error; ?>
+          </div>
+        <?php endif; ?>
       </div>
+
 
       <button type="submit" name="register" class="btn button-primary w-100">Registrarse</button>
     </form>
@@ -117,7 +177,7 @@ if (isset($_POST["register"]) && !empty($_POST["name"]) && !empty($_POST["passwo
 
   <!-- Enlace inferior -->
   <div class="text-center mt-3 sinFondo">
-    <a href="login.php" >¿Ya estás registrado? Inicia sesión aquí</a>
+    <a href="login.php">¿Ya estás registrado? Inicia sesión aquí</a>
   </div>
 </body>
 
