@@ -89,12 +89,16 @@ if (isset($_POST["register"]) && !empty($_POST["name"]) && !empty($_POST["passwo
 
       <div class="mb-3 sinFondo">
         <label for="name" class="form-label">Nombre</label>
-        <input type="text" class="form-control border border-primary rounded" id="name" name="name" required>
+        <input type="text" class="form-control border border-primary rounded" id="name" name="name" value="<?php  if (isset($_POST["register"])) {
+            echo  htmlspecialchars($_POST['name']);
+        } ?>" required>
       </div>
 
       <div class="mb-3 sinFondo">
         <label for="email" class="form-label">Correo electrónico</label>
-        <input type="email" class="form-control border border-primary rounded" id="email" name="email" required>
+        <input type="email" class="form-control border border-primary rounded" id="email" name="email" value="<?php if (isset($_POST["register"])) {
+          echo  htmlspecialchars($_POST['email']);
+        } ?>" required>
       </div>
 
       <div class="mb-3 sinFondo">
