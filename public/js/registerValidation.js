@@ -14,7 +14,7 @@ const pass2 = document.getElementById('confirmPass');       // input de confirma
 // Escuchamos el evento submit y evitamos el envío automático.
 // En su lugar, llamamos a la función de validación.
 formRegister.addEventListener('submit', function (e) {
-    e.preventDefault(); // evita que el formulario se envíe antes de validar
+    // e.preventDefault(); // evita que el formulario se envíe antes de validar
     validationForm();   // llama a la función que valida todos los campos
 });
 
@@ -35,6 +35,11 @@ function validationForm() {
     // Validación del correo
     if (email.value.trim() === "") {
         showError(email, 'El correo es obligatorio');
+        valid = false;
+    }
+    // Validación del correo patrones
+    if (!validarEmail(email.value.trim())) {
+        showError(email, 'Añade un email valido');
         valid = false;
     }
 
@@ -105,19 +110,23 @@ function validarEmail(email) {
  */
 function showError(input, message) {
     if (!input) return; // seguridad por si se pasa un input nulo
-    input.classList.add('input-error');
+
+    // Añade la clase de Bootstrap para marcar el input como inválido
+    input.classList.add('is-invalid');
 
     const parent = input.parentElement; // contenedor del input
-    let existing = parent.querySelector('.error-message'); // busca si ya hay mensaje
+    let existing = parent.querySelector('.invalid-feedback'); // busca si ya hay mensaje
+
     if (existing) {
         existing.textContent = message; // actualiza mensaje existente
     } else {
-        const p = document.createElement('p'); // crea un nuevo párrafo
-        p.className = 'error-message';          // añade clase CSS
-        p.textContent = message;                // agrega el mensaje
-        parent.appendChild(p);                  // lo inserta debajo del input
+        const div = document.createElement('div'); // crea un nuevo contenedor
+        div.className = 'invalid-feedback';        // clase Bootstrap para feedback
+        div.textContent = message;                 // agrega el mensaje
+        parent.appendChild(div);                   // lo inserta debajo del input
     }
 }
+
 
 /**
  * clearError
@@ -132,8 +141,10 @@ function showError(input, message) {
  * Esto se suele llamar al inicio de la validación de un formulario para limpiar errores previos.
  */
 function clearError() {
-    // elimina todos los mensajes
-    document.querySelectorAll('.error-message').forEach(e => e.remove());
-    // quita el borde rojo de los inputs
-    document.querySelectorAll('.input-error').forEach(i => i.classList.remove('input-error'));
+    // elimina todos los mensajes de error de Bootstrap
+    document.querySelectorAll('.invalid-feedback').forEach(e => e.remove());
+
+    // quita la clase de borde rojo de los inputs
+    document.querySelectorAll('.is-invalid').forEach(i => i.classList.remove('is-invalid'));
 }
+
