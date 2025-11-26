@@ -39,6 +39,7 @@ if(isset($_SESSION["user_id"])){
   <link rel="stylesheet" href="../css/reset.css">
   <link rel="stylesheet" href="../css/style-guide.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="../js/login.js" defer></script>
   <script src="../js/theme.js" defer></script>
   <style>
     .error-message {
