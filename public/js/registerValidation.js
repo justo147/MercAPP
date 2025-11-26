@@ -72,36 +72,21 @@ function validationForm() {
    ENVIO DE DATOS AL SERVIDOR DE FORMA ASINCRONA
    ============================================== */
 async function enviarFormulario() {
-    const datos = new FormData(formRegister);
+     const formData = new FormData(formRegister); ;
 
-    try {
-        const respuesta = await fetch('../views/register.php', {
-            method: 'POST',
-            body: datos
-        });
+    const res = await fetch("../views/register.php", {
+        method: "POST",
+        body: formData
+    });
 
-        if (!respuesta.ok) throw new Error("Error en la petición");
+    const html = await res.text(); // recibimos HTML parcial
+    document.getElementById("respuesta").innerHTML = html;
 
-        // Aquí asumimos que PHP devuelve JSON con {status, message}
-        const resultado = await respuesta.json();
-
-        if (resultado.status === "ok") {
-            document.getElementById('respuesta').innerHTML = `
-                <div class="alert alert-success">${resultado.message}</div>
-            `;
-            // opcional: redirigir si PHP lo indica
-            if (resultado.redirect) {
-                window.location.href = resultado.redirect;
-            }
-        } else {
-            document.getElementById('respuesta').innerHTML = `
-                <div class="alert alert-danger">${resultado.message}</div>
-            `;
-        }
-    } catch (error) {
-        document.getElementById('respuesta').innerHTML = `
-            <div class="alert alert-danger">Hubo un problema: ${error.message}</div>
-        `;
+    // Si quieres redirigir en caso de éxito:
+    if (html.includes("alert-success")) {
+        setTimeout(() => {
+            window.location.href = "pending_verification.php";
+        }, 2000);
     }
 }
 

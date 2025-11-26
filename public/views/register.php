@@ -3,75 +3,75 @@ session_start(); // Iniciamos la sesión para poder comprobar si el usuario ya e
 
 // Si la petición es POST (es decir, el formulario se envía con fetch)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    header('Content-Type: application/json'); 
-    // Esto indica al navegador/JS que la respuesta será JSON, no HTML
+  // Validaciones básicas en servidor
+  if (empty($_POST["name"]) || empty($_POST["password"]) || empty($_POST["confirmPass"]) || empty($_POST["email"])) {
+    echo "<div class='alert alert-danger'>Todos los campos son obligatorios.</div>";
+    exit;
+  } elseif (strlen($_POST["password"]) < 8) {
+    echo "<div class='alert alert-danger'>La contraseña debe tener al menos 8 caracteres.</div>";
+    exit;
+  } elseif ($_POST["password"] !== $_POST["confirmPass"]) {
+    echo "<div class='alert alert-danger'>Las contraseñas no coinciden.</div>";
+    exit;
+  } elseif (!filter_var($_POST["email"], FILTER_VALIDATE_EMAIL)) {
+    echo "<div class='alert alert-danger'>El correo tiene que ser válido.</div>";
+    exit;
+  } else {
+    // Si pasa las validaciones básicas, recogemos los datos
+    $name = $_POST["name"];
+    $password = $_POST["password"];
+    $email = $_POST["email"];
+    $password_encripted = password_hash($password, PASSWORD_DEFAULT); // Encriptamos la contraseña
 
-    // Validaciones básicas en servidor
-    if (empty($_POST["name"]) || empty($_POST["password"]) || empty($_POST["confirmPass"]) || empty($_POST["email"])) {
-        // Si falta algún campo, devolvemos un JSON con estado "error"
-        echo json_encode(["status" => "error", "message" => "Todos los campos son obligatorios."]);
-        exit; // Terminamos aquí para no seguir ejecutando
-    } elseif (strlen($_POST["password"]) < 8) {
-        echo json_encode(["status" => "error", "message" => "La contraseña debe tener al menos 8 caracteres."]);
+    try {
+      // Conexión a la base de datos
+      $bd = new PDO("mysql:host=localhost;dbname=mercapp", "root", "");
+
+      // Comprobamos si el email ya existe
+      $consulta = $bd->prepare("SELECT * FROM usuario WHERE email=?");
+      $consulta->execute([$email]);
+
+      if ($consulta->rowCount() == 1) {
+        echo "<div class='alert alert-danger'>El correo electrónico ya está registrado.</div>";
         exit;
-    } elseif ($_POST["password"] !== $_POST["confirmPass"]) {
-        echo json_encode(["status" => "error", "message" => "Las contraseñas no coinciden."]);
+      }
+
+      // Insertamos el nuevo usuario
+      $consulta = $bd->prepare("INSERT INTO usuario(email,contraseña_hash,nombre) VALUES (?,?,?)");
+      $consulta->execute([$email, $password_encripted, $name]);
+
+      if ($consulta->rowCount() === 1) {
+        // Generamos un token de verificación
+        $verifyToken = bin2hex(random_bytes(32));
+        $upd = $bd->prepare("UPDATE usuario SET verify_token = ? WHERE email = ?");
+        $upd->execute([$verifyToken, $email]);
+
+        // Enviamos correo de verificación
+        require __DIR__ . '/../../config/mail_config.php';
+        $subject = "Confirma tu correo en MercaAPP";
+        $body = "Bienvenido {$name}, confirma tu correo: http://localhost/MercApp/public/views/verify_email.php?token={$verifyToken}&email=" . urlencode($email);
+        sendMail($email, $name, $subject, $body);
+
+        // Si todo va bien, devolvemos directamente HTML
+        echo "<div class='alert alert-success'>
+            Registro correcto. Revisa tu correo para confirmar.
+          </div>";
+
+        // Opcional: redirigir automáticamente tras unos segundos
+        echo "<script>
+            setTimeout(function() {
+              window.location.href = 'pending_verification.php';
+            }, 2000);
+          </script>";
         exit;
+      }
 
-    } elseif (!filter_var($_POST["email"],FILTER_VALIDATE_EMAIL)) {
-    echo json_encode(["status" => "error", "message" => "El correo tiene que ser valido."]);
-  }
-     else {
-        // Si pasa las validaciones básicas, recogemos los datos
-        $name = $_POST["name"];
-        $password = $_POST["password"];
-        $email = $_POST["email"];
-        $password_encripted = password_hash($password, PASSWORD_DEFAULT); // Encriptamos la contraseña
+    } catch (Exception $e) {
+      echo "<div class='alert alert-danger'>Error en la base de datos: " . htmlspecialchars($e->getMessage()) . "</div>";
+      exit;
 
-        try {
-            // Conexión a la base de datos
-            $bd = new PDO("mysql:host=localhost;dbname=mercapp", "root", "");
-
-            // Comprobamos si el email ya existe
-            $consulta = $bd->prepare("SELECT * FROM usuario WHERE email=?");
-            $consulta->execute([$email]);
-
-            if ($consulta->rowCount() == 1) {
-                // Si ya existe, devolvemos JSON con error
-                echo json_encode(["status" => "error", "message" => "El correo electrónico ya está registrado."]);
-                exit;
-            }
-
-            // Insertamos el nuevo usuario
-            $consulta = $bd->prepare("INSERT INTO usuario(email,contraseña_hash,nombre) VALUES (?,?,?)");
-            $consulta->execute([$email, $password_encripted, $name]);
-
-            if ($consulta->rowCount() === 1) {
-                // Generamos un token de verificación
-                $verifyToken = bin2hex(random_bytes(32));
-                $upd = $bd->prepare("UPDATE usuario SET verify_token = ? WHERE email = ?");
-                $upd->execute([$verifyToken, $email]);
-
-                // Enviamos correo de verificación
-                require __DIR__ . '/../../config/mail_config.php';
-                $subject = "Confirma tu correo en MercaAPP";
-                $body = "Bienvenido {$name}, confirma tu correo: http://localhost/MercApp/public/views/verify_email.php?token={$verifyToken}&email=" . urlencode($email);
-                sendMail($email, $name, $subject, $body);
-
-                // Si todo va bien, devolvemos JSON con éxito y opcionalmente una redirección
-                echo json_encode([
-                    "status" => "ok",
-                    "message" => "Registro correcto. Revisa tu correo para confirmar.",
-                    "redirect" => "pending_verification.php"
-                ]);
-                exit;
-            }
-        } catch (Exception $e) {
-            // Si hay error en la BD, devolvemos JSON con el mensaje
-            echo json_encode(["status" => "error", "message" => $e->getMessage()]);
-            exit;
-        }
     }
+  }
 }
 
 // Si la petición es GET (el usuario entra a la página desde el navegador),
@@ -117,21 +117,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <div class="mb-3 sinFondo">
         <label for="name" class="form-label">Nombre</label>
         <input type="text" class="form-control border border-primary rounded" id="name" name="name" value="<?php if (isset($_POST["register"])) {
-                                                                                                              echo  htmlspecialchars($_POST['name']);
-                                                                                                            } ?>" required>
+          echo htmlspecialchars($_POST['name']);
+        } ?>" required>
       </div>
 
       <div class="mb-3 sinFondo">
         <label for="email" class="form-label">Correo electrónico</label>
-        <input
-          type="email"
-          class="form-control border border-primary rounded <?php if (isset($emailError)) echo 'is-invalid'; ?>"
-          id="email"
-          name="email"
-          value="<?php if (isset($_POST["register"])) {
-                    echo htmlspecialchars($_POST['email']);
-                  } ?>"
-          required>
+        <input type="email" class="form-control border border-primary rounded <?php if (isset($emailError))
+          echo 'is-invalid'; ?>" id="email" name="email" value="<?php if (isset($_POST["register"])) {
+              echo htmlspecialchars($_POST['email']);
+            } ?>" required>
         <?php if (isset($emailError)): ?>
           <div class="invalid-feedback">
             <?php echo $error; ?>
@@ -142,12 +137,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       <div class="mb-3 sinFondo">
         <label for="password" class="form-label">Contraseña</label>
-        <input
-          type="password"
-          class="form-control border border-primary rounded <?php if (isset($passwordError)) echo 'is-invalid'; ?>"
-          id="password"
-          name="password"
-          required>
+        <input type="password" class="form-control border border-primary rounded <?php if (isset($passwordError))
+          echo 'is-invalid'; ?>" id="password" name="password" required>
         <?php if (isset($passwordError)): ?>
           <div class="invalid-feedback">
             <?php echo $error; ?>
@@ -157,12 +148,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       <div class="mb-3 sinFondo">
         <label for="confirmPass" class="form-label">Confirmar contraseña</label>
-        <input
-          type="password"
-          class="form-control border border-primary rounded <?php if (isset($passError)) echo 'is-invalid'; ?>"
-          id="confirmPass"
-          name="confirmPass"
-          required>
+        <input type="password" class="form-control border border-primary rounded <?php if (isset($passError))
+          echo 'is-invalid'; ?>" id="confirmPass" name="confirmPass" required>
         <?php if (isset($passError)): ?>
           <div class="invalid-feedback">
             <?php echo $error; ?>
