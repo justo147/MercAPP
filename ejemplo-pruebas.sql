@@ -1,3 +1,8 @@
+-----------------------------------------------------
+--
+--HAY QUE VOLVER A HACER ESTO
+--
+-------------------------------------------------------
 -- Usuarios
 INSERT INTO Usuario (email, nick, contraseña_hash, nombre, apellidos, telefono, rol)
 VALUES
