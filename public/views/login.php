@@ -4,8 +4,8 @@ require_once '../../controllers/AuthController.php';
 
 
 $error_message = "";
-
-if (isset($_POST["login"])) {
+//Cambiamos la condicion porque al hacer el .submit() desde js no se ejecuta el input del formulario
+if (!empty($_POST['email']) && !empty($_POST['password'])) {
   $auth = new AuthController();
   $email = $_POST['email'] ?? '';
   $password = $_POST['password'] ?? '';
@@ -86,8 +86,8 @@ if(isset($_SESSION["user_id"])){
         </div>
       <?php endif; ?>
 
-      <input type="email" name="email" class="form-control border border-primary rounded" placeholder="Escriba su correo" required value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>" />
-      <input type="password" name="password" class="form-control border border-primary rounded" placeholder="Contraseña" required />
+      <input type="email" id="email" name="email" class="form-control border border-primary rounded" placeholder="Escriba su correo" required value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>" />
+      <input type="password" id="password" name="password" class="form-control border border-primary rounded" placeholder="Contraseña" required />
 
       <a href="forgotpass.php">¿Olvidaste tu contraseña?</a>
       <input type="submit" name="login" value="Iniciar Sesión" class="button-primary" />
