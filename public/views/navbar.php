@@ -1,5 +1,6 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4 shadow-sm">
   <div class="container-fluid">
+    <i class="bi bi-shop mx-1"></i>
     <a class="navbar-brand fw-bold" href="home.php">MercApp</a>
 
     <!-- Botón hamburguesa para móviles -->
@@ -10,7 +11,7 @@
     <div class="collapse navbar-collapse" id="navbarContent">
       <!-- Buscador centrado solo si $showSearch = true -->
       <?php if (!empty($showSearch) && $showSearch === true): ?>
-        <div class="mx-auto" style="max-width: 500px; width: 100%;">
+        <div class="ms-auto" style="max-width: 500px; width: 100%;">
           <form class="d-flex" role="search" method="get" action="buscar.php">
             <input class="form-control me-2" type="search" name="q" placeholder="Buscar productos..." aria-label="Buscar">
             <button class="btn btn-light" type="submit"><i class="bi bi-search"></i></button>
@@ -28,6 +29,7 @@
           <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
             <li><a class="dropdown-item" href="profile.php"><i class="bi bi-person"></i> Mi perfil</a></li>
             <li><a class="dropdown-item" href="subir.php"><i class="bi bi-upload"></i> Subir producto</a></li>
+            <li><a class="dropdown-item" href="detailAccount.php"><i class="bi bi-gear"></i> Ajustes de Cuenta</a></li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item text-danger" href="logout.php"><i class="bi bi-box-arrow-right"></i> Cerrar sesión</a></li>
           </ul>

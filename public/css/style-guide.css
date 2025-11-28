@@ -102,12 +102,22 @@ input {
 
 
 /* Estilo para títulos h1–h6 */
-h1, h2, h3, h4, h5, h6 {
-  font-weight: 700;                        /* Negrita para destacar títulos */
-  color: var(--color-primary);             /* Color principal (verde) */
-  line-height: 1.2;                        /* Espaciado más compacto */
-  margin-bottom: 0.5em;                    /* Espacio debajo de cada título */
+h1,h2,h3,h4,h5,h6 {
+  font-weight: 700;
+  color: var(--color-primary);
+  line-height: 1.2;
+  margin-bottom: 0.5em;
 }
+
+h1.no-style,
+h2.no-style,
+h3.no-style,
+h4.no-style,
+h5.no-style,
+h6.no-style {
+  color: inherit;
+}
+
 
 
 
@@ -278,11 +288,8 @@ span {
   border-radius: 12px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-.card:hover {
+.card:hover:not(.sin-hover) {
   transform: translateY(-5px);
   box-shadow: 0 8px 20px rgba(0,0,0,0.1);
 }
-.card-title {
-  font-weight: 600;
-  color: var(--color-primary);
-}
+
