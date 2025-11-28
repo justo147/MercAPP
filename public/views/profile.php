@@ -23,19 +23,65 @@
   include("navbar.php"); ?>
 
   <br>
-<div class="perfil-box mx-auto my-4 sinFondo">
-  <h2 class="mb-3 text-center">Datos del Usuario</h2>
-  <ul class="list-group">
-    <li class="list-group-item d-flex justify-content-between align-items-center">
-      <strong>Nombre:</strong>
-      <span id="userName"></span>
-    </li>
-    <li class="list-group-item d-flex justify-content-between align-items-center">
-      <strong>Email:</strong>
-      <span id="userEmail"></span>
-    </li>
-  </ul>
+  <div class="perfil-box mx-auto my-4 sinFondo">
+    <h2 class="mb-3 text-center">Datos del Usuario</h2>
+    <!-- card del usuario -->
+    <div class="col col-md-9 col-lg-7 col-xl-5 sinFondo">
+      <div class="card no-hover ">
+        <div class="card-body p-4 no-hover ">
+          <!-- content -->
+          <div class="d-flex ">
+            <div class="flex-shrink-0 ">
+              <!-- imagen -->
+              <!-- logica de si no tiene foto se ponga una predeterminada y si tiene la obtenga del servidor -->
+              <?php /*if (!empty($user['foto_perfil'])): ?>
+                              <!-- <img src="<?= htmlspecialchars($user['foto_perfil']) ?>" -->
+                                  <!-- class="rounded-circle mb-3" width="120" height="120" alt="Foto de perfil"> -->
+                          <?php /*else:*/ ?>
+              <i class="rounded-circle mb-3 bi bi-people" style="font-size:150px;"></i>
+              <?php /*endif; */ ?>
+            </div>
+            <div class="flex-grow-1 ms-3 sinFondo">
+              <!-- Contenido -->
+              <h5 class="mb-1">Paco Fiestas</h5>
+              <p class="mb-2 pb-1">Senior</p>
+              <div class="d-flex justify-content-between text-center rounded-3 p-2 mb-2" style="background-color: rgb(186, 185, 185);">
+  <div class="flex-fill sinFondo">
+    <p class="small text-body-secondary mb-1">Productos</p>
+    <p class="mb-0 fs-4 fw-bold">15</p>
+  </div>
+  <div class="flex-fill mx-4 sinFondo">
+    <p class="small text-body-secondary mb-1">Ventas</p>
+    <p class="mb-0 fs-4 fw-bold">515</p>
+  </div>
+  <div class="flex-fill sinFondo">
+    <p class="small text-body-secondary mb-1">Valoración</p>
+    <p class="mb-0 fs-4 fw-bold">9.2</p>
+  </div>
 </div>
+
+
+              <!-- Botones -->
+              <div class="d-flex">
+                <button type="button" class="btn btn-outline-primary me-1 flex-grow-1 position-relative">
+                  Message
+                  <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger">
+                    10
+                  </span>
+                </button>
+
+                <button class="flex-grow-1 btn btn-primary">
+                  Follow
+                </button>
+
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
 
 

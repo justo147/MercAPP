@@ -88,9 +88,9 @@ try {
     <?php
     $showSearch = false;
     include("navbar.php"); ?>
-    <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
+    <div class="container py-5 sinFondo">
+        <div class="row justify-content-center sinFondo">
+            <div class="col-md-8 sinFondo">
                 <div class="card shadow sin-hover">
                     <div class="card-header bg-primary text-white">
                         <h4 class="no-style">Detalles de la cuenta</h4>
