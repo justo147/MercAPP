@@ -294,6 +294,11 @@ span {
   box-shadow: 0 8px 20px rgba(0,0,0,0.1);
 }
 
+body.dark-mode .text-muted {
+  color: #b0b0b0 !important; /* gris claro legible en fondo oscuro */
+}
+
+
 
 
 

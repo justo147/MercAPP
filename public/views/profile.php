@@ -42,11 +42,10 @@
                 $email = $_SESSION['email'];
                 try {
                   $database = new Database();
-                  $pdo = $database->getConnection();             
-                  $stmt = $pdo->prepare("SELECT foto_perfil FROM usuario WHERE email = ?");
+                  $pdo = $database->getConnection();
+                  $stmt = $pdo->prepare("SELECT * FROM usuario WHERE email = ?");
                   $stmt->execute([$email]);
                   $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
                 } catch (PDOException $e) {
                   error_log("Error de base de datos: " . $e->getMessage());
                 }
@@ -61,8 +60,14 @@
             </div>
             <div class="flex-grow-1 ms-3 sinFondo">
               <!-- Contenido -->
-              <h5 class="mb-1">Paco Fiestas</h5>
-              <p class="mb-2 pb-1">Senior</p>
+              <h5 class="mb-1"><?php echo $user['nombre'] . " " . $user["apellidos"] ?></h5>
+              <p class="mb-2 pb-1 fs-6 text-muted">Cuenta creada:<?php
+                                                        $fecha = new DateTime($user['fecha_registro']);
+                                                        $mes   = $fecha->format('m'); // mes en número (01-12)
+                                                        $anio  = $fecha->format('Y'); // año en 4 dígitos
+
+                                                        echo "$mes/$anio";
+                                                        ?></p>
               <div class="d-flex justify-content-between text-center rounded-3 p-2 mb-2"
                 style="background-color: rgb(186, 185, 185);">
                 <div class="flex-fill sinFondo">
