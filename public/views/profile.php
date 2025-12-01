@@ -34,18 +34,37 @@
             <div class="flex-shrink-0 sinFondo me-4 mt-3">
               <!-- imagen -->
               <!-- logica de si no tiene foto se ponga una predeterminada y si tiene la obtenga del servidor -->
-              <?php /*if (!empty($user['foto_perfil'])): ?>
-                              <!-- <img src="<?= htmlspecialchars($user['foto_perfil']) ?>" -->
-                                  <!-- class="rounded-circle mb-3" width="120" height="120" alt="Foto de perfil"> -->
-                          <?php /*else:*/ ?>
-              <i class="bi bi-people rounded-circle mb-3 " style="font-size:150px; background-color: transparent;"></i>
-              <?php /*endif; */ ?>
+              <?php
+              session_start();
+              require_once __DIR__ . '/../../config/db.php';
+              $user = null;
+              if (isset($_SESSION['email'])) {
+                $email = $_SESSION['email'];
+                try {
+                  $database = new Database();
+                  $pdo = $database->getConnection();             
+                  $stmt = $pdo->prepare("SELECT foto_perfil FROM usuario WHERE email = ?");
+                  $stmt->execute([$email]);
+                  $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                } catch (PDOException $e) {
+                  error_log("Error de base de datos: " . $e->getMessage());
+                }
+              }
+              ?>
+              <?php if ($user && !empty($user['foto_perfil'])): ?>
+                <img src="<?= htmlspecialchars($user['foto_perfil']) ?>" class="rounded-circle mb-3" width="120"
+                  height="120" style="object-fit: cover;" alt="Foto de perfil">
+              <?php else: ?>
+                <i class="bi bi-person-circle mb-3 text-secondary" style="font-size: 120px; display: block;"></i>
+              <?php endif; ?>
             </div>
             <div class="flex-grow-1 ms-3 sinFondo">
               <!-- Contenido -->
               <h5 class="mb-1">Paco Fiestas</h5>
               <p class="mb-2 pb-1">Senior</p>
-              <div class="d-flex justify-content-between text-center rounded-3 p-2 mb-2" style="background-color: rgb(186, 185, 185);">
+              <div class="d-flex justify-content-between text-center rounded-3 p-2 mb-2"
+                style="background-color: rgb(186, 185, 185);">
                 <div class="flex-fill sinFondo">
                   <p class="small text-body-secondary mb-1">Productos</p>
                   <p class="mb-0 fs-4 fw-bold">15</p>
