@@ -19,6 +19,7 @@
 
 <body>
   <?php
+  session_start();
   $showSearch = false;
   include("navbar.php"); ?>
 
@@ -35,16 +36,16 @@
               <!-- imagen -->
               <!-- logica de si no tiene foto se ponga una predeterminada y si tiene la obtenga del servidor -->
               <?php
-              session_start();
+              
               require_once __DIR__ . '/../../config/db.php';
               $user = null;
-              if (isset($_SESSION['email'])) {
-                $email = $_SESSION['email'];
+              if (isset($_GET['id'])) {
+                $id = $_GET['id'];
                 try {
                   $database = new Database();
                   $pdo = $database->getConnection();
-                  $stmt = $pdo->prepare("SELECT * FROM usuario WHERE email = ?");
-                  $stmt->execute([$email]);
+                  $stmt = $pdo->prepare("SELECT * FROM usuario WHERE id = ?");
+                  $stmt->execute([$id]);
                   $user = $stmt->fetch(PDO::FETCH_ASSOC);
                 } catch (PDOException $e) {
                   error_log("Error de base de datos: " . $e->getMessage());
@@ -93,10 +94,16 @@
                     10
                   </span>
                 </button>
-
-                <button class="flex-grow-1 btn btn-primary">
-                  Follow
-                </button>
+                <?php
+                if($_GET['id'] != $_SESSION['user_id']){
+                  echo "<button class='flex-grow-1 btn btn-primary'>";
+                  echo "Follow";
+                  echo "</button>";
+                } 
+                ?>
+                
+                  
+                
 
               </div>
 

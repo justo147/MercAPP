@@ -27,7 +27,7 @@
             <i class="bi bi-person-circle"></i> Perfil
           </button>
           <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-            <li><a class="dropdown-item" href="profile.php"><i class="bi bi-person"></i> Mi perfil</a></li>
+            <li><a class="dropdown-item" href="profile.php?id=<?php echo $_SESSION["user_id"] ?>"><i class="bi bi-person"></i> Mi perfil</a></li>
             <li><a class="dropdown-item" href="subir.php"><i class="bi bi-upload"></i> Subir producto</a></li>
             <li><a class="dropdown-item" href="detailAccount.php"><i class="bi bi-gear"></i> Ajustes de Cuenta</a></li>
             <li><hr class="dropdown-divider"></li>
