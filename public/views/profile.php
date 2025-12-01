@@ -53,7 +53,7 @@
               }
               ?>
               <?php if ($user && !empty($user['foto_perfil'])): ?>
-                <img src="<?= htmlspecialchars($user['foto_perfil']) ?>" class="rounded-circle mb-3" width="120"
+                <img src="<?= htmlspecialchars($user['foto_perfil']) ?>" class="rounded-circle mt-5" width="120"
                   height="120" style="object-fit: cover;" alt="Foto de perfil">
               <?php else: ?>
                 <i class="bi bi-person-circle mb-3 text-secondary" style="font-size: 120px; display: block;"></i>
