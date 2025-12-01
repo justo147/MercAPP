@@ -37,6 +37,7 @@ class AuthController {
                     $_SESSION['user_id'] = $row['id']; // Asumiendo que hay un campo id
                     $_SESSION['email'] = $row['email'];
                     $_SESSION["profile_photo"]= $row["foto_perfil"];
+                    $_SESSION["name"]= $row["nombre"];
                     
                     header("Location: ../views/home.php");
                     exit();
