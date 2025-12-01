@@ -36,6 +36,7 @@ class AuthController {
                     session_regenerate_id(true); // Seguridad: prevenir fijación de sesión
                     $_SESSION['user_id'] = $row['id']; // Asumiendo que hay un campo id
                     $_SESSION['email'] = $row['email'];
+                    $_SESSION["profile_photo"]= $row["foto_perfil"];
                     
                     header("Location: ../views/home.php");
                     exit();
