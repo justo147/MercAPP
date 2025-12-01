@@ -27,18 +27,18 @@
     <h2 class="mb-3 text-center">Datos del Usuario</h2>
     <!-- card del usuario -->
     <div class="col col-md-9 col-lg-7 col-xl-5 sinFondo">
-      <div class="card no-hover ">
-        <div class="card-body p-4 no-hover ">
+      <div class="card no-hover sinFondo">
+        <div class="card-body p-4 no-hover sinFondo">
           <!-- content -->
-          <div class="d-flex ">
-            <div class="flex-shrink-0 ">
+          <div class="d-flex sinFondo">
+            <div class="flex-shrink-0 sinFondo me-4 mt-3">
               <!-- imagen -->
               <!-- logica de si no tiene foto se ponga una predeterminada y si tiene la obtenga del servidor -->
               <?php /*if (!empty($user['foto_perfil'])): ?>
                               <!-- <img src="<?= htmlspecialchars($user['foto_perfil']) ?>" -->
                                   <!-- class="rounded-circle mb-3" width="120" height="120" alt="Foto de perfil"> -->
                           <?php /*else:*/ ?>
-              <i class="rounded-circle mb-3 bi bi-people" style="font-size:150px;"></i>
+              <i class="bi bi-people rounded-circle mb-3 " style="font-size:150px; background-color: transparent;"></i>
               <?php /*endif; */ ?>
             </div>
             <div class="flex-grow-1 ms-3 sinFondo">
@@ -46,19 +46,19 @@
               <h5 class="mb-1">Paco Fiestas</h5>
               <p class="mb-2 pb-1">Senior</p>
               <div class="d-flex justify-content-between text-center rounded-3 p-2 mb-2" style="background-color: rgb(186, 185, 185);">
-  <div class="flex-fill sinFondo">
-    <p class="small text-body-secondary mb-1">Productos</p>
-    <p class="mb-0 fs-4 fw-bold">15</p>
-  </div>
-  <div class="flex-fill mx-4 sinFondo">
-    <p class="small text-body-secondary mb-1">Ventas</p>
-    <p class="mb-0 fs-4 fw-bold">515</p>
-  </div>
-  <div class="flex-fill sinFondo">
-    <p class="small text-body-secondary mb-1">Valoración</p>
-    <p class="mb-0 fs-4 fw-bold">9.2</p>
-  </div>
-</div>
+                <div class="flex-fill sinFondo">
+                  <p class="small text-body-secondary mb-1">Productos</p>
+                  <p class="mb-0 fs-4 fw-bold">15</p>
+                </div>
+                <div class="flex-fill mx-4 sinFondo">
+                  <p class="small text-body-secondary mb-1">Ventas</p>
+                  <p class="mb-0 fs-4 fw-bold">515</p>
+                </div>
+                <div class="flex-fill sinFondo">
+                  <p class="small text-body-secondary mb-1">Valoración</p>
+                  <p class="mb-0 fs-4 fw-bold">9.2</p>
+                </div>
+              </div>
 
 
               <!-- Botones -->

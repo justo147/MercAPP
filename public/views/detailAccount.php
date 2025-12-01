@@ -45,16 +45,29 @@ try {
             // Manejo de foto
             $foto = $user['foto_perfil'];
             if (!empty($_FILES['foto']['name'])) {
-                $targetDir = "uploads/";
+                $targetDir = "../uploads/";
                 if (!is_dir($targetDir)) {
                     mkdir($targetDir, 0777, true);
                 }
-                $fileName = basename($_FILES['foto']['name']);
-                $targetFile = $targetDir . time() . "_" . $fileName;
-                if (move_uploaded_file($_FILES['foto']['tmp_name'], $targetFile)) {
-                    $foto = $targetFile;
+
+                // Obtener extensión del archivo
+                $extension = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
+
+                // Validar extensión permitida
+                $allowed = ['jpg', 'jpeg', 'png', 'gif','webp'];
+                if (!in_array($extension, $allowed)) {
+                    $error = "Formato de imagen no permitido.";
+                } else {
+                    // Crear nombre único con time() y sufijo FotoPerfil[idUsuario]
+                    $fileName = time() . "_FotoPerfil" . $userId . "." . $extension;
+                    $targetFile = $targetDir . $fileName;
+
+                    if (move_uploaded_file($_FILES['foto']['tmp_name'], $targetFile)) {
+                        $foto = $targetFile;
+                    }
                 }
             }
+
 
             // Actualizar datos
             $upd = $bd->prepare("UPDATE usuario SET nombre=?, apellidos=?, email=?, telefono=?, foto_perfil=? WHERE id=?");
@@ -88,11 +101,12 @@ try {
     <?php
     $showSearch = false;
     include("navbar.php"); ?>
+
     <div class="container py-5 sinFondo">
         <div class="row justify-content-center sinFondo">
             <div class="col-md-8 sinFondo">
-                <div class="card shadow sin-hover">
-                    <div class="card-header bg-primary text-white">
+                <div class="card shadow no-hover sinFondo">
+                    <div class="card-header bg-primary text-white sinFondo">
                         <h4 class="no-style">Detalles de la cuenta</h4>
                     </div>
                     <div class="card-body">
