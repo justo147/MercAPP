@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '\..\..\config\db.php';
 // ===============================
 // INICIO DE SESIÓN Y CONTROL DE ACCESO
 // ===============================
@@ -12,8 +13,9 @@ try {
     // ===============================
     // CONEXIÓN A LA BASE DE DATOS
     // ===============================
-    $bd = new PDO("mysql:host=localhost;dbname=mercapp", "root", "");
-    $bd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $bd = new Database();
+    $bd=$bd->getConnection();
+    
 
     $userId = $_SESSION["user_id"];
 
