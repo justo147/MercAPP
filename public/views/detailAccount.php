@@ -47,7 +47,7 @@ try {
             // Manejo de foto
             $foto = $user['foto_perfil'];
             if (!empty($_FILES['foto']['name'])) {
-                $targetDir = "../uploads/";
+                $targetDir = "../../uploads/";
                 if (!is_dir($targetDir)) {
                     mkdir($targetDir, 0777, true);
                 }
@@ -61,12 +61,13 @@ try {
                     $error = "Formato de imagen no permitido.";
                 } else {
                     // Crear nombre único con time() y sufijo FotoPerfil[idUsuario]
-                    $fileName = time() . "_FotoPerfil" . $userId . "." . $extension;
+                    $fileName ="FotoPerfil" . $userId . "." . $extension;
                     $targetFile = $targetDir . $fileName;
 
                     if (move_uploaded_file($_FILES['foto']['tmp_name'], $targetFile)) {
                         $foto = $targetFile;
                     }
+                    $_SESSION["profile_photo"]=$targetFile;
                 }
             }
 
