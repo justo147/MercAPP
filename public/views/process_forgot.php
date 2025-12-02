@@ -1,6 +1,7 @@
 <?php
-require __DIR__ . '/../../config/mail_config.php';
-require __DIR__ . '/../../config/db.php'; // tu conexión a la BD
+// RUTAS CORREGIDAS para los requires
+require_once __DIR__ . '/../config/mail_config.php';
+require_once __DIR__ . '/../config/db.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email']);
@@ -21,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare("UPDATE usuario SET reset_token = ?, reset_expires = ? WHERE id = ?");
         $stmt->execute([$token, $expires, $user['id']]);
 
-        // Enviar correo
+        // RUTA CORRECTA para el enlace de reset
         $resetLink = "http://localhost/MercApp/public/views/reset_password.php?token=$token";
         $htmlBody = "<p>Has solicitado restablecer tu contraseña.</p>
                      <p>Haz clic en el siguiente enlace para cambiarla:</p>

@@ -1,5 +1,6 @@
 <?php
-require __DIR__ . '/../../config/db.php';
+// RUTA CORREGIDA
+require_once __DIR__ . '/../../../config/db.php';
 
 $token = $_GET['token'] ?? '';
 
@@ -12,8 +13,6 @@ $user = $stmt->fetch();
 if (!$user) {
     die("El enlace no es válido o ha caducado.");
 }
-
-
 ?>
 
 <!DOCTYPE html>
@@ -44,9 +43,8 @@ if (!$user) {
         $newPass = password_hash($_POST['password'], PASSWORD_DEFAULT);
         $stmt = $pdo->prepare("UPDATE usuario SET contraseña_hash = ?, reset_token = NULL, reset_expires = NULL WHERE id = ?");
         $stmt->execute([$newPass, $user['id']]);
-        echo "Contraseña actualizada correctamente. <a href='login.php' class='button_primary'>Inicia sesión</a>";
+        echo "Contraseña actualizada correctamente. <a href='auth/login.php'>Inicia sesión</a>";
     }
     ?>
 </body>
-
 </html>

@@ -72,19 +72,20 @@ function validationForm() {
    ENVIO DE DATOS AL SERVIDOR DE FORMA ASINCRONA
    ============================================== */
 async function enviarFormulario() {
-     const formData = new FormData(formRegister); ;
+    const formData = new FormData(formRegister);
 
-    const res = await fetch("../views/register.php", {
+    // RUTA CORREGIDA - register.php está en la misma carpeta
+    const res = await fetch("register.php", {
         method: "POST",
         body: formData
     });
 
-    const html = await res.text(); // recibimos HTML parcial
+    const html = await res.text();
     document.getElementById("respuesta").innerHTML = html;
 
-    // Si quieres redirigir en caso de éxito:
     if (html.includes("alert-success")) {
         setTimeout(() => {
+            // RUTA CORRECTA - misma carpeta
             window.location.href = "pending_verification.php";
         }, 2000);
     }

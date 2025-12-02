@@ -1,5 +1,10 @@
 <?php
-session_start();
+// No iniciar sesión aquí si ya lo haces en los handlers
+// if (session_status() === PHP_SESSION_NONE) {
+//     session_start();
+// }
+
+// 1. RUTA CORREGIDA para db.php
 require_once __DIR__ . '/../config/db.php';
 
 class AuthController {
@@ -33,13 +38,14 @@ class AuthController {
                     }
 
                     // Login exitoso
-                    session_regenerate_id(true); // Seguridad: prevenir fijación de sesión
-                    $_SESSION['user_id'] = $row['id']; // Asumiendo que hay un campo id
+                    session_regenerate_id(true);
+                    $_SESSION['user_id'] = $row['id'];
                     $_SESSION['email'] = $row['email'];
-                    $_SESSION["profile_photo"]= $row["foto_perfil"];
-                    $_SESSION["name"]= $row["nombre"];
+                    $_SESSION["profile_photo"] = $row["foto_perfil"];
+                    $_SESSION["name"] = $row["nombre"];
                     
-                    header("Location: ../views/home.php");
+                    // 2. RUTA CORREGIDA para home.php
+                    header("Location: ../home.php");
                     exit();
                 } else {
                     return "Contraseña incorrecta.";
@@ -53,3 +59,4 @@ class AuthController {
         }
     }
 }
+?>

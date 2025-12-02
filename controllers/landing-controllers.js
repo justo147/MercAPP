@@ -5,11 +5,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Evento para ir a la vista de login
   btnLogin.addEventListener("click", () => {
-    window.location.href = "login.php";
+    window.location.href = "auth/login.php";
   });
 
   // Evento para ir a la vista de registro
   btnRegister.addEventListener("click", () => {
-    window.location.href = "register.php";
+    window.location.href = "auth/register.php";
   });
 });

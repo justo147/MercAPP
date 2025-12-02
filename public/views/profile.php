@@ -1,6 +1,6 @@
 <?php
-  session_start();
-  ?>
+session_start();
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -8,16 +8,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Perfil de <?php echo $_SESSION["name"] ?> </title>
-  <!-- enlaces a bootstrap -->
+  <title>Perfil de <?php echo $_SESSION["name"] ?? 'Usuario' ?> </title>
+  
+  <!-- Favicon -->
+  <link rel="icon" href="../ico/logo_sinfondo.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="../ico/logo_sinfondo.ico" type="image/x-icon">
+  
+  <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
+  <!-- CSS -->
   <link rel="stylesheet" href="../css/reset.css">
   <link rel="stylesheet" href="../css/style-guide.css">
-  <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/homeStyle.css">
+  
+  <!-- JS -->
   <script src="../js/theme.js" defer></script>
 </head>
 
@@ -37,9 +44,9 @@
           <div class="d-flex sinFondo">
             <div class="flex-shrink-0 sinFondo me-4 mt-3">
               <!-- imagen -->
-              <!-- logica de si no tiene foto se ponga una predeterminada y si tiene la obtenga del servidor -->
               <?php
               
+  
               require_once __DIR__ . '/../../config/db.php';
               $user = null;
               if (isset($_GET['id'])) {
@@ -104,10 +111,6 @@
                   echo "</button>";
                 } 
                 ?>
-                
-                  
-                
-
               </div>
 
             </div>
@@ -116,10 +119,6 @@
       </div>
     </div>
   </div>
-
-
-
-
 
   <section class="user-products container my-5 sinFondo">
     <h2 class="mb-4">Tus productos</h2>
@@ -166,9 +165,6 @@
       </div>
     </div>
   </section>
-
-
-
 
 </body>
 
