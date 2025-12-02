@@ -1,8 +1,7 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4 shadow-sm">
   <div class="container-fluid">
-    <i class="bi bi-shop mx-1"></i>
-    <a class="navbar-brand fw-bold" href="home.php">
-      <img src="../img/logo_sinfondo.png" alt="MercApp" height="30" class="d-inline-block align-text-top">
+    <a class="navbar-brand fw-bold " href="home.php">
+      <img src="../img/logo_sinfondo.png" alt="MercApp" height="30" class="d-inline-block align-middle">
       MercApp
     </a>
 
