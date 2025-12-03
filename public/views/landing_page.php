@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="../css/reset.css">
   <link rel="stylesheet" href="../css/style-guide.css">
   <link rel="stylesheet" href="../css/style.css">
-  <script src="../../controllers/landing-controllers.js"></script>
+  <script src="../../controllers/landing_controllers.js"></script>
 </head>
 
 <body class="landing-page">

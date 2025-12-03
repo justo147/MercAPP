@@ -1,6 +1,6 @@
 <?php
 // Cargar el handler correctamente: desde /public/views/ subir 2 niveles y entrar en /handlers/
-require_once __DIR__ . '/../../controllers/handlers/verifyEmail_handlers.php';
+require_once __DIR__ . '/../../controllers/handlers/verify_email_handlers.php';
 ?>
 <!DOCTYPE html>
 <html lang="es">

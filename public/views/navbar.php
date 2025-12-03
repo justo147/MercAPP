@@ -51,7 +51,7 @@
               </a>
             </li>
             <li>
-              <a class="dropdown-item" href="detailAccount.php">
+              <a class="dropdown-item" href="detail_account.php">
                 <i class="bi bi-gear"></i> Ajustes de Cuenta
               </a>
             </li>
