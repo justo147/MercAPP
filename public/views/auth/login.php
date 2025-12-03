@@ -80,7 +80,7 @@ require_once __DIR__ . '../../../../controllers/handlers/login_handlers.php';
       <input type="email" id="email" name="email" class="form-control border border-primary rounded" placeholder="Escriba su correo" required value="<?= isset($_POST['email']) ? htmlspecialchars($_POST['email']) : '' ?>" />
       <input type="password" id="password" name="password" class="form-control border border-primary rounded" placeholder="Contraseña" required />
 
-      <a href="forgotpass.php">¿Olvidaste tu contraseña?</a>
+      <a href="../forgotpass.php">¿Olvidaste tu contraseña?</a>
       <input type="submit" name="login" value="Iniciar Sesión" class="button-primary" />
     </form>
   </div>
