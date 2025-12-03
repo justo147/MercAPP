@@ -59,9 +59,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
              WHERE id = ?"
         );
         $stmt->execute([$newPass, $user['id']]);
-
-        // Mensaje de éxito con enlace a login
-        echo "<p class='sucess-mesage'>Contraseña actualizada correctamente.</p> 
-              <a href='auth/login.php' class='btn btn-primary'>Inicia sesión</a>";
+        $message = "
+<div class='alert alert-success d-flex flex-column align-items-start'>
+  <p class='mb-2'>Contraseña actualizada correctamente.</p>
+  <a href='auth/login.php' class='btn btn-primary'>Inicia sesión</a>
+</div>";
     }
 }
