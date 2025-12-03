@@ -23,6 +23,8 @@ require __DIR__ . "/../../controllers/handlers/reset_password_handlers.php";
                 <button type="submit" class="btn btn-success">Actualizar contraseña</button>
             </div>
         </form>
+        <?php
+        if(isset($message)) echo $message ?>
     </div>
 
 </body>
