@@ -32,7 +32,7 @@ document.getElementById('formRegistro').addEventListener('submit', function (e) 
   };
 
   /**
-   * Indica si el correo electrónico ya está registrado.
+   * Verifica si el correo electrónico ya está registrado.
    * @type {boolean}
    */
   const existe = usuarios.some(user => user.email === nuevoUsuario.email);
@@ -42,10 +42,10 @@ document.getElementById('formRegistro').addEventListener('submit', function (e) 
     return;
   }
 
-  // Guardar nuevo usuario
+  // Guardar el nuevo usuario en el array y en localStorage
   usuarios.push(nuevoUsuario);
   localStorage.setItem('usuarios', JSON.stringify(usuarios));
 
   alert('¡Registro exitoso!');
-  window.location.href = 'login.php';
+  window.location.href = 'login.php'; // Redirige al login
 });

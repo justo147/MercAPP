@@ -1,15 +1,22 @@
+<!-- Navbar principal -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4 shadow-sm">
   <div class="container-fluid">
+
+    <!-- Logo y nombre de la aplicación -->
     <a class="navbar-brand fw-bold " href="home.php">
       <img src="../img/logo_sinfondo.png" alt="MercApp" height="30" class="d-inline-block align-middle">
       MercApp
     </a>
 
+    <!-- Botón de colapso para móviles -->
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
+    <!-- Contenido colapsable -->
     <div class="collapse navbar-collapse" id="navbarContent">
+
+      <!-- Buscador, solo si $showSearch está habilitado -->
       <?php if (!empty($showSearch) && $showSearch === true): ?>
         <div class="ms-auto" style="max-width: 500px; width: 100%;">
           <form class="d-flex" role="search" method="get" action="home.php">
@@ -19,7 +26,10 @@
         </div>
       <?php endif; ?>
 
+      <!-- Menú de usuario y toggle de tema -->
       <div class="d-flex ms-auto align-items-center">
+
+        <!-- Dropdown de usuario -->
         <div class="dropdown me-2">
           <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center"
             type="button"
@@ -27,6 +37,7 @@
             data-bs-toggle="dropdown"
             aria-expanded="false">
 
+            <!-- Foto de perfil o icono por defecto -->
             <?php if (!empty($_SESSION["profile_photo"])): ?>
               <img src="<?php echo htmlspecialchars($_SESSION["profile_photo"]) ?>"
                 alt="Foto de perfil"
@@ -39,6 +50,7 @@
             Perfil
           </button>
 
+          <!-- Opciones del dropdown -->
           <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
             <li>
               <a class="dropdown-item" href="profile.php?id=<?php echo htmlspecialchars($_SESSION['user_id']) ?>">
@@ -57,7 +69,7 @@
             </li>
             <li><hr class="dropdown-divider"></li>
             <li>
-              <!-- RUTA CORREGIDA para logout -->
+              <!-- Cerrar sesión -->
               <a class="dropdown-item text-danger" href="../../controllers/logout.php">
                 <i class="bi bi-box-arrow-right"></i> Cerrar sesión
               </a>
@@ -65,10 +77,12 @@
           </ul>
         </div>
 
+        <!-- Botón de toggle de tema (claro/oscuro) -->
         <button id="themeToggle" class="btn btn-outline-light rounded-circle" aria-label="Cambiar tema">🌙</button>
       </div>
     </div>
   </div>
 </nav>
 
+<!-- Script para manejar cambio de tema -->
 <script src="../js/theme.js"></script>

@@ -1,18 +1,19 @@
-
+/* Modo oscuro: texto de párrafos */
 body.dark-mode p {
-  color: var(--color-text-dark);
+  color: var(--color-text-dark); /* Color de texto en modo oscuro */
 }
 
+/* Caja de perfil */
 .perfil-box {
-  display: block;          /* ocupa su propio bloque */
-  min-width: 250px;        /* tamaño mínimo */
-  max-width: 400px;        /* tamaño máximo más compacto */
-  width: auto;             /* se ajusta al contenido */
+  display: block;          /* Ocupa su propio bloque */
+  min-width: 250px;        /* Tamaño mínimo de la caja */
+  max-width: 400px;        /* Tamaño máximo para que no sea demasiado grande */
+  width: auto;             /* Se ajusta al contenido disponible */
 }
 
+/* Items dentro de la lista de perfil */
 .perfil-box .list-group-item {
-  min-height: 50px;
-  background-color: var(--bs-body-bg);
-  color: var(--bs-body-color);
+  min-height: 50px;                     /* Altura mínima para los elementos de la lista */
+  background-color: var(--bs-body-bg);  /* Fondo según la variable de Bootstrap */
+  color: var(--bs-body-color);          /* Color de texto según la variable de Bootstrap */
 }
-

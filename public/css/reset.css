@@ -1,23 +1,29 @@
 /* reset.css minimalista */
+
+/* Ajuste general de todos los elementos */
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+  margin: 0;            /* Elimina márgenes por defecto */
+  padding: 0;           /* Elimina padding por defecto */
+  box-sizing: border-box; /* Incluye padding y borde dentro del tamaño total */
 }
 
+/* Asegura que html y body ocupen todo el alto de la ventana */
 html, body {
   height: 100%;
 }
 
+/* Elementos multimedia y gráficos se muestran como bloque y se ajustan al ancho máximo */
 img, picture, video, canvas, svg {
   display: block;
-  max-width: 100%;
+  max-width: 100%;      /* Evita que se desborden del contenedor */
 }
 
+/* Inputs, botones y selects heredan la fuente del contenedor */
 button, input, select, textarea {
   font: inherit;
 }
 
+/* Enlaces conservan el color del texto y no subrayan */
 a {
   color: inherit;
   text-decoration: none;

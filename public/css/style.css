@@ -1,34 +1,35 @@
-/* Estilos landing-page*/
-
+/* Estilos para la landing page */
 body.landing-page {
+  /* Fondo con imagen y degradado semitransparente */
   background:
     linear-gradient(rgba(255, 255, 255, 0.5), rgba(2, 165, 111, 0.5)),
     url("../img/imagenportada.jpg");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  height: 100vh;
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between; /* separa contenido arriba y botones abajo */
-  text-align: center;
+  background-size: contain;        /* Ajusta la imagen al contenedor */
+  background-repeat: no-repeat;    /* Evita repetir la imagen */
+  background-position: center;     /* Centra la imagen */
+  
+  height: 100vh;                   /* Ocupa toda la altura de la ventana */
+  margin: 0;                        /* Elimina margen por defecto */
+  font-family: 'Segoe UI', sans-serif; /* Fuente de texto */
+  color: white;                     /* Color de texto principal */
+  
+  display: flex;                    /* Usa flexbox para layout */
+  flex-direction: column;           /* Contenido en columna */
+  align-items: center;              /* Centra horizontalmente */
+  justify-content: space-between;   /* Separa contenido superior e inferior */
+  text-align: center;               /* Centra el texto */
 }
 
-/* Contenido superior */
-.contenidoLandingPage{
-  margin-top: 2vh;
+/* Contenido superior de la landing page */
+.contenidoLandingPage {
+  margin-top: 2vh;                  /* Espacio desde el top */
 }
 
-/* Botones al fondo */
-.botonesLandingPage{
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-bottom: 100px;
+/* Contenedor de botones en la parte inferior */
+.botonesLandingPage {
+  display: flex;                    /* Flex para organizar botones */
+  gap: 20px;                        /* Espacio entre botones */
+  flex-wrap: wrap;                  /* Permite que los botones pasen a la siguiente línea */
+  justify-content: center;          /* Centra horizontalmente */
+  margin-bottom: 100px;             /* Separación desde el bottom */
 }
-

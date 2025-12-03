@@ -4,6 +4,20 @@ require __DIR__ . '/../vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+/**
+ * Envía un correo electrónico utilizando PHPMailer.
+ *
+ * Esta función permite enviar correos HTML y texto plano, utilizando SMTP con Gmail.
+ * Se asegura de que el correo se envíe en UTF-8 para manejar caracteres especiales como acentos y ñ.
+ *
+ * @param string $toEmail Dirección de correo del destinatario.
+ * @param string $toName Nombre del destinatario (opcional, puede dejarse vacío).
+ * @param string $subject Asunto del correo.
+ * @param string $htmlBody Cuerpo del correo en HTML.
+ * @param string $altBody Cuerpo alternativo en texto plano (opcional). Si no se proporciona, se genera automáticamente a partir de $htmlBody.
+ * 
+ * @return bool Retorna true si el correo se envió correctamente, false en caso de error.
+ */
 function sendMail($toEmail, $toName, $subject, $htmlBody, $altBody = ''): bool {
   $mail = new PHPMailer(true);
 

@@ -1,9 +1,10 @@
 <?php
-// RUTA CORREGIDA para login_handlers.php
-// Desde: public/views/auth/login.php
-// Hacia: handlers/login_handlers.php (subir 3 niveles hasta la raíz)
+/**
+ * Incluye el handler de login.
+ * Maneja la validación de credenciales, inicio de sesión y mensajes de error.
+ * RUTA: desde public/views/auth/login.php → ../../../../controllers/handlers/login_handlers.php
+ */
 require_once __DIR__ . '../../../../controllers/handlers/login_handlers.php';
-
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -32,6 +33,7 @@ require_once __DIR__ . '../../../../controllers/handlers/login_handlers.php';
   <script src="../../js/theme.js" defer></script>
 
   <style>
+    /* Mensaje de error al intentar login */
     .error-message {
       color: #ff4444;
       background-color: #ffe6e6;
@@ -46,6 +48,7 @@ require_once __DIR__ . '../../../../controllers/handlers/login_handlers.php';
 
 <body>
 
+  <!-- Header con botón de cambio de tema y logo -->
   <header>
     <button id="themeToggle" class="toggle-btn" aria-label="Cambiar tema">🌙</button>
     <div class="imageLogo sinFondo">
@@ -53,10 +56,12 @@ require_once __DIR__ . '../../../../controllers/handlers/login_handlers.php';
     </div>
   </header>
 
+  <!-- Contenedor central del formulario de login -->
   <div class="container d-flex justify-content-center align-items-center sinFondo" id="container">
     <form id="formLogin" method="post" class="form">
       <h1>Iniciar Sesión</h1>
 
+      <!-- Botones de login social -->
       <div class="d-flex justify-content-center gap-2 my-3 sinFondo">
         <a href="#" class="btn btn-outline-primary rounded-circle d-flex align-items-center justify-content-center" style="width:40px; height:40px;">
           <i class="bi bi-facebook"></i>
@@ -71,20 +76,26 @@ require_once __DIR__ . '../../../../controllers/handlers/login_handlers.php';
 
       <span>Use su cuenta</span>
 
+      <!-- Mensaje de error dinámico desde el handler -->
       <?php if (!empty($error_message)): ?>
         <div class="error-message">
           <?= htmlspecialchars($error_message) ?>
         </div>
       <?php endif; ?>
 
+      <!-- Campos de correo y contraseña -->
       <input type="email" id="email" name="email" class="form-control border border-primary rounded" placeholder="Escriba su correo" required value="<?= isset($_POST['email']) ? htmlspecialchars($_POST['email']) : '' ?>" />
       <input type="password" id="password" name="password" class="form-control border border-primary rounded" placeholder="Contraseña" required />
 
+      <!-- Enlace de recuperación de contraseña -->
       <a href="../forgot_pass.php">¿Olvidaste tu contraseña?</a>
+
+      <!-- Botón de envío del formulario -->
       <input type="submit" name="login" value="Iniciar Sesión" class="button-primary" />
     </form>
   </div>
 
+  <!-- Enlace al registro -->
   <br>
   <div class="text-center sinFondo">
     <a href="register.php">¿No tienes cuenta? Regístrate aquí</a>

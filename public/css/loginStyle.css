@@ -8,19 +8,22 @@
     transform: scale(0.95);
 }
 
+/* Quitar borde al enfocar */
 .buttom:focus {
-    outline: none; /* Quita el borde al enfocar */
+    outline: none;
 }
 
+/* Fondo para modo oscuro */
 body.dark-mode {
-  background-color: var(--color-background-dark);
+    background-color: var(--color-background-dark);
 }
 
+/* Efecto hover en botón de alternancia */
 .toggle-btn:hover {
-  transform: scale(1.05);
+    transform: scale(1.05);
 }
 
-/*Contenedor principal*/
+/* Contenedor principal de login */
 .login-container {
     background-color: var(--color-background);
     border-radius: 10px; /* Bordes redondeados */
@@ -34,5 +37,3 @@ body.dark-mode {
     align-items: center;
     justify-content: center;
 }
-
-
