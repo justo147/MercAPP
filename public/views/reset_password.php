@@ -1,18 +1,5 @@
 <?php
-// RUTA CORREGIDA
-require_once __DIR__ . '/../../config/db.php';
-
-$token = $_GET['token'] ?? '';
-
-$database = new Database();
-$pdo = $database->getConnection();
-$stmt = $pdo->prepare("SELECT id FROM usuario WHERE reset_token = ? AND reset_expires > NOW()");
-$stmt->execute([$token]);
-$user = $stmt->fetch();
-
-if (!$user) {
-    die("El enlace no es válido o ha caducado.");
-}
+require __DIR__ . "/../../controllers/handlers/reset_password_handlers.php";
 ?>
 
 <!DOCTYPE html>
@@ -38,13 +25,5 @@ if (!$user) {
         </form>
     </div>
 
-    <?php
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $newPass = password_hash($_POST['password'], PASSWORD_DEFAULT);
-        $stmt = $pdo->prepare("UPDATE usuario SET contraseña_hash = ?, reset_token = NULL, reset_expires = NULL WHERE id = ?");
-        $stmt->execute([$newPass, $user['id']]);
-        echo "Contraseña actualizada correctamente. <a href='auth/login.php'>Inicia sesión</a>";
-    }
-    ?>
 </body>
 </html>
