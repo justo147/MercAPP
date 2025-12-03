@@ -34,8 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         sendMail($email, '', 'Recuperar contraseña - MercApp', $htmlBody);
 
-        echo "Hemos enviado un enlace de recuperación a tu correo.";
+        $mensaje="Hemos enviado un enlace de recuperación a tu correo.";
     } else {
-        echo "No existe ninguna cuenta con ese correo.";
+        $mensaje="No existe ninguna cuenta con ese correo.";
     }
 }
