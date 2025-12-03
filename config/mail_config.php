@@ -20,6 +20,7 @@ function sendMail($toEmail, $toName, $subject, $htmlBody, $altBody = ''): bool {
     $mail->addAddress($toEmail, $toName);
 
     $mail->isHTML(true);
+    $mail->CharSet = 'UTF-8';
     $mail->Subject = $subject;
     $mail->Body = $htmlBody;
     $mail->AltBody = $altBody ?: strip_tags($htmlBody);
