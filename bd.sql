@@ -138,7 +138,8 @@ CREATE TABLE Transacciones (
   FOREIGN KEY (comprador_id) REFERENCES Usuario(id)
     ON DELETE RESTRICT ON UPDATE CASCADE,
   FOREIGN KEY (vendedor_id) REFERENCES Usuario(id)
-    ON DELETE RESTRICT ON UPDATE CASCADE
+    ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT chk_no_auto_transaccion CHECK (comprador_id <> vendedor_id)
 ) ENGINE=InnoDB;
 
 -- Para soportar múltiples productos por trueque
@@ -265,9 +266,12 @@ CREATE TABLE Reportes (
   motivo TEXT,
   fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
   estado ENUM('pendiente','revisado','rechazado') DEFAULT 'pendiente',
+  admin_id INT NULL, -- moderador que revisa el reporte
   FOREIGN KEY (usuario_reportador) REFERENCES Usuario(id)
     ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY (producto_id) REFERENCES Productos(id)
+    ON DELETE SET NULL ON UPDATE CASCADE,
+  FOREIGN KEY (admin_id) REFERENCES Usuario(id)
     ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
