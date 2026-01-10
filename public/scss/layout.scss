@@ -1,0 +1,38 @@
+/* ------------------------------
+   LAYOUT
+--------------------------------*/
+
+.section {
+  padding: 3rem 0;
+  background-color: var(--color-surface);
+}
+
+.imageLogo {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.imageLogo img {
+  max-width: 300px;
+  width: 80%;
+  height: auto;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-muted {
+  color: var(--color-muted);
+}
+
+input {
+  background-color: var(--color-surface);
+  border: none;
+  padding: 12px 15px;
+  margin: 8px 0;
+  width: 100%;
+}
