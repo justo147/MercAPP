@@ -4,7 +4,7 @@
  * Redirige a login si no hay sesión activa
  */
 session_start();
-if(!isset($_SESSION["user_id"])){
+if (!isset($_SESSION["user_id"])) {
   header("location:auth/login.php");
 }
 ?>
@@ -15,11 +15,11 @@ if(!isset($_SESSION["user_id"])){
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Perfil de <?php echo $_SESSION["name"] ?? 'Usuario' ?></title>
-  
+
   <!-- Favicon -->
   <link rel="icon" href="../ico/logo_sinfondo.ico" type="image/x-icon">
   <link rel="shortcut icon" href="../ico/logo_sinfondo.ico" type="image/x-icon">
-  
+
   <!-- Bootstrap CSS y JS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
@@ -29,7 +29,7 @@ if(!isset($_SESSION["user_id"])){
   <link rel="stylesheet" href="../css/reset.css">
   <link rel="stylesheet" href="../css/style-guide.css">
   <link rel="stylesheet" href="../css/homeStyle.css">
-  
+
   <!-- JS de tema -->
   <script src="../js/theme.js" defer></script>
 </head>
@@ -73,7 +73,7 @@ if(!isset($_SESSION["user_id"])){
                 }
               }
               ?>
-              
+
               <!-- Mostrar foto de perfil o icono por defecto -->
               <?php if ($user && !empty($user['foto_perfil'])): ?>
                 <img src="<?= htmlspecialchars($user['foto_perfil']) ?>" class="rounded-circle mt-5" width="120"
@@ -87,12 +87,12 @@ if(!isset($_SESSION["user_id"])){
             <div class="flex-grow-1 ms-3 sinFondo">
               <h5 class="mb-1"><?= htmlspecialchars($user['nombre'] . " " . $user["apellidos"]) ?></h5>
               <p class="mb-2 pb-1 fs-6 text-muted">
-                Cuenta creada: 
+                Cuenta creada:
                 <?php
-                  $fecha = new DateTime($user['fecha_registro']);
-                  $mes   = $fecha->format('m'); 
-                  $anio  = $fecha->format('Y'); 
-                  echo "$mes/$anio";
+                $fecha = new DateTime($user['fecha_registro']);
+                $mes = $fecha->format('m');
+                $anio = $fecha->format('Y');
+                echo "$mes/$anio";
                 ?>
               </p>
 
@@ -124,9 +124,9 @@ if(!isset($_SESSION["user_id"])){
 
                 <?php
                 // Mostrar botón Follow si no es el propio perfil
-                if($_GET['id'] != $_SESSION['user_id']){
+                if ($_GET['id'] != $_SESSION['user_id']) {
                   echo "<button class='flex-grow-1 btn btn-primary'>Follow</button>";
-                } 
+                }
                 ?>
               </div>
 
@@ -138,21 +138,27 @@ if(!isset($_SESSION["user_id"])){
   </div>
 
   <!-- Sección de productos del usuario -->
-  <section class="user-products container my-5 sinFondo">
+  <!-- <section class="user-products container my-5 sinFondo">
     <h2 class="mb-4">Tus productos</h2>
     <div class="row g-4 sinFondo">
-      <?php for ($i = 1; $i <= 5; $i++): ?>
+      <?php// for ($i = 1; $i <= 5; $i++): ?>
         <div class="col-6 col-md-4 col-lg-3 sinFondo">
           <div class="card h-100 text-center">
             <div class="card-body">
-              <p class="card-text">Producto <?= $i ?></p>
+              <p class="card-text">Producto <?// $i ?></p>
               <div class="display-1">📦</div>
             </div>
           </div>
         </div>
-      <?php endfor; ?>
+      <?php //endfor; ?>
     </div>
-  </section>
+  </section> -->
 
+  <div class="container my-4">
+    <h2 class="mb-3">Mis productos</h2>
+    <div id="productos-usuario" class="row g-3"></div>
+  </div>
+  <script src="../js/productosPerfil.js"></script>
 </body>
+
 </html>
