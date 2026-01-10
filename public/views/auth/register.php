@@ -88,5 +88,16 @@ require_once __DIR__ . '/../../../controllers/handlers/register_handlers.php';
   <div class="text-center mt-3 sinFondo">
     <a href="login.php">¿Ya estás registrado? Inicia sesión aquí</a>
   </div>
+
+<div id="modalOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:999;"></div>
+
+<div id="modalSuccess" class="modal-bom" style="display:none; position:absolute; left:50%; transform:translateX(-50%); z-index:1000; background:white; padding:30px; border-radius:15px; width:90%; max-width:400px; text-align:center; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+    <h2 style="color: #47a881;">¡Registro con éxito!</h2>
+    <p>Hemos enviado un enlace a:</p>
+    <p><strong id="userEmail"></strong></p>
+    <p>Revisa tu correo para activar tu cuenta.</p>
+    <button onclick="window.location.href='login.php'" class="btn" style="background:#47a881; color:white; margin-top:15px;">Ir al Login</button>
+</div>
+
 </body>
 </html>

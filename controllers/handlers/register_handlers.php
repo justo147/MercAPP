@@ -94,6 +94,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // ===============================
                 // MENSAJE DE ÉXITO Y REDIRECCIÓN
                 // ===============================
+                // Redirigimos de vuelta a register.php con parámetros para el BOM
+                echo "REGISTRO_EXITOSO";
+                exit;
+
+                /*
                 echo "<div class='alert alert-success'>
                         Registro correcto. Revisa tu correo para confirmar.
                       </div>";
@@ -104,6 +109,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         }, 2000);
                       </script>";
                 exit;
+
+*/
             }
 
         } catch (Exception $e) {

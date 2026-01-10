@@ -37,3 +37,32 @@ body.dark-mode {
     align-items: center;
     justify-content: center;
 }
+
+/* Contenedor oscuro que cubre toda la pantalla */
+.modal-overlay {
+    display: none; 
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 999;
+}
+
+/* La ventana modal en sí */
+.modal-bom {
+    display: none;
+    position: absolute; /* Para usar con window.scrollY */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 400px;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    z-index: 1000;
+    text-align: center;
+    border-top: 10px solid #4CAF50;
+}
