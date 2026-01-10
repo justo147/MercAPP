@@ -34,7 +34,7 @@ El objetivo principal es **integrar los conocimientos de Desarrollo Web en Entor
   - **Vista:** Interfaz y renderización dinámica.  
   - **Controlador:** Comunicación entre modelo y vista.  
 - **Git / GitHub** → Control de versiones y colaboración.
-[enlace](https://github.com/justo147/2DAW_DWEC_T030405)
+[enlace](https://github.com/justo147/MercAPP)
   
 
 ---
