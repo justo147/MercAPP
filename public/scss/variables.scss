@@ -1,0 +1,40 @@
+/* ---------------------------------------------------------
+   ESTRUCTURA DEL PROYECTO SCSS
+   ---------------------------------------------------------
+   Archivo              | Contenido
+   ---------------------------------------------------------
+   _variables.scss      | Variables Sass + exportación a CSS variables
+   _mixins.scss         | Mixins reutilizables (transiciones, hover, etc.)
+   _reset.scss          | Reset o normalización si usas uno
+   _typography.scss     | h1–h6, párrafos, enlaces, fuentes
+   _buttons.scss        | Botones primarios, secundarios, text-button, toggle
+   _layout.scss         | Secciones, contenedores, utilidades
+   _dark-mode.scss      | Todo lo relacionado con body.dark-mode
+   _cards.scss          | Estilos de .card y variantes
+
+   style.scss           | Archivo principal que importa todos los anteriores
+   ---------------------------------------------------------
+*/
+
+/* ------------------------------
+   VARIABLES DE COLOR
+--------------------------------*/
+:root {
+  --color-primary: #04aa86;
+  --color-primary-dark: #03503f;
+  --color-secondary: #e9d9c2;
+  --color-secondary-dark: rgb(170, 149, 117);
+  --color-background: #ffffff;
+  --color-surface: #f5f5f5;
+  --color-text: #333333;
+  --color-muted: #777777;
+  --color-text-dark: #f9f9f9;
+  --color-background-dark: #1b1b1b;
+
+  --bs-primary: #04aa86;
+  --bs-primary-rgb: 4, 170, 134;
+  --bs-secondary: #e9d9c2;
+  --bs-secondary-rgb: 233, 217, 194;
+  --bs-link-color: var(--bs-primary);
+  --bs-link-hover-color: #03503f;
+}
