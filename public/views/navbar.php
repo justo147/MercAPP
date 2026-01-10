@@ -39,7 +39,7 @@
 
             <!-- Foto de perfil o icono por defecto -->
             <?php if (!empty($_SESSION["profile_photo"])): ?>
-              <img src="<?php echo htmlspecialchars($_SESSION["profile_photo"]) ?>"
+              <img src="/MercApp/<?php echo htmlspecialchars($_SESSION["profile_photo"]) ?>"
                 alt="Foto de perfil"
                 class="rounded-circle me-2"
                 width="24" height="24">

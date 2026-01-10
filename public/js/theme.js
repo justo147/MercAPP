@@ -10,20 +10,44 @@ const toggleBtn = document.getElementById('themeToggle');
  */
 const body = document.body;
 
-// Aplicar tema guardado al cargar la página
-if (localStorage.getItem('theme') === 'dark') {
-  body.classList.add('dark-mode'); // Activa modo oscuro
-  toggleBtn.textContent = '☀️';    // Cambia icono a sol
+/**
+ * Intentamos leer el tema guardado en localStorage.
+ * Uso de try...catch porque:
+ * - localStorage puede estar deshabilitado por el navegador.
+ * - El usuario puede tener bloqueado el almacenamiento.
+ * - El valor guardado podría estar corrupto o inaccesible.
+ */
+try {
+  const savedTheme = localStorage.getItem('theme');
+
+  if (savedTheme === 'dark') {
+    body.classList.add('dark-mode');
+    toggleBtn.textContent = '☀️';
+  }
+} catch (error) {
+  console.error("Error al leer localStorage:", error);
+  // No aplicamos tema guardado, pero la app sigue funcionando.
 }
 
-// Cambiar tema al hacer clic en el botón
+/**
+ * Evento para alternar el tema.
+ */
 toggleBtn.addEventListener('click', () => {
-  // Alterna la clase dark-mode en el body
   const darkModeEnabled = body.classList.toggle('dark-mode');
-
-  // Cambia el icono según el tema activo
   toggleBtn.textContent = darkModeEnabled ? '☀️' : '🌙';
 
-  // Guarda la preferencia en localStorage
-  localStorage.setItem('theme', darkModeEnabled ? 'dark' : 'light');
+  /**
+   * Guardamos la preferencia del usuario.
+   * try...catch necesario porque:
+   * - localStorage.setItem puede lanzar excepciones si:
+   *   - El almacenamiento está lleno.
+   *   - El usuario está en modo incógnito (Safari).
+   *   - El navegador bloquea el acceso por políticas de seguridad.
+   */
+  try {
+    localStorage.setItem('theme', darkModeEnabled ? 'dark' : 'light');
+  } catch (error) {
+    console.error("No se pudo guardar la preferencia de tema:", error);
+    // La app sigue funcionando aunque no se guarde la preferencia.
+  }
 });
