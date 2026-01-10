@@ -1,0 +1,44 @@
+/* ------------------------------
+   MODO OSCURO
+--------------------------------*/
+
+body.dark-mode {
+  background-color: var(--color-background-dark);
+  color: var(--color-text-dark);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body.dark-mode .list-group-item {
+  background-color: var(--color-background-dark);
+  color: var(--color-text-dark);
+}
+
+body.dark-mode .form {
+  background-color: var(--color-background-dark);
+  color: var(--color-text-dark);
+  border-color: var(--bs-border-color);
+}
+
+body.dark-mode input {
+  background-color: #444;
+  color: var(--color-text-dark);
+  border: 1px solid #555;
+}
+
+body.dark-mode input::placeholder {
+  color: #bbb;
+}
+
+body.dark-mode div:not(.sinFondo) {
+  background-color: #2b2b2b;
+  color: var(--color-text-dark);
+}
+
+body.dark-mode form {
+  background-color: var(--color-surface-dark, #2b2b2b);
+  color: var(--color-text-dark);
+}
+
+body.dark-mode .text-muted {
+  color: #b0b0b0 !important;
+}

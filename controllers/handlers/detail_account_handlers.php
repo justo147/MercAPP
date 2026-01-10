@@ -59,44 +59,98 @@ try {
         // ===============================
         // VALIDACIONES BÁSICAS
         // ===============================
-        if (empty($nombre) || empty($email)) {
-            $error = "Nombre y correo son obligatorios.";
-        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $error = "El correo no es válido.";
+       if (empty($nombre) || empty($email)) {
+    $error = "Nombre y correo son obligatorios.";
+} elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    $error = "El correo no es válido.";
+} else {
+
+    // ===============================
+    // MANEJO DE FOTO DE PERFIL (OPTIMIZADO)
+    // ===============================
+    $foto = $user['foto_perfil'];
+
+    if (!empty($_FILES['foto']['name'])) {
+
+        $targetDir = "../../uploads/users/";
+
+        // Crear carpeta si no existe
+        if (!is_dir($targetDir)) {
+            mkdir($targetDir, 0777, true);
+        }
+
+        // Validar que realmente es una imagen
+        $info = getimagesize($_FILES['foto']['tmp_name']);
+        if ($info === false) {
+            $error = "El archivo subido no es una imagen válida.";
         } else {
-            // ===============================
-            // MANEJO DE FOTO DE PERFIL
-            // ===============================
-            $foto = $user['foto_perfil'];
-            if (!empty($_FILES['foto']['name'])) {
-                $targetDir = "../../uploads/";
-                
-                // Crear carpeta si no existe
-                if (!is_dir($targetDir)) {
-                    mkdir($targetDir, 0777, true);
-                }
 
-                // Obtener extensión del archivo en minúsculas
-                $extension = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
+            $mime = $info['mime'];
 
-                // Extensiones permitidas
-                $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-                if (!in_array($extension, $allowed)) {
-                    $error = "Formato de imagen no permitido.";
-                } else {
-                    // Crear nombre único para la imagen
-                    $fileName = "FotoPerfil" . $userId . "." . $extension;
-                    $targetFile = $targetDir . $fileName;
+            // Cargar imagen según tipo
+            switch ($mime) {
+                case 'image/jpeg':
+                case 'image/jpg':
+                case 'image/pjpeg':
+                    $img = imagecreatefromjpeg($_FILES['foto']['tmp_name']);
+                    break;
 
-                    // Mover archivo subido a la carpeta de destino
-                    if (move_uploaded_file($_FILES['foto']['tmp_name'], $targetFile)) {
-                        $foto = $targetFile;
-                    }
+                case 'image/png':
+                    $img = imagecreatefrompng($_FILES['foto']['tmp_name']);
+                    break;
 
-                    // Guardar la ruta en sesión para mostrar la nueva foto inmediatamente
-                    $_SESSION["profile_photo"] = $targetFile;
-                }
+                case 'image/gif':
+                    $img = imagecreatefromgif($_FILES['foto']['tmp_name']);
+                    break;
+
+                case 'image/webp':
+                    $img = imagecreatefromwebp($_FILES['foto']['tmp_name']);
+                    break;
+
+                default:
+                    $error = "Formato de imagen no soportado.";
+                    $img = null;
             }
+
+            if ($img) {
+
+                // ===============================
+                // REDIMENSIONAR (máx 500px)
+                // ===============================
+                $maxWidth = 500;
+                $width = imagesx($img);
+                $height = imagesy($img);
+
+                if ($width > $maxWidth) {
+                    $ratio = $height / $width;
+                    $newWidth = $maxWidth;
+                    $newHeight = $maxWidth * $ratio;
+
+                    $tmp = imagecreatetruecolor($newWidth, $newHeight);
+                    imagecopyresampled($tmp, $img, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+                    $img = $tmp;
+                }
+
+                // ===============================
+                // GUARDAR COMO WEBP OPTIMIZADO
+                // ===============================
+                $fileName = "FotoPerfil_" . $userId  . ".webp";
+                $targetFile = $targetDir . $fileName;
+
+                imagewebp($img, $targetFile, 80);
+
+                // Guardar ruta relativa para BD
+                $foto = "uploads/users/" . $fileName;
+
+                // Actualizar sesión para mostrar la nueva foto
+                $_SESSION["profile_photo"] = $foto;
+            }
+        }
+    }
+
+    
+
+
 
             // ===============================
             // ACTUALIZAR DATOS EN LA BASE DE DATOS

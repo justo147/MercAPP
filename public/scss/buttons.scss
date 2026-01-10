@@ -1,0 +1,67 @@
+/* ------------------------------
+   BOTONES
+--------------------------------*/
+
+.button-primary {
+  background-color: var(--color-primary);
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border-color: var(--color-primary);
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.button-primary:hover {
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+  transform: scale(1.02);
+}
+
+.button-secondary {
+  background-color: var(--color-secondary);
+  color: #fff;
+}
+
+.button-secondary:hover {
+  background-color: var(--color-secondary-dark);
+  transform: scale(1.02);
+}
+
+.button-text {
+  background: none;
+  color: var(--color-primary);
+  padding: 0.5em;
+}
+
+.button-text:hover {
+  color: var(--color-primary-dark);
+  text-decoration: underline;
+}
+
+.toggle-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: var(--color-primary);
+  color: #fff;
+  border-radius: 50%;
+  padding: 10px 12px;
+  font-size: 20px;
+  cursor: pointer;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.toggle-btn:hover {
+  transform: scale(1.1);
+  background-color: var(--color-primary-dark);
+}
+
+#themeToggle {
+  width: 40px;
+  height: 40px;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
