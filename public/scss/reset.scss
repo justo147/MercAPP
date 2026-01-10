@@ -1,0 +1,61 @@
+/* ---------------------------------------------------------
+   RESET GLOBAL
+   ---------------------------------------------------------
+   Este archivo elimina estilos por defecto del navegador
+   para asegurar una base visual consistente en todo el
+   proyecto. No añade diseño, solo normaliza.
+--------------------------------------------------------- */
+
+/* Elimina márgenes, paddings y asegura box-sizing */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Asegura que html y body ocupen toda la altura */
+html, body {
+  height: 100%;
+}
+
+/* Tipografía base heredada */
+body {
+  font-family: inherit;
+  line-height: 1.6;
+}
+
+/* Quita estilos por defecto de listas */
+ul, ol {
+  list-style: none;
+}
+
+/* Quita subrayado y color por defecto en enlaces */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Imágenes responsivas */
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* Botones sin estilos del navegador */
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* Inputs y formularios sin estilos del navegador */
+input,
+textarea,
+select {
+  font-family: inherit;
+  border: none;
+  outline: none;
+}

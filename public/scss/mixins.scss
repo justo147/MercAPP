@@ -1,0 +1,49 @@
+/* ---------------------------------------------------------
+   MIXINS REUTILIZABLES
+   ---------------------------------------------------------
+   Colección de funciones Sass que te permiten escribir
+   estilos más limpios, reutilizables y consistentes.
+--------------------------------------------------------- */
+
+/* Transición estándar */
+@mixin transition($props: all, $time: 0.25s, $ease: ease) {
+  transition: $props $time $ease;
+}
+
+/* Centrado flex (horizontal y vertical) */
+@mixin flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Hover con elevación (ideal para cards y botones) */
+@mixin hover-lift($shadow: 0 8px 20px rgba(0,0,0,0.1)) {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: $shadow;
+  }
+}
+
+/* Botón base (padding, radio, peso) */
+@mixin button-base {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  @include transition(background-color);
+}
+
+/* Placeholder estilizado */
+@mixin placeholder($color) {
+  &::placeholder {
+    color: $color;
+  }
+}
+
+/* Tamaños responsivos para títulos */
+@mixin fluid-type($min, $max) {
+  font-size: clamp($min, 2vw, $max);
+}
