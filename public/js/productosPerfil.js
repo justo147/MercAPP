@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="card h-100 border rounded-3 shadow-sm">
 
             <!-- Carrusel -->
-            <div id="${idCarrusel}" class="carousel slide" data-bs-ride="carousel">
+            <div id="${idCarrusel}" class="carousel carousel-dark slide" data-bs-ride="carousel">
 
               <div class="carousel-inner">
                 ${imagenes.map((img, i) => `
