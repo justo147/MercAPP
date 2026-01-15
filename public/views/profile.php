@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Inicio de sesión y verificación
  * Redirige a login si no hay sesión activa
@@ -7,6 +8,11 @@ session_start();
 if (!isset($_SESSION["user_id"])) {
   header("location:auth/login.php");
 }
+$perfilId = intval($_GET["id"] ?? 0);
+$usuarioLogueado = $_SESSION["user_id"];
+
+$esPropietario = ($perfilId === $usuarioLogueado);
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -137,27 +143,15 @@ if (!isset($_SESSION["user_id"])) {
     </div>
   </div>
 
-  <!-- Sección de productos del usuario -->
-  <!-- <section class="user-products container my-5 sinFondo">
-    <h2 class="mb-4">Tus productos</h2>
-    <div class="row g-4 sinFondo">
-      <?php// for ($i = 1; $i <= 5; $i++): ?>
-        <div class="col-6 col-md-4 col-lg-3 sinFondo">
-          <div class="card h-100 text-center">
-            <div class="card-body">
-              <p class="card-text">Producto <?// $i ?></p>
-              <div class="display-1">📦</div>
-            </div>
-          </div>
-        </div>
-      <?php //endfor; ?>
-    </div>
-  </section> -->
-
   <div class="container my-4">
     <h2 class="mb-3">Mis productos</h2>
     <div id="productos-usuario" class="row g-3"></div>
   </div>
+
+  <script>
+    const ES_PROPIETARIO = <?= $esPropietario ? 'true' : 'false' ?>;
+  </script>
+
   <script src="../js/productosPerfil.js"></script>
 </body>
 

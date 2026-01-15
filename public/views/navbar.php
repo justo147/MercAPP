@@ -58,7 +58,7 @@
               </a>
             </li>
             <li>
-              <a class="dropdown-item" href="#">
+              <a class="dropdown-item" href="upload_product.php">
                 <i class="bi bi-upload"></i> Subir producto
               </a>
             </li>

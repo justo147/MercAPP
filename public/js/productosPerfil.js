@@ -3,11 +3,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (!contenedor) return;
 
-  // Obtener el ID del usuario desde la URL
   const params = new URLSearchParams(window.location.search);
   const userId = params.get("id");
 
-  // Si no hay ID, mostramos mensaje y salimos
   if (!userId) {
     contenedor.innerHTML = `
       <div class="col-12">
@@ -16,7 +14,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // Llamada a la API con el ID
   fetch(`../../api/productos_usuario.php?id=${userId}`)
     .then(async res => {
       try {
@@ -48,24 +45,73 @@ document.addEventListener("DOMContentLoaded", () => {
         const col = document.createElement("div");
         col.className = "col-12 col-md-6 col-lg-4";
 
-        const imagenPrincipal =
-          prod.imagenes && prod.imagenes.length > 0
-            ? prod.imagenes[0].url
-            : "/uploads/products/default-product.png";
+        const imagenes = prod.imagenes && prod.imagenes.length > 0
+          ? prod.imagenes
+          : [{ url: "/uploads/products/default-product.png" }];
+
+        const idCarrusel = "carousel_" + prod.id;
 
         col.innerHTML = `
-          <div class="card h-100 no-hover">
-            <img src="../../${imagenPrincipal}" class="card-img-top" alt="${prod.titulo}">
-            <div class="card-body">
-              <h5 class="card-title">${prod.titulo}</h5>
-              <p class="card-text text-muted mb-2">${prod.descripcion || "Sin descripción"}</p>
-              <p><i class="bi bi-cash"></i> <strong>Precio:</strong> ${prod.precio} €</p>
-              <p><i class="bi bi-tag"></i> <strong>Categoría:</strong> ${prod.categoria}</p>
-              <p><i class="bi bi-box"></i> <strong>Estado:</strong> ${prod.estado_producto}</p>
-              <p><i class="bi bi-arrow-left-right"></i> <strong>Transacción:</strong> ${prod.tipo_transaccion}</p>
-              <p><i class="bi bi-geo-alt"></i> <strong>Ubicación:</strong> ${prod.ubicacion || "No indicada"}</p>
-              <p class="text-muted"><i class="bi bi-calendar"></i> <small>${prod.fecha_publicacion}</small></p>
+          <div class="card h-100 border rounded-3 shadow-sm">
+
+            <!-- Carrusel -->
+            <div id="${idCarrusel}" class="carousel slide" data-bs-ride="carousel">
+
+              <div class="carousel-inner">
+                ${imagenes.map((img, i) => `
+                  <div class="carousel-item ${i === 0 ? "active" : ""}">
+                    <img src="../../${img.url}" class="d-block w-100"
+                      style="height: 200px; object-fit: cover; border-bottom: 1px solid #ddd;">
+                  </div>
+                `).join("")}
+              </div>
+
+              ${imagenes.length > 1 ? `
+                <button class="carousel-control-prev" type="button" data-bs-target="#${idCarrusel}" data-bs-slide="prev">
+                  <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#${idCarrusel}" data-bs-slide="next">
+                  <span class="carousel-control-next-icon"></span>
+                </button>
+              ` : ""}
             </div>
+
+            <!-- Info del producto -->
+            <div class="card-body">
+
+              <h5 class="card-title fw-semibold mb-2">${prod.titulo}</h5>
+
+              <div class="d-flex align-items-center mb-2">
+                <span class="badge bg-success me-2">€${prod.precio}</span>
+                <span class="badge bg-primary">${prod.estado_producto}</span>
+              </div>
+
+              <div class="small text-muted mb-2">
+                <i class="bi bi-tag"></i> ${prod.categoria}
+              </div>
+
+              <div class="small text-muted mb-2">
+                <i class="bi bi-geo-alt"></i> ${prod.ubicacion || "No indicada"}
+              </div>
+
+              <div class="small text-muted">
+                <i class="bi bi-calendar"></i> ${prod.fecha_publicacion}
+              </div>
+
+            </div>
+
+            <!-- Footer dinámico -->
+            <div class="card-footer border-0">
+              ${ES_PROPIETARIO ? `
+                <div class="d-flex justify-content-between">
+                  <a href="editar_producto.php?id=${prod.id}" class="btn btn-sm btn-outline-warning">Editar</a>
+                  <button class="btn btn-sm btn-outline-danger" onclick="eliminarProducto(${prod.id})">Eliminar</button>
+                </div>
+              ` : `
+                <a href="mensaje.php?to=${prod.usuario_id}" class="btn btn-sm btn-primary w-100">Contactar</a>
+              `}
+            </div>
+
           </div>
         `;
 

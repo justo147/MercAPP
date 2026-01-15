@@ -1,0 +1,1 @@
+Para que funcione el subir foto descomentar de php.ini la extension "gp"
