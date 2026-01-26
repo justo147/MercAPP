@@ -51,3 +51,6 @@ h1 {
 .faq-item.open .faq-answer {
   display: block;
 }
+body.dark-mode p{
+  color: white;
+}
