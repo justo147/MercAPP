@@ -13,9 +13,6 @@
     <!-- CSS personalizados-->
     <link href="../css/style-guide.css" rel="stylesheet">
 
-    <!-- JS para tema oscuro/claro -->
-    <script src="../js/theme.js" defer></script>
-
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
@@ -50,8 +47,8 @@
             <div class="col-6 col-md-3">
                 <h5 class="text-white mb-3">Ayuda</h5>
                 <ul class="list-unstyled text-small">
-                    <li><a class="text-light opacity-75 text-decoration-none" href="#">Centro de soporte</a></li>
-                    <li><a class="text-light opacity-75 text-decoration-none" href="#">Preguntas frecuentes</a></li>
+                    <li><a class="text-light opacity-75 text-decoration-none" href="../views/help.php#centro-ayuda">Centro de Ayuda</a></li>
+                    <li><a class="text-light opacity-75 text-decoration-none" href="../views/help.php#preguntas-frecuentes">Preguntas frecuentes</a></li>
                     <li><a class="text-light opacity-75 text-decoration-none" href="#">Seguridad</a></li>
                     <li><a class="text-light opacity-75 text-decoration-none" href="#">Contacto</a></li>
                 </ul>

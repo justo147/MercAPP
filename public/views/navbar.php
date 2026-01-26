@@ -62,12 +62,15 @@
                 <i class="bi bi-upload"></i> Subir producto
               </a>
             </li>
+            <li> <a class="dropdown-item" href="../../public/views/help.php"> <i class="bi bi-question-circle"></i> Ayuda </a> </li>
             <li>
               <a class="dropdown-item" href="detail_account.php">
                 <i class="bi bi-gear"></i> Ajustes de Cuenta
               </a>
             </li>
-            <li><hr class="dropdown-divider"></li>
+            <li>
+              <hr class="dropdown-divider">
+            </li>
             <li>
               <!-- Cerrar sesión -->
               <a class="dropdown-item text-danger" href="../../controllers/logout.php">
