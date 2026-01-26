@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const imagenes = prod.imagenes && prod.imagenes.length > 0
           ? prod.imagenes
-          : [{ url: "/uploads/products/default-product.png" }];
+          : [{ url: "uploads/products/default.jpg" }];
 
         const idCarrusel = "carousel_" + prod.id;
 

@@ -1,7 +1,11 @@
 <?php
-// Incluye el handler que prepara los datos para la página de inicio
-// (en este caso, el array $productos)
-require_once __DIR__ . '/../../controllers/handlers/home_handlers.php';
+session_start();
+if (!isset($_SESSION["user_id"])) {
+  header("Location: ../auth/login.php");
+  exit;
+}
+// Ya no necesitamos cargar productos aquí 
+// require_once __DIR__ . '/../../controllers/handlers/home_handlers.php';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -18,7 +22,6 @@ require_once __DIR__ . '/../../controllers/handlers/home_handlers.php';
   <!-- CSS personalizados -->
   <link rel="stylesheet" href="../css/reset.css">
   <link rel="stylesheet" href="../css/homeStyle.css">
-  <!-- <link rel="stylesheet" href="../css/style-guide.css"> -->
 
   <!-- JS para tema oscuro/claro -->
   <script src="../js/theme.js" defer></script>
@@ -26,54 +29,50 @@ require_once __DIR__ . '/../../controllers/handlers/home_handlers.php';
   <!-- Bootstrap CSS y JS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js" integrity="sha384-G/EV+4j2dNv+tEPo3++6LCgdCROaejBqfUeNjuKAiuXbjrxilcCdDz6ZAVfHWe1Y" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
 
   <!-- Bootstrap Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
   <link href="../css/style-guide.css" rel="stylesheet">
 
+  <!-- JS del scroll infinito -->
+  <script src="../js/home.js" defer></script>
+
 </head>
 
 <body>
   <!-- Navbar -->
   <?php
-  $showSearch = true; // Mostrar barra de búsqueda en el navbar
+  $showSearch = true;
   include("navbar.php");
   ?>
 
   <main class="container">
     <h2 class="mb-4 text-primary">Productos disponibles</h2>
 
-    <div class="row g-4 sinFondo">
-      <!-- Iteración sobre el array de productos para mostrar cada producto en una card -->
-      <?php foreach ($productos as $producto): ?>
-        <div class="col-6 col-md-4 col-lg-3 sinFondo">
-          <div class="card h-100 text-center shadow-sm">
-            <div class="card-body">
-              <!-- Emoji o imagen representando el producto -->
-              <div class="display-1"><?= $producto["imagen"] ?></div>
+    <!-- Contenedor donde JS insertará los productos -->
+    <div id="product-list" class="row g-4 sinFondo">
+      <!-- Skeleton Loader -->
+      <div id="skeleton-loader" class="row g-4"></div>
+    </div>
 
-              <!-- Nombre del producto -->
-              <h5 class="card-title mt-3"><?= htmlspecialchars($producto["nombre"]) ?></h5>
+    <!-- Sentinel para IntersectionObserver -->
+    <div id="sentinel" style="height: 1px;"></div>
 
-              <!-- Precio del producto -->
-              <p class="card-text text-muted"><?= htmlspecialchars($producto["precio"]) ?></p>
 
-              <!-- Botón de acción -->
-              <a href="#" class="btn button-primary w-100">Ver más</a>
-            </div>
-          </div>
-        </div>
-      <?php endforeach; ?>
+
+    <!-- Error -->
+    <div id="error" style="display:none; color:red; text-align:center;">
+      Error cargando productos
     </div>
   </main>
+
+  <footer>
+    <?php include __DIR__ . '/footer.php'; ?>
+  </footer>
+
 </body>
-<footer>
-
-  <?php include __DIR__ . '/footer.php'; ?>
-
-</footer>
 
 </html>
