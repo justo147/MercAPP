@@ -1,80 +1,64 @@
 document.addEventListener("DOMContentLoaded", () => {
   const contenedor = document.getElementById("productos-usuario");
+  const paginacion = document.getElementById("paginacion-productos");
 
   if (!contenedor) return;
 
   const params = new URLSearchParams(window.location.search);
   const userId = params.get("id");
 
-  if (!userId) {
-    contenedor.innerHTML = `
-      <div class="col-12">
-        <p class="text-muted">No se ha proporcionado un ID de usuario.</p>
-      </div>`;
-    return;
-  }
+  let page = 1;
+  const limit = 6;
 
-  fetch(`../../api/productos_usuario.php?id=${userId}`)
-    .then(async res => {
-      try {
-        return await res.json();
-      } catch (e) {
-        console.error("La API no devolvió JSON válido:", e);
-        return { error: "invalid_json" };
-      }
-    })
-    .then(productos => {
+  function cargarProductos() {
+    fetch(`../../api/productos_usuario.php?id=${userId}&page=${page}&limit=${limit}`)
+      .then(res => res.json())
+      .then(data => {
+        const productos = data.productos;
+        const total = data.total;
 
-      if (productos.error) {
-        contenedor.innerHTML = `
-          <div class="col-12">
-            <p class="text-muted">${productos.error}</p>
-          </div>`;
-        return;
-      }
+        contenedor.innerHTML = "";
 
-      if (!Array.isArray(productos) || productos.length === 0) {
-        contenedor.innerHTML = `
-          <div class="col-12">
-            <p class="text-muted">No tienes productos publicados.</p>
-          </div>`;
-        return;
-      }
+        if (!productos || productos.length === 0) {
+          contenedor.innerHTML = `
+            <div class="col-12">
+              <p class="text-muted">No tienes productos publicados.</p>
+            </div>`;
+          return;
+        }
 
-      productos.forEach(prod => {
-        const col = document.createElement("div");
-        col.className = "col-12 col-md-6 col-lg-4";
+        productos.forEach(prod => {
+          const col = document.createElement("div");
+          col.className = "col-12 col-md-6 col-lg-4";
 
-        const imagenes = prod.imagenes && prod.imagenes.length > 0
-          ? prod.imagenes
-          : [{ url: "uploads/products/default.jpg" }];
+          const imagenes = prod.imagenes.length > 0
+            ? prod.imagenes
+            : [{ url: "uploads/products/default.jpg" }];
 
-        const idCarrusel = "carousel_" + prod.id;
+          const idCarrusel = "carousel_" + prod.id;
 
-        col.innerHTML = `
-          <div class="card h-100 border rounded-3 shadow-sm">
+          col.innerHTML = `
+            <div class="card h-100 border rounded-3 shadow-sm">
 
-            <!-- Carrusel -->
-            <div id="${idCarrusel}" class="carousel carousel-dark slide" data-bs-ride="carousel">
+              <div id="${idCarrusel}" class="carousel carousel-dark slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                  ${imagenes.map((img, i) => `
+                    <div class="carousel-item ${i === 0 ? "active" : ""}">
+                      <img src="../../${img.url}" class="d-block w-100"
+                        style="height: 200px; object-fit: cover; border-bottom: 1px solid #ddd;">
+                    </div>
+                  `).join("")}
+                </div>
 
-              <div class="carousel-inner">
-                ${imagenes.map((img, i) => `
-                  <div class="carousel-item ${i === 0 ? "active" : ""}">
-                    <img src="../../${img.url}" class="d-block w-100"
-                      style="height: 200px; object-fit: cover; border-bottom: 1px solid #ddd;">
-                  </div>
-                `).join("")}
+                ${imagenes.length > 1 ? `
+                  <button class="carousel-control-prev" type="button" data-bs-target="#${idCarrusel}" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                  </button>
+                  <button class="carousel-control-next" type="button" data-bs-target="#${idCarrusel}" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                  </button>
+                ` : ""}
               </div>
-
-              ${imagenes.length > 1 ? `
-                <button class="carousel-control-prev" type="button" data-bs-target="#${idCarrusel}" data-bs-slide="prev">
-                  <span class="carousel-control-prev-icon"></span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#${idCarrusel}" data-bs-slide="next">
-                  <span class="carousel-control-next-icon"></span>
-                </button>
-              ` : ""}
-            </div>
 
             <!-- Info del producto -->
             <div class="card-body">
@@ -112,17 +96,52 @@ document.addEventListener("DOMContentLoaded", () => {
               `}
             </div>
 
-          </div>
-        `;
+            </div>
+          `;
 
-        contenedor.appendChild(col);
+          contenedor.appendChild(col);
+        });
+
+        // PAGINACIÓN
+        const totalPages = Math.ceil(total / limit);
+
+        paginacion.innerHTML = `
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+
+        <li class="page-item ${page <= 1 ? "disabled" : ""}">
+            <button class="page-link text-primary border-primary" id="btn-prev">
+                <i class="bi bi-chevron-left"></i> Anterior
+            </button>
+        </li>
+
+        <li class="page-item disabled">
+            <span class="page-link fw-semibold bg-primary text-white">
+                Página ${page} de ${totalPages}
+            </span>
+        </li>
+
+        <li class="page-item ${page >= totalPages ? "disabled" : ""}">
+            <button class="page-link text-primary border-primary" id="btn-next">
+                Siguiente <i class="bi bi-chevron-right"></i>
+            </button>
+        </li>
+
+    </ul>
+</nav>
+`;
+
+        document.getElementById("btn-prev")?.addEventListener("click", () => {
+          page--;
+          cargarProductos();
+        });
+
+        document.getElementById("btn-next")?.addEventListener("click", () => {
+          page++;
+          cargarProductos();
+        });
       });
-    })
-    .catch(err => {
-      console.error("Error cargando productos:", err);
-      contenedor.innerHTML = `
-        <div class="col-12">
-          <p class="text-muted">Error cargando productos.</p>
-        </div>`;
-    });
+  }
+
+  cargarProductos();
 });

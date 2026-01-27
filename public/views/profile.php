@@ -31,6 +31,7 @@ $esPropietario = ($perfilId === $usuarioLogueado);
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
+
   <!-- CSS personalizado -->
   <link rel="stylesheet" href="../css/reset.css">
   <link rel="stylesheet" href="../css/style-guide.css">
@@ -148,11 +149,19 @@ $esPropietario = ($perfilId === $usuarioLogueado);
     <div id="productos-usuario" class="row g-3"></div>
   </div>
 
+
+  <div class="d-flex justify-content-center mt-4" id="paginacion-productos"></div>
+
+
   <script>
     const ES_PROPIETARIO = <?= $esPropietario ? 'true' : 'false' ?>;
   </script>
 
   <script src="../js/productosPerfil.js"></script>
+
+  <footer>
+    <?php include __DIR__ . '/footer.php'; ?>
+  </footer>
 </body>
 
 </html>
