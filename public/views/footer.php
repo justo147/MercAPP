@@ -38,12 +38,15 @@
                 <div class="d-flex gap-3 align-items-center">
                     <a href="https://www.facebook.com/profile.php?id=61587328942929" target="_blank" class="text-light fs-4 text-decoration-none">
                         <i class="bi bi-facebook"></i>
+                        <span class="visually-hidden">Visitar nuestro Facebook</span>
                     </a>
                     <a href="https://www.instagram.com/merc_appoficial/" target="_blank" class="text-light fs-4 text-decoration-none">
                         <i class="bi bi-instagram"></i>
+                        <span class="visually-hidden">Visitar nuestro Instagram</span>
                     </a>
                     <a href="https://x.com/MercaAppOficial" target="_blank" class="text-light fs-4 text-decoration-none">
                         <i class="bi bi-twitter-x"></i>
+                        <span class="visually-hidden">Visitar nuestro Twitter</span>
                     </a>
                 </div>
             </div>
