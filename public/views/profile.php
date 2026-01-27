@@ -134,7 +134,7 @@ $esPropietario = ($perfilId === $usuarioLogueado);
 
                 <?php
                 // Mostrar botón Follow si no es el propio perfil
-                if ($_GET['id'] != $_SESSION['user_id']) {
+                if (!$esPropietario) {
                   echo "<button class='flex-grow-1 btn btn-primary'>Follow</button>";
                 }
                 ?>
@@ -157,6 +157,7 @@ $esPropietario = ($perfilId === $usuarioLogueado);
 
 
   <script>
+    const PERFIL_ID = <?= $perfilId ?>;
     const ES_PROPIETARIO = <?= $esPropietario ? 'true' : 'false' ?>;
   </script>
 
