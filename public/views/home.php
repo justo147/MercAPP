@@ -47,7 +47,7 @@ if (!isset($_SESSION["user_id"])) {
   ?>
 
   <main class="container">
-    <h2 class="mb-4 text-primary">Productos disponibles</h2>
+    <h1 class="mb-4 text-primary">Productos disponibles</h1>
 
     <!-- Contenedor donde JS insertará los productos -->
     <div id="product-list" class="row g-4 sinFondo">

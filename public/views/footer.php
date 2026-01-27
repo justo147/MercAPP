@@ -27,14 +27,14 @@
 
             <!-- Marca -->
             <div class="col-12 col-md-3">
-                <img src="../img/logo_sinfondo.png" alt="Logo" width="70" height="70" class="mb-3">
+                <img src="../img/logo_sinfondo.png" alt="Logo de MercaApp en el footer de la pagina" width="70" height="70" class="mb-3">
                 <p class="text-light opacity-75 mb-1">MercaApp</p>
                 <small class="text-light opacity-75">Compra fácil, vende seguro.</small>
             </div>
 
             <!-- Explorar -->
             <div class="col-6 col-md-3">
-                <h5 class="text-white mb-3">Explorar</h5>
+                <h3 class="text-white mb-3">Explorar</h3>
                 <ul class="list-unstyled text-small">
                     <li><a class="text-light opacity-75 text-decoration-none" href="#">Productos</a></li>
                     <li><a class="text-light opacity-75 text-decoration-none" href="#">Categorías</a></li>
@@ -45,7 +45,7 @@
 
             <!-- Ayuda -->
             <div class="col-6 col-md-3">
-                <h5 class="text-white mb-3">Ayuda</h5>
+                <h3 class="text-white mb-3">Ayuda</h3>
                 <ul class="list-unstyled text-small">
                     <li><a class="text-light opacity-75 text-decoration-none" href="../views/help.php#centro-ayuda">Centro de Ayuda</a></li>
                     <li><a class="text-light opacity-75 text-decoration-none" href="../views/help.php#preguntas-frecuentes">Preguntas frecuentes</a></li>
@@ -56,7 +56,7 @@
 
             <!-- Redes sociales -->
             <div class="col-12 col-md-3">
-                <h5 class="text-white mb-3">Síguenos</h5>
+                <h3 class="text-white mb-3">Síguenos</h3>
                 <div class="d-flex gap-3 align-items-center">
                     <a href="https://facebook.com" target="_blank" class="text-light fs-4 text-decoration-none">
                         <i class="bi bi-facebook"></i>

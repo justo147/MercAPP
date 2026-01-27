@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <!-- Info del producto -->
             <div class="card-body">
 
-              <h5 class="card-title fw-semibold mb-2">${prod.titulo}</h5>
+              <h2 class="card-title fw-semibold mb-2">${prod.titulo}</h2>
 
               <div class="d-flex align-items-center mb-2">
                 <span class="badge bg-success me-2">€${prod.precio}</span>

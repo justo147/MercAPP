@@ -4,12 +4,13 @@
 
     <!-- Logo y nombre de la aplicación -->
     <a class="navbar-brand fw-bold " href="home.php">
-      <img src="../img/logo_sinfondo.png" alt="MercApp" height="30" class="d-inline-block align-middle">
+      <img src="../img/logo_sinfondo.png" alt="Logo de MercApp de la barra de navegacion" height="30" class="d-inline-block align-middle">
       MercApp
     </a>
 
     <!-- Botón de colapso para móviles -->
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+      aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
@@ -21,7 +22,9 @@
         <div class="ms-auto" style="max-width: 500px; width: 100%;">
           <form class="d-flex" role="search" method="get" action="home.php">
             <input class="form-control me-2" type="search" name="q" placeholder="Buscar productos..." aria-label="Buscar">
-            <button class="btn btn-light" type="submit"><i class="bi bi-search"></i></button>
+            <button class="btn btn-light" type="submit" aria-label="Buscar productos">
+              <i class="bi bi-search"></i>
+            </button>
           </form>
         </div>
       <?php endif; ?>
@@ -31,18 +34,13 @@
 
         <!-- Dropdown de usuario -->
         <div class="dropdown me-2">
-          <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center"
-            type="button"
-            id="userMenu"
-            data-bs-toggle="dropdown"
-            aria-expanded="false">
+          <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center" type="button" id="userMenu"
+            data-bs-toggle="dropdown" aria-expanded="false">
 
             <!-- Foto de perfil o icono por defecto -->
             <?php if (!empty($_SESSION["profile_photo"])): ?>
-              <img src="/MercApp/<?php echo htmlspecialchars($_SESSION["profile_photo"]) ?>"
-                alt="Foto de perfil"
-                class="rounded-circle me-2"
-                width="24" height="24">
+              <img src="/MercApp/<?php echo htmlspecialchars($_SESSION["profile_photo"]) ?>" alt="Foto de perfil"
+                class="rounded-circle me-2" width="24" height="24">
             <?php else: ?>
               <i class="bi bi-person me-2 fs-5"></i>
             <?php endif; ?>
@@ -62,7 +60,8 @@
                 <i class="bi bi-upload"></i> Subir producto
               </a>
             </li>
-            <li> <a class="dropdown-item" href="../../public/views/help.php"> <i class="bi bi-question-circle"></i> Ayuda </a> </li>
+            <li> <a class="dropdown-item" href="../../public/views/help.php"> <i class="bi bi-question-circle"></i>
+                Ayuda </a> </li>
             <li>
               <a class="dropdown-item" href="detail_account.php">
                 <i class="bi bi-gear"></i> Ajustes de Cuenta

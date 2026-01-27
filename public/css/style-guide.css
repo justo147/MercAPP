@@ -20,7 +20,7 @@
    VARIABLES DE COLOR
 --------------------------------*/
 :root {
-  --color-primary: #04aa86;
+  --color-primary: #038065 !important;
   --color-primary-dark: #03503f;
   --color-secondary: #e9d9c2;
   --color-secondary-dark: rgb(170, 149, 117);
@@ -30,8 +30,8 @@
   --color-muted: #777777;
   --color-text-dark: #f9f9f9;
   --color-background-dark: #1b1b1b;
-  --bs-primary: #04aa86;
-  --bs-primary-rgb: 4, 170, 134;
+  --bs-primary: #038065;
+  --bs-primary-rgb: 3, 128, 101;
   --bs-secondary: #e9d9c2;
   --bs-secondary-rgb: 233, 217, 194;
   --bs-link-color: var(--bs-primary);

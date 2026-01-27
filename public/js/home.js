@@ -21,9 +21,9 @@ function showSkeleton(count = 8) {
                 </div>
 
                 <div class="card-body">
-                    <h5 class="card-title placeholder-glow">
+                    <h2 class="card-title placeholder-glow">
                         <span class="placeholder col-8"></span>
-                    </h5>
+                    </h2>
 
                     <p class="placeholder-glow">
                         <span class="placeholder col-4"></span>
@@ -99,7 +99,7 @@ function renderProducts(products) {
                 <img src="${img}" class="card-img-top" alt="${p.titulo}" style="height: 180px; object-fit: cover;">
 
                 <div class="card-body d-flex flex-column">
-                    <h5 class="card-title text-truncate">${p.titulo}</h5>
+                    <h2 class="card-title text-truncate">${p.titulo}</h2>
 
                     <p class="card-text fw-bold text-primary mb-3">
                         ${p.precio} €
