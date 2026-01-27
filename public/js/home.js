@@ -21,9 +21,9 @@ function showSkeleton(count = 8) {
                 </div>
 
                 <div class="card-body">
-                    <h2 class="card-title placeholder-glow">
+                    <div class="card-title placeholder-glow">
                         <span class="placeholder col-8"></span>
-                    </h2>
+                    </div>
 
                     <p class="placeholder-glow">
                         <span class="placeholder col-4"></span>
