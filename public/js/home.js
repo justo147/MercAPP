@@ -88,8 +88,9 @@ function renderProducts(products) {
 
     products.forEach(p => {
         const img = p.imagenes.length > 0
-            ? p.imagenes[0].url
+            ? `../../${p.imagenes[0].url}`
             : "../img/default.jpg";
+
 
         const col = document.createElement("div");
         col.classList.add("col-6", "col-md-4", "col-lg-3", "mb-4");
