@@ -41,7 +41,7 @@
 
   <h1 id="centro-ayuda">Centro de Ayuda</h1>
 
-  <p>Aquí encontrarás respuestas a las dudas más comunes sobre cómo comprar y vender productos.</p>
+  <p class="d-flex justify-content-center">Encuentra información útil, guías paso a paso y respuestas a las preguntas más frecuentes sobre el uso de nuestra plataforma. Estamos aquí para ayudarte a comprar y vender de forma segura.</p>
 
   <!-- Vídeo explicativo -->
   <h2 class="d-flex justify-content-center">Cómo funciona la plataforma</h2>

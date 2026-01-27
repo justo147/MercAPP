@@ -58,13 +58,13 @@
             <div class="col-12 col-md-3">
                 <h3 class="text-white mb-3">Síguenos</h3>
                 <div class="d-flex gap-3 align-items-center">
-                    <a href="https://facebook.com" target="_blank" class="text-light fs-4 text-decoration-none">
+                    <a href="https://www.facebook.com/profile.php?id=61587328942929" target="_blank" class="text-light fs-4 text-decoration-none">
                         <i class="bi bi-facebook"></i>
                     </a>
-                    <a href="https://instagram.com" target="_blank" class="text-light fs-4 text-decoration-none">
+                    <a href="https://www.instagram.com/merc_appoficial/" target="_blank" class="text-light fs-4 text-decoration-none">
                         <i class="bi bi-instagram"></i>
                     </a>
-                    <a href="https://twitter.com" target="_blank" class="text-light fs-4 text-decoration-none">
+                    <a href="https://x.com/MercaAppOficial" target="_blank" class="text-light fs-4 text-decoration-none">
                         <i class="bi bi-twitter-x"></i>
                     </a>
                 </div>
