@@ -109,17 +109,17 @@ $esPropietario = ($perfilId === $usuarioLogueado);
 
                 <div class="flex-fill sinFondo">
                   <p id="label-productos" class="small text-body-secondary mb-1">Productos</p>
-                  <p class="mb-0 fs-4 fw-bold" aria-labelledby="label-productos">15</p>
+                  <p class="mb-0 fs-4 fw-bold" aria-labelledby="label-productos" id="stat-productos">15</p>
                 </div>
 
                 <div class="flex-fill mx-4 sinFondo">
                   <p id="label-ventas" class="small text-body-secondary mb-1">Ventas</p>
-                  <p class="mb-0 fs-4 fw-bold" aria-labelledby="label-ventas">515</p>
+                  <p class="mb-0 fs-4 fw-bold" aria-labelledby="label-ventas" id="stat-ventas">515</p>
                 </div>
 
                 <div class="flex-fill sinFondo">
                   <p id="label-valoracion" class="small text-body-secondary mb-1">Valoración</p>
-                  <p class="mb-0 fs-4 fw-bold" aria-labelledby="label-valoracion">9.2</p>
+                  <p class="mb-0 fs-4 fw-bold" aria-labelledby="label-valoracion" id="stat-valoracion">9.2</p>
                 </div>
               </div>
 
