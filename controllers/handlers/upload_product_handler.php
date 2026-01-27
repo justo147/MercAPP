@@ -163,7 +163,7 @@ try {
                 imagewebp($img, $targetFile, 80);
 
                 // Ruta relativa para BD
-                $rutaBD = "uploads/productos/" . $fileName;
+                $rutaBD = "uploads/products/" . $fileName;
 
                 // Insertar en tabla Imagenes_prod
                 $stmtImg = $bd->prepare("
