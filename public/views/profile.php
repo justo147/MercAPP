@@ -108,15 +108,15 @@ $esPropietario = ($perfilId === $usuarioLogueado);
                 style="background-color: rgb(186, 185, 185);">
                 <div class="flex-fill sinFondo">
                   <p class="small text-body-secondary mb-1">Productos</p>
-                  <p class="mb-0 fs-4 fw-bold">15</p>
+                  <p id="stat-productos" class="mb-0 fs-4 fw-bold">0</p>
                 </div>
                 <div class="flex-fill mx-4 sinFondo">
                   <p class="small text-body-secondary mb-1">Ventas</p>
-                  <p class="mb-0 fs-4 fw-bold">515</p>
+                  <p id="stat-ventas" class="mb-0 fs-4 fw-bold">0</p>
                 </div>
                 <div class="flex-fill sinFondo">
                   <p class="small text-body-secondary mb-1">Valoración</p>
-                  <p class="mb-0 fs-4 fw-bold">9.2</p>
+                  <p id="stat-valoracion" class="mb-0 fs-4 fw-bold">0</p>
                 </div>
               </div>
 
@@ -131,7 +131,7 @@ $esPropietario = ($perfilId === $usuarioLogueado);
 
                 <?php
                 // Mostrar botón Follow si no es el propio perfil
-                if ($_GET['id'] != $_SESSION['user_id']) {
+                if (!$esPropietario) {
                   echo "<button class='flex-grow-1 btn btn-primary'>Follow</button>";
                 }
                 ?>
@@ -154,6 +154,7 @@ $esPropietario = ($perfilId === $usuarioLogueado);
 
 
   <script>
+    const PERFIL_ID = <?= $perfilId ?>;
     const ES_PROPIETARIO = <?= $esPropietario ? 'true' : 'false' ?>;
   </script>
 

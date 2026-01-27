@@ -144,4 +144,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   cargarProductos();
+
+
+
+  fetch(`/MercApp/api/stats.php?id=${PERFIL_ID}`)
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("stat-productos").textContent = data.productos;
+      document.getElementById("stat-ventas").textContent = data.ventas;
+      document.getElementById("stat-valoracion").textContent = data.valoracion;
+    })
+    .catch(err => console.error("Error cargando estadísticas:", err));
 });
