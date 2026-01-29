@@ -171,7 +171,7 @@ function renderProducts(products) {
         col.classList.add("col-6", "col-md-4", "col-lg-3", "mb-4");
 
         col.innerHTML = `
-            <div class="card h-100 shadow-sm border-0">
+            <div class="card h-100 shadow-sm border">
                 <img src="${img}" class="card-img-top" alt="${p.titulo}" style="height: 180px; object-fit: cover;">
 
                 <div class="card-body d-flex flex-column">
