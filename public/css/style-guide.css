@@ -349,6 +349,23 @@ body.dark-mode .text-muted {
   color: #b0b0b0 !important;
 }
 
+.page-item.disabled .page-link {
+    background-color: #f8f9fa !important; /* Gris muy claro */
+    color: #555 !important; /* Gris oscuro para cumplir contraste */
+    opacity: 1 !important; /* Eliminamos la transparencia que causa el error */
+    border-color: var(--bs-primary);
+}
+
+.page-item.disabled .bg-primary.text-white {
+    background-color: var(--bs-primary) !important;
+    color: #ffffff !important;
+    opacity: 1 !important;
+}
+
+.page-link.text-primary {
+    color: var(--bs-primary) !important;
+}
+
 /* ---------------------------------------------------------
    MIXINS REUTILIZABLES
    ---------------------------------------------------------
