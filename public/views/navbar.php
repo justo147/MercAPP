@@ -21,7 +21,16 @@
       <?php if (!empty($showSearch) && $showSearch === true): ?>
         <div class="ms-auto" style="max-width: 500px; width: 100%;">
           <form class="d-flex" role="search" method="get" action="home.php">
-            <input class="form-control me-2" type="search" name="q" placeholder="Buscar productos..." aria-label="Buscar">
+            <input 
+  class="form-control me-2" 
+  type="search" 
+  name="q" 
+  id="navbar-search"
+  placeholder="Buscar productos..." 
+  aria-label="Buscar"
+  value="<?php echo htmlspecialchars($_GET['q'] ?? '') ?>"
+>
+
             <button class="btn btn-light" type="submit" aria-label="Buscar productos">
               <i class="bi bi-search"></i>
             </button>

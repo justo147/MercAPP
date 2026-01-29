@@ -1,18 +1,21 @@
 <?php
 require_once __DIR__ . '/../config/db.php';
 
-class Product {
+class Product
+{
 
     private $conn;
 
-    public function __construct($conn) {
+    public function __construct($conn)
+    {
         $this->conn = $conn;
     }
 
     /* -----------------------------------------
        Obtener productos paginados (Home)
     ------------------------------------------ */
-    public function getPaginated($limit, $offset) {
+    public function getPaginated($limit, $offset)
+    {
         $sql = "SELECT 
                     p.*, 
                     u.nombre AS usuario_nombre,
@@ -36,7 +39,8 @@ class Product {
     /* -----------------------------------------
        Obtener imágenes del producto
     ------------------------------------------ */
-    public function getImages($productId) {
+    public function getImages($productId)
+    {
         $sql = "SELECT url, orden 
                 FROM Imagenes_prod 
                 WHERE id_producto = :id 
@@ -52,7 +56,8 @@ class Product {
     /* -----------------------------------------
        Obtener producto por ID (detalle)
     ------------------------------------------ */
-    public function getById($id) {
+    public function getById($id)
+    {
         $sql = "SELECT 
                     p.*,
                     c.nombre AS categoria,
@@ -83,7 +88,8 @@ class Product {
     /* -----------------------------------------
        Obtener productos por usuario (perfil)
     ------------------------------------------ */
-    public function getByUserPaginated(int $userId, int $limit, int $offset): array {
+    public function getByUserPaginated(int $userId, int $limit, int $offset): array
+    {
         try {
             $sql = "SELECT 
                         p.id,
@@ -113,7 +119,6 @@ class Product {
 
             $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
             return $this->attachImages($productos);
-
         } catch (PDOException $e) {
             error_log("Error en Product::getByUserPaginated → " . $e->getMessage());
             return [];
@@ -123,7 +128,8 @@ class Product {
     /* -----------------------------------------
        Crear producto
     ------------------------------------------ */
-    public function create($data) {
+    public function create($data)
+    {
         try {
             $sql = "INSERT INTO Productos 
                 (usuario_id, categoria_id, titulo, descripcion, precio, estado_producto_id, tipo_transaccion, estado_publicacion_id, ubicacion)
@@ -144,7 +150,6 @@ class Product {
             ]);
 
             return $this->conn->lastInsertId();
-
         } catch (PDOException $e) {
             error_log("Error en Product::create → " . $e->getMessage());
             return false;
@@ -154,7 +159,8 @@ class Product {
     /* -----------------------------------------
        Actualizar producto
     ------------------------------------------ */
-    public function update($id, $data) {
+    public function update($id, $data)
+    {
         try {
             $sql = "UPDATE Productos SET 
                         categoria_id = :categoria_id,
@@ -180,7 +186,6 @@ class Product {
                 ":ubicacion" => $data["ubicacion"],
                 ":id" => $id
             ]);
-
         } catch (PDOException $e) {
             error_log("Error en Product::update → " . $e->getMessage());
             return false;
@@ -190,7 +195,8 @@ class Product {
     /* -----------------------------------------
        Eliminar producto
     ------------------------------------------ */
-    public function delete($id) {
+    public function delete($id)
+    {
         $sql = "DELETE FROM Productos WHERE id = :id";
         $stmt = $this->conn->prepare($sql);
         return $stmt->execute([":id" => $id]);
@@ -199,7 +205,8 @@ class Product {
     /* -----------------------------------------
        Adjuntar imágenes a productos
     ------------------------------------------ */
-    private function attachImages(array $productos): array {
+    private function attachImages(array $productos): array
+    {
         foreach ($productos as &$p) {
             $p["imagenes"] = $this->getImages($p["id"]);
         }
@@ -209,7 +216,8 @@ class Product {
     /* -----------------------------------------
        Contar productos por usuario
     ------------------------------------------ */
-    public function countByUser(int $userId): int {
+    public function countByUser(int $userId): int
+    {
         try {
             $sql = "SELECT COUNT(*) FROM Productos WHERE usuario_id = :uid";
             $stmt = $this->conn->prepare($sql);
@@ -239,10 +247,6 @@ class Product {
             WHERE 1=1";
 
     $params = [];
-
-    /* -----------------------------------------
-       FILTROS DINÁMICOS
-    ------------------------------------------ */
 
     // Búsqueda por texto
     if (!empty($filters["q"])) {
@@ -285,30 +289,23 @@ class Product {
         $params[":ubicacion"] = "%" . $filters["ubicacion"] . "%";
     }
 
-    /* -----------------------------------------
-       ORDENACIÓN SEGURA
-    ------------------------------------------ */
-
-    $ordenesPermitidos = [
-        "fecha_desc" => "p.fecha_publicacion DESC",
-        "fecha_asc"  => "p.fecha_publicacion ASC",
-        "precio_asc" => "p.precio ASC",
-        "precio_desc"=> "p.precio DESC"
-    ];
-
-    if (!empty($filters["orden"]) && isset($ordenesPermitidos[$filters["orden"]])) {
-        $sql .= " ORDER BY " . $ordenesPermitidos[$filters["orden"]];
-    } else {
-        $sql .= " ORDER BY p.fecha_publicacion DESC";
+    // Orden
+    switch ($filters["orden"] ?? "fecha_desc") {
+        case "precio_asc":
+            $sql .= " ORDER BY p.precio ASC";
+            break;
+        case "precio_desc":
+            $sql .= " ORDER BY p.precio DESC";
+            break;
+        case "fecha_asc":
+            $sql .= " ORDER BY p.fecha_publicacion ASC";
+            break;
+        default:
+            $sql .= " ORDER BY p.fecha_publicacion DESC";
+            break;
     }
 
-    /* -----------------------------------------
-       PAGINACIÓN
-    ------------------------------------------ */
-
-    $limit = $filters["limit"] ?? 12;
-    $offset = $filters["offset"] ?? 0;
-
+    // Paginación
     $sql .= " LIMIT :limit OFFSET :offset";
 
     $stmt = $this->conn->prepare($sql);
@@ -317,14 +314,18 @@ class Product {
         $stmt->bindValue($key, $value);
     }
 
-    $stmt->bindValue(":limit", (int)$limit, PDO::PARAM_INT);
-    $stmt->bindValue(":offset", (int)$offset, PDO::PARAM_INT);
+    $stmt->bindValue(":limit", (int)$filters["limit"], PDO::PARAM_INT);
+    $stmt->bindValue(":offset", (int)$filters["offset"], PDO::PARAM_INT);
 
     $stmt->execute();
-
     $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    return $this->attachImages($productos);
+    // Añadir imágenes
+    foreach ($productos as &$p) {
+        $p["imagenes"] = $this->getImages($p["id"]);
+    }
+
+    return $productos;
 }
 
 }
