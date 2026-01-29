@@ -19,7 +19,7 @@ class UserModelTest extends TestCase
         $this->pdo = $this->createMock(PDO::class);
 
         // Instancia del modelo
-        $this->usuario = new Usuario($this->pdo);
+        $this->usuario = new User($this->pdo);
     }
 
     /** ============================
