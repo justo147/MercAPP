@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION["user_id"])) {
-  header("Location: ../auth/login.php");
+  header("Location: ../views/auth/login.php");
   exit;
 }
 // Ya no necesitamos cargar productos aquí 

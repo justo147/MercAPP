@@ -45,6 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   ${imagenes.map((img, i) => `
                     <div class="carousel-item ${i === 0 ? "active" : ""}">
                       <img src="../../${img.url}" class="d-block w-100"
+                      alt="Imagen ${i + 1} de ${prod.titulo}"
                         style="height: 200px; object-fit: cover; border-bottom: 1px solid #ddd;">
                     </div>
                   `).join("")}
