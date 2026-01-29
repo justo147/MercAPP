@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../models/User.php';
 /**
  * Script de registro de usuario.
  *
@@ -48,21 +49,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $name = $_POST["name"];
         $password = $_POST["password"];
         $email = $_POST["email"];
-        $password_encripted = password_hash($password, PASSWORD_DEFAULT);
 
         try {
             // ===============================
             // CONEXIÓN A LA BASE DE DATOS
             // ===============================
             $bd = new PDO("mysql:host=localhost;dbname=mercapp", "root", "");
-
+            $userModel = new User($bd);
             // ===============================
             // COMPROBAR SI EL EMAIL YA ESTÁ REGISTRADO
             // ===============================
-            $consulta = $bd->prepare("SELECT * FROM usuario WHERE email=?");
-            $consulta->execute([$email]);
-
-            if ($consulta->rowCount() == 1) {
+            if ($userModel->emailExists($email)) {
                 echo "<div class='alert alert-danger'>El correo electrónico ya está registrado.</div>";
                 exit;
             }
@@ -70,49 +67,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // ===============================
             // INSERTAR NUEVO USUARIO
             // ===============================
-            $consulta = $bd->prepare("INSERT INTO usuario(email,contraseña_hash,nombre) VALUES (?,?,?)");
-            $consulta->execute([$email, $password_encripted, $name]);
+            $userModel->create($email, $password, $name);
 
-            if ($consulta->rowCount() === 1) {
-                // ===============================
-                // GENERAR TOKEN DE VERIFICACIÓN Y ACTUALIZAR EN BD
-                // ===============================
-                $verifyToken = bin2hex(random_bytes(32));
-                $upd = $bd->prepare("UPDATE usuario SET verify_token = ? WHERE email = ?");
-                $upd->execute([$verifyToken, $email]);
+            // ===============================
+            // GENERAR TOKEN DE VERIFICACIÓN Y ACTUALIZAR EN BD
+            // ===============================
+            $verifyToken = bin2hex(random_bytes(32));
+            $userModel->setVerifyToken($email, $verifyToken);
 
-                // ===============================
-                // ENVIAR EMAIL DE VERIFICACIÓN
-                // ===============================
-                require __DIR__ . '/../../config/mail_config.php';
-                $verifyUrl = "http://localhost/MercApp/public/views/verify_email.php?token={$verifyToken}&email=" . urlencode($email);
-                $subject = "Confirma tu correo en MercaAPP";
-                $body = "Bienvenido {$name}, confirma tu correo: {$verifyUrl}";
 
-                sendMail($email, $name, $subject, $body);
+            // ===============================
+            // ENVIAR EMAIL DE VERIFICACIÓN
+            // ===============================
+            require __DIR__ . '/../../config/mail_config.php';
+            $verifyUrl = "http://localhost/MercApp/public/views/verify_email.php?token={$verifyToken}&email=" . urlencode($email);
+            $subject = "Confirma tu correo en MercaAPP";
+            $body = "Bienvenido {$name}, confirma tu correo: {$verifyUrl}";
 
-                // ===============================
-                // MENSAJE DE ÉXITO Y REDIRECCIÓN
-                // ===============================
-                // Redirigimos de vuelta a register.php con parámetros para el BOM
-                echo "REGISTRO_EXITOSO";
-                exit;
+            sendMail($email, $name, $subject, $body);
 
-                /*
-                echo "<div class='alert alert-success'>
-                        Registro correcto. Revisa tu correo para confirmar.
-                      </div>";
-
-                echo "<script>
-                        setTimeout(function() {
-                          window.location.href = 'pending_verification.php';
-                        }, 2000);
-                      </script>";
-                exit;
-
-*/
-            }
-
+            // ===============================
+            // MENSAJE DE ÉXITO Y REDIRECCIÓN
+            // ===============================
+            // Redirigimos de vuelta a register.php con parámetros para el BOM
+            echo "REGISTRO_EXITOSO";
+            exit;
         } catch (Exception $e) {
             // ===============================
             // MANEJO DE ERRORES DE BASE DE DATOS

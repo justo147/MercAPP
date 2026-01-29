@@ -17,14 +17,3 @@ if (!isset($_SESSION["user_id"])) {
     exit;
 }
 
-// ===============================
-// LISTADO DE PRODUCTOS
-// ===============================
-// Array asociativo con productos: nombre, precio e imagen
-$productos = [
-    ["nombre" => "Teléfono móvil", "precio" => "250€", "imagen" => "📱"],
-    ["nombre" => "Portátil", "precio" => "750€", "imagen" => "💻"],
-    ["nombre" => "Auriculares", "precio" => "50€", "imagen" => "🎧"],
-    ["nombre" => "Cámara", "precio" => "300€", "imagen" => "📷"],
-    ["nombre" => "Reloj inteligente", "precio" => "120€", "imagen" => "⌚"],
-];

@@ -1,33 +1,51 @@
 <?php
 session_start();
-require_once '../models/Product.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
+require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../models/Product.php';
+
 // Validar ID
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
-    echo json_encode(["error" => "Falta el parámetro id o no es válido"]);
+    echo json_encode(["success" => false, "error" => "Falta el parámetro id o no es válido"]);
     exit;
 }
 
 $userId = intval($_GET['id']);
 
 // Parámetros de paginación
-$limit = isset($_GET['limit']) ? intval($_GET['limit']) : 6;
-$page  = isset($_GET['page']) ? intval($_GET['page']) : 1;
+$limit  = isset($_GET['limit']) ? intval($_GET['limit']) : 6;
+$page   = isset($_GET['page']) ? intval($_GET['page']) : 1;
 $offset = ($page - 1) * $limit;
 
-$productModel = new Product();
+try {
+    // Conexión a la BD
+    $db = new Database();
+    $conn = $db->getConnection();
 
-// Obtener productos paginados
-$productos = $productModel->getByUserPaginated($userId, $limit, $offset);
+    // Modelo
+    $productModel = new Product($conn);
 
-// Obtener total de productos del usuario
-$total = $productModel->countByUser($userId);
+    // Obtener productos paginados
+    $productos = $productModel->getByUserPaginated($userId, $limit, $offset);
 
-echo json_encode([
-    "productos" => $productos,
-    "total" => $total,
-    "page" => $page,
-    "limit" => $limit
-]);
+    // Obtener total de productos del usuario
+    $total = $productModel->countByUser($userId);
+
+    echo json_encode([
+        "success"   => true,
+        "productos" => $productos,
+        "total"     => $total,
+        "page"      => $page,
+        "limit"     => $limit
+    ]);
+
+} catch (Exception $e) {
+
+    echo json_encode([
+        "success" => false,
+        "error"   => "Error en el servidor",
+        "details" => $e->getMessage()
+    ]);
+}

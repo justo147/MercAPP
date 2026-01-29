@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+
   const contenedor = document.getElementById("productos-usuario");
   const paginacion = document.getElementById("paginacion-productos");
 
@@ -7,13 +8,25 @@ document.addEventListener("DOMContentLoaded", () => {
   const params = new URLSearchParams(window.location.search);
   const userId = params.get("id");
 
+  if (!userId) {
+    console.error("No se encontró el ID del usuario en la URL");
+    return;
+  }
+
   let page = 1;
   const limit = 6;
 
   function cargarProductos() {
-    fetch(`../../api/productos_usuario.php?id=${userId}&page=${page}&limit=${limit}`)
+
+    fetch(`/MercApp/api/productos_usuario.php?id=${userId}&page=${page}&limit=${limit}`)
       .then(res => res.json())
       .then(data => {
+
+        if (!data.success && data.error) {
+          contenedor.innerHTML = `<p class="text-danger">${data.error}</p>`;
+          return;
+        }
+
         const productos = data.productos;
         const total = data.total;
 
@@ -24,6 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="col-12">
               <p class="text-muted">No tienes productos publicados.</p>
             </div>`;
+          paginacion.innerHTML = "";
           return;
         }
 
@@ -31,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const col = document.createElement("div");
           col.className = "col-12 col-md-6 col-lg-4";
 
-          const imagenes = prod.imagenes.length > 0
+          const imagenes = prod.imagenes?.length
             ? prod.imagenes
             : [{ url: "uploads/products/default.jpg" }];
 
@@ -44,8 +58,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="carousel-inner">
                   ${imagenes.map((img, i) => `
                     <div class="carousel-item ${i === 0 ? "active" : ""}">
-                      <img src="../../${img.url}" class="d-block w-100"
-                      alt="Imagen ${i + 1} de ${prod.titulo}"
+                      <img src="/MercApp/${img.url}" class="d-block w-100"
+                        alt="Imagen ${i + 1} de ${prod.titulo}"
                         style="height: 200px; object-fit: cover; border-bottom: 1px solid #ddd;">
                     </div>
                   `).join("")}
@@ -61,41 +75,37 @@ document.addEventListener("DOMContentLoaded", () => {
                 ` : ""}
               </div>
 
-            <!-- Info del producto -->
-            <div class="card-body">
+              <div class="card-body">
+                <h2 class="card-title fw-semibold mb-2">${prod.titulo}</h2>
 
-              <h2 class="card-title fw-semibold mb-2">${prod.titulo}</h2>
-
-              <div class="d-flex align-items-center mb-2">
-                <span class="badge bg-success me-2">€${prod.precio}</span>
-                <span class="badge bg-primary">${prod.estado_producto}</span>
-              </div>
-
-              <div class="small text-muted mb-2">
-                <i class="bi bi-tag"></i> ${prod.categoria}
-              </div>
-
-              <div class="small text-muted mb-2">
-                <i class="bi bi-geo-alt"></i> ${prod.ubicacion || "No indicada"}
-              </div>
-
-              <div class="small text-muted">
-                <i class="bi bi-calendar"></i> ${prod.fecha_publicacion}
-              </div>
-
-            </div>
-
-            <!-- Footer dinámico -->
-            <div class="card-footer border-0">
-              ${ES_PROPIETARIO ? `
-                <div class="d-flex justify-content-between">
-                  <a href="editar_producto.php?id=${prod.id}" class="btn btn-sm btn-outline-warning">Editar</a>
-                  <button class="btn btn-sm btn-outline-danger" onclick="eliminarProducto(${prod.id})">Eliminar</button>
+                <div class="d-flex align-items-center mb-2">
+                  <span class="badge bg-success me-2">€${prod.precio}</span>
+                  <span class="badge bg-primary">${prod.estado_producto}</span>
                 </div>
-              ` : `
-                <a href="mensaje.php?to=${prod.usuario_id}" class="btn btn-sm btn-primary w-100">Contactar</a>
-              `}
-            </div>
+
+                <div class="small text-muted mb-2">
+                  <i class="bi bi-tag"></i> ${prod.categoria}
+                </div>
+
+                <div class="small text-muted mb-2">
+                  <i class="bi bi-geo-alt"></i> ${prod.ubicacion || "No indicada"}
+                </div>
+
+                <div class="small text-muted">
+                  <i class="bi bi-calendar"></i> ${prod.fecha_publicacion}
+                </div>
+              </div>
+
+              <div class="card-footer border-0">
+                ${ES_PROPIETARIO ? `
+                  <div class="d-flex justify-content-between">
+                    <a href="editar_producto.php?id=${prod.id}" class="btn btn-sm btn-outline-warning">Editar</a>
+                    <button class="btn btn-sm btn-outline-danger" onclick="eliminarProducto(${prod.id})">Eliminar</button>
+                  </div>
+                ` : `
+                  <a href="mensaje.php?to=${prod.usuario_id}" class="btn btn-sm btn-primary w-100">Contactar</a>
+                `}
+              </div>
 
             </div>
           `;
@@ -108,52 +118,68 @@ document.addEventListener("DOMContentLoaded", () => {
 
         paginacion.innerHTML = `
 <nav class="mt-4">
-    <ul class="pagination justify-content-center">
+  <ul class="pagination justify-content-center">
 
-        <li class="page-item ${page <= 1 ? "disabled" : ""}">
-            <button class="page-link text-primary border-primary" id="btn-prev">
-                <i class="bi bi-chevron-left"></i> Anterior
-            </button>
-        </li>
+    <li class="page-item ${page <= 1 ? "disabled" : ""}">
+      <button class="page-link text-primary border-primary" id="btn-prev">
+        <i class="bi bi-chevron-left"></i> Anterior
+      </button>
+    </li>
 
-        <li class="page-item disabled">
-            <span class="page-link fw-semibold bg-primary text-white">
-                Página ${page} de ${totalPages}
-            </span>
-        </li>
+    <li class="page-item disabled">
+      <span class="page-link fw-semibold bg-primary text-white">
+        Página ${page} de ${totalPages}
+      </span>
+    </li>
 
-        <li class="page-item ${page >= totalPages ? "disabled" : ""}">
-            <button class="page-link text-primary border-primary" id="btn-next">
-                Siguiente <i class="bi bi-chevron-right"></i>
-            </button>
-        </li>
+    <li class="page-item ${page >= totalPages ? "disabled" : ""}">
+      <button class="page-link text-primary border-primary" id="btn-next">
+        Siguiente <i class="bi bi-chevron-right"></i>
+      </button>
+    </li>
 
-    </ul>
+  </ul>
 </nav>
 `;
 
         document.getElementById("btn-prev")?.addEventListener("click", () => {
-          page--;
-          cargarProductos();
+          if (page > 1) {
+            page--;
+            cargarProductos();
+          }
         });
 
         document.getElementById("btn-next")?.addEventListener("click", () => {
-          page++;
-          cargarProductos();
+          if (page < totalPages) {
+            page++;
+            cargarProductos();
+          }
         });
-      });
+
+      })
+      .catch(err => console.error("Error cargando productos:", err));
   }
 
   cargarProductos();
 
-
+  // ============================
+  // ESTADÍSTICAS DEL USUARIO
+  // ============================
 
   fetch(`/MercApp/api/stats.php?id=${PERFIL_ID}`)
     .then(res => res.json())
     .then(data => {
-      document.getElementById("stat-productos").textContent = data.productos;
-      document.getElementById("stat-ventas").textContent = data.ventas;
-      document.getElementById("stat-valoracion").textContent = data.valoracion;
+      if (!data.success) {
+        console.error("Error en estadísticas:", data.error);
+        return;
+      }
+
+      const stats = data.data;
+
+      document.getElementById("stat-productos").textContent   = stats.productos;
+      document.getElementById("stat-ventas").textContent      = stats.ventas;
+      document.getElementById("stat-valoracion").textContent  = stats.valoracion;
     })
     .catch(err => console.error("Error cargando estadísticas:", err));
+
 });
