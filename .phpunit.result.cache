@@ -1,0 +1,1 @@
+{"version":2,"defects":[],"times":{"UserModelTest::testCreateDevuelveTrue":0.058,"UserModelTest::testSetVerifyToken":0,"UserModelTest::testVerifyEmail":0,"UserModelTest::testGetByEmail":0.051,"UserModelTest::testVerifyCredentialsCorrectas":0.099,"UserModelTest::testVerifyCredentialsIncorrectas":0.099,"UserModelTest::testEmailExists":0,"UserModelTest::testEmailDoesNotExist":0}}
