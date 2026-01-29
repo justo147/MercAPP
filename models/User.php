@@ -184,9 +184,50 @@ class User
     public function obtenerEstadisticas($userId)
     {
         return [
-            "productos" => $this->contarProductos($userId),
-            "ventas" => $this->contarVentas($userId),
-            "valoracion" => $this->obtenerValoracion($userId)
+            "productos"        => $this->contarProductos($userId),
+            "activos"          => $this->contarActivos($userId),
+            "vendidos"         => $this->contarVendidos($userId),
+            "ventas"           => $this->contarVentas($userId),
+            "valoracion"       => $this->obtenerValoracion($userId),
+            "fecha_registro"   => $this->obtenerFechaRegistro($userId),
+            "ultima_publicacion" => $this->obtenerUltimaPublicacion($userId)
         ];
+    }
+
+    public function contarActivos($userId)
+    {
+        $sql = "SELECT COUNT(*) 
+            FROM Productos 
+            WHERE usuario_id = ? AND estado_publicacion_id = 1";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$userId]);
+        return (int)$stmt->fetchColumn();
+    }
+    public function contarVendidos($userId)
+    {
+        $sql = "SELECT COUNT(*) 
+            FROM Productos 
+            WHERE usuario_id = ? AND estado_publicacion_id = 3";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$userId]);
+        return (int)$stmt->fetchColumn();
+    }
+    public function obtenerFechaRegistro($userId)
+    {
+        $sql = "SELECT fecha_registro FROM Usuario WHERE id = ?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$userId]);
+        return $stmt->fetchColumn();
+    }
+    public function obtenerUltimaPublicacion($userId)
+    {
+        $sql = "SELECT fecha_publicacion 
+            FROM Productos 
+            WHERE usuario_id = ? 
+            ORDER BY fecha_publicacion DESC 
+            LIMIT 1";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$userId]);
+        return $stmt->fetchColumn();
     }
 }
