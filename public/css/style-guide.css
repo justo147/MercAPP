@@ -350,10 +350,10 @@ body.dark-mode .text-muted {
 }
 
 .page-item.disabled .page-link {
-    background-color: #f8f9fa !important; /* Gris muy claro */
-    color: #555 !important; /* Gris oscuro para cumplir contraste */
-    opacity: 1 !important; /* Eliminamos la transparencia que causa el error */
-    border-color: var(--bs-primary);
+    background-color: #f8f9fa !important; 
+    color: #444444 !important; /* Gris más oscuro para asegurar el pase de contraste */
+    opacity: 1 !important; 
+    border-color: #dee2e6 !important; /* Color de borde estándar de Bootstrap para disabled */
 }
 
 .page-item.disabled .bg-primary.text-white {
@@ -364,6 +364,17 @@ body.dark-mode .text-muted {
 
 .page-link.text-primary {
     color: var(--bs-primary) !important;
+}
+
+/* Mejora la visibilidad de los bordes de los campos de texto */
+.form-control.border-primary {
+    border-color: #025a47 !important; /* Usar el verde oscuro de contraste */
+}
+
+/* Color para el texto del placeholder (debe ser legible) */
+::placeholder {
+    color: #555555 !important;
+    opacity: 1;
 }
 
 /* ---------------------------------------------------------
