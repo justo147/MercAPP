@@ -20,7 +20,7 @@ if (!isset($_SESSION["user_id"])) {
   <!-- CSS -->
   <link rel="stylesheet" href="../css/reset.css">
   <link rel="stylesheet" href="../css/homeStyle.css">
-  
+
 
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -52,6 +52,7 @@ if (!isset($_SESSION["user_id"])) {
 
           <!-- Categoría -->
           <div class="col-6 col-md-3">
+            <label for="filtro-categoria" class="visually-hidden">Filtrar por Categoría</label>
             <select id="filtro-categoria" class="form-select">
               <option value="">Categoría</option>
             </select>
@@ -59,6 +60,7 @@ if (!isset($_SESSION["user_id"])) {
 
           <!-- Estado del producto -->
           <div class="col-6 col-md-3">
+            <label for="filtro-estado" class="visually-hidden">Filtrar por Estado del producto</label>
             <select id="filtro-estado" class="form-select">
               <option value="">Estado</option>
             </select>
@@ -66,6 +68,7 @@ if (!isset($_SESSION["user_id"])) {
 
           <!-- Tipo de transacción -->
           <div class="col-6 col-md-3">
+            <label for="filtro-transaccion" class="visually-hidden">Filtrar por Tipo de transacción</label>
             <select id="filtro-transaccion" class="form-select">
               <option value="">Transacción</option>
             </select>
@@ -73,6 +76,7 @@ if (!isset($_SESSION["user_id"])) {
 
           <!-- Orden -->
           <div class="col-6 col-md-3">
+            <label for="filtro-orden" class="visually-hidden">Ordenar resultados</label>
             <select id="filtro-orden" class="form-select">
               <option value="fecha_desc">Más recientes</option>
               <option value="fecha_asc">Más antiguos</option>
@@ -107,4 +111,5 @@ if (!isset($_SESSION["user_id"])) {
   <?php include __DIR__ . '/footer.php'; ?>
 
 </body>
+
 </html>
