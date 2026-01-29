@@ -15,7 +15,7 @@ try {
     $db = new Database();
     $pdo = $db->getConnection();
 
-    $usuarioModel = new Usuario($pdo);
+    $usuarioModel = new User($pdo);
     $stats = $usuarioModel->obtenerEstadisticas($userId);
 
     echo json_encode($stats);

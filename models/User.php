@@ -1,7 +1,7 @@
 <?php
 // models/Usuario.php
 
-class Usuario
+class User
 {
     private $db;
     public function __construct($db)
