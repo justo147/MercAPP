@@ -66,3 +66,24 @@ body.dark-mode {
     text-align: center;
     border-top: 10px solid #4CAF50;
 }
+
+/* Corrección de contraste para botones sociales outline */
+.btn-outline-primary {
+    color: #025a47 !important; /* Verde más oscuro que el original */
+    border-color: #025a47 !important;
+}
+
+.btn-outline-warning {
+    color: #856404 !important; /* Marrón/Dorado oscuro para mejor contraste sobre blanco */
+    border-color: #856404 !important;
+}
+
+.btn-outline-info {
+    color: #087990 !important; /* Cian oscuro */
+    border-color: #087990 !important;
+}
+
+/* Asegurar que al pasar el ratón el texto sea blanco */
+.btn-outline-primary:hover, .btn-outline-warning:hover, .btn-outline-info:hover {
+    color: #ffffff !important;
+}

@@ -105,21 +105,21 @@ $esPropietario = ($perfilId === $usuarioLogueado);
 
               <!-- Estadísticas del usuario -->
               <div class="d-flex justify-content-between text-center rounded-3 p-2 mb-2"
-                style="background-color: rgb(186, 185, 185);" role="group" aria-label="Estadísticas de usuario">
+                style="background-color: rgb(245, 245, 245);" role="group" aria-label="Estadísticas de usuario">
 
                 <div class="flex-fill sinFondo">
                   <p id="label-productos" class="small text-body-secondary mb-1">Productos</p>
-                  <p class="mb-0 fs-4 fw-bold" aria-labelledby="label-productos" id="stat-productos">15</p>
+                  <h3 class="mb-0 fs-4 fw-bold" aria-labelledby="label-productos" id="stat-productos">15</h3>
                 </div>
 
                 <div class="flex-fill mx-4 sinFondo">
                   <p id="label-ventas" class="small text-body-secondary mb-1">Ventas</p>
-                  <p class="mb-0 fs-4 fw-bold" aria-labelledby="label-ventas" id="stat-ventas">515</p>
+                  <h3 class="mb-0 fs-4 fw-bold" aria-labelledby="label-ventas" id="stat-ventas">515</h3>
                 </div>
 
                 <div class="flex-fill sinFondo">
                   <p id="label-valoracion" class="small text-body-secondary mb-1">Valoración</p>
-                  <p class="mb-0 fs-4 fw-bold" aria-labelledby="label-valoracion" id="stat-valoracion">9.2</p>
+                  <h3 class="mb-0 fs-4 fw-bold" aria-labelledby="label-valoracion" id="stat-valoracion">9.2</h3>
                 </div>
               </div>
 

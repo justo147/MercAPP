@@ -349,6 +349,34 @@ body.dark-mode .text-muted {
   color: #b0b0b0 !important;
 }
 
+.page-item.disabled .page-link {
+    background-color: #f8f9fa !important; 
+    color: #444444 !important; /* Gris más oscuro para asegurar el pase de contraste */
+    opacity: 1 !important; 
+    border-color: #dee2e6 !important; /* Color de borde estándar de Bootstrap para disabled */
+}
+
+.page-item.disabled .bg-primary.text-white {
+    background-color: var(--bs-primary) !important;
+    color: #ffffff !important;
+    opacity: 1 !important;
+}
+
+.page-link.text-primary {
+    color: var(--bs-primary) !important;
+}
+
+/* Mejora la visibilidad de los bordes de los campos de texto */
+.form-control.border-primary {
+    border-color: #025a47 !important; /* Usar el verde oscuro de contraste */
+}
+
+/* Color para el texto del placeholder (debe ser legible) */
+::placeholder {
+    color: #555555 !important;
+    opacity: 1;
+}
+
 /* ---------------------------------------------------------
    MIXINS REUTILIZABLES
    ---------------------------------------------------------

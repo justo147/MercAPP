@@ -58,41 +58,57 @@ require_once __DIR__ . '../../../../controllers/handlers/login_handlers.php';
 
   <!-- Contenedor central del formulario de login -->
   <div class="container d-flex justify-content-center align-items-center sinFondo" id="container">
-    <form id="formLogin" method="post" class="form">
-      <h1>Iniciar Sesión</h1>
+    <main>
+      <form id="formLogin" method="post" class="form">
+        <h1>Iniciar Sesión</h1>
 
-      <!-- Botones de login social -->
-      <div class="d-flex justify-content-center gap-2 my-3 sinFondo">
-        <a href="#" class="btn btn-outline-primary rounded-circle d-flex align-items-center justify-content-center" style="width:40px; height:40px;">
-          <i class="bi bi-facebook"></i>
-        </a>
-        <a href="#" class="btn btn-outline-warning rounded-circle d-flex align-items-center justify-content-center" style="width:40px; height:40px;">
-          <i class="bi bi-google"></i>
-        </a>
-        <a href="#" class="btn btn-outline-info rounded-circle d-flex align-items-center justify-content-center" style="width:40px; height:40px;">
-          <i class="bi bi-linkedin"></i>
-        </a>
-      </div>
-
-      <span>Use su cuenta</span>
-
-      <!-- Mensaje de error dinámico desde el handler -->
-      <?php if (!empty($error_message)): ?>
-        <div class="error-message">
-          <?= htmlspecialchars($error_message) ?>
+        <div class="d-flex justify-content-center gap-2 my-3 sinFondo">
+          <a href="https://www.facebook.com/profile.php?id=61587328942929" target="_blank" rel="noopener"
+            class="btn btn-outline-primary rounded-circle d-flex align-items-center justify-content-center"
+            style="width:40px; height:40px;">
+            <i class="bi bi-facebook" aria-hidden="true"></i>
+            <span class="visually-hidden">Iniciar sesión con Facebook</span>
+          </a>
+          <a href="https://www.instagram.com/merc_appoficial/" target="_blank" rel="noopener"
+            class="btn btn-outline-warning rounded-circle d-flex align-items-center justify-content-center"
+            style="width:40px; height:40px;">
+            <i class="bi bi-instagram" aria-hidden="true"></i>
+            <span class="visually-hidden">Iniciar sesión con Instagram</span>
+          </a>
+          <a href="https://x.com/MercaAppOficial" target="_blank" rel="noopener"
+            class="btn btn-outline-info rounded-circle d-flex align-items-center justify-content-center"
+            style="width:40px; height:40px;">
+            <i class="bi bi-twitter-x" aria-hidden="true"></i>
+            <span class="visually-hidden">Iniciar sesión con X (Twitter)</span>
+          </a>
         </div>
-      <?php endif; ?>
 
-      <!-- Campos de correo y contraseña -->
-      <input type="email" id="email" name="email" class="form-control border border-primary rounded" placeholder="Escriba su correo" required value="<?= isset($_POST['email']) ? htmlspecialchars($_POST['email']) : '' ?>" />
-      <input type="password" id="password" name="password" class="form-control border border-primary rounded" placeholder="Contraseña" required />
+        <span>Use su cuenta</span>
 
-      <!-- Enlace de recuperación de contraseña -->
-      <a href="../forgot_pass.php">¿Olvidaste tu contraseña?</a>
+        <?php if (!empty($error_message)): ?>
+          <div class="error-message" role="alert">
+            <?= htmlspecialchars($error_message) ?>
+          </div>
+        <?php endif; ?>
 
-      <!-- Botón de envío del formulario -->
-      <input type="submit" name="login" value="Iniciar Sesión" class="button-primary" />
-    </form>
+        <div class="mb-3">
+          <label for="email" class="visually-hidden">Correo electrónico</label>
+          <input type="email" id="email" name="email" class="form-control border border-primary rounded"
+            placeholder="Escriba su correo" required
+            value="<?= isset($_POST['email']) ? htmlspecialchars($_POST['email']) : '' ?>" />
+        </div>
+
+        <div class="mb-3">
+          <label for="password" class="visually-hidden">Contraseña</label>
+          <input type="password" id="password" name="password" class="form-control border border-primary rounded"
+            placeholder="Contraseña" required />
+        </div>
+
+        <a href="../forgot_pass.php">¿Olvidaste tu contraseña?</a>
+
+        <input type="submit" name="login" value="Iniciar Sesión" class="button-primary" />
+      </form>
+    </main>
   </div>
 
   <!-- Enlace al registro -->
@@ -101,4 +117,5 @@ require_once __DIR__ . '../../../../controllers/handlers/login_handlers.php';
     <a href="register.php">¿No tienes cuenta? Regístrate aquí</a>
   </div>
 </body>
+
 </html>

@@ -41,17 +41,22 @@
 
   <h1 id="centro-ayuda">Centro de Ayuda</h1>
 
-  <p class="d-flex justify-content-center">Encuentra información útil, guías paso a paso y respuestas a las preguntas más frecuentes sobre el uso de nuestra plataforma. Estamos aquí para ayudarte a comprar y vender de forma segura.</p>
+  <p class="d-flex justify-content-center">Encuentra información útil, guías paso a paso y respuestas a las preguntas
+    más frecuentes sobre el uso de nuestra plataforma. Estamos aquí para ayudarte a comprar y vender de forma segura.
+  </p>
 
   <!-- Vídeo explicativo -->
   <h2 class="d-flex justify-content-center">Cómo funciona la plataforma</h2>
 
   <div class="d-flex justify-content-center">
-    <video width="50%" controls>
-      <source src="../video/6011533_People_Person_3840x2160.mp4" type="video/mp4">
-      Tu navegador no soporta el elemento de vídeo.
+    <video width="50%" controls title="Vídeo demostrativo" aria-label="Vídeo de personas colaborando en una oficina">
+        <source src="../video/6011533_People_Person_3840x2160.mp4" type="video/mp4">
+        
+        <track kind="captions" src="captions.vtt" srclang="es" label="Español" default>
+        
+        Tu navegador no soporta el elemento de vídeo.
     </video>
-  </div>
+</div>
 
 
   <h2 id="preguntas-frecuentes" class="mt-4 d-flex justify-content-center">Preguntas Frecuentes</h2>

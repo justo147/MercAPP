@@ -9,12 +9,18 @@ $email = $_SESSION['pending_email'] ?? null;
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <title>Confirmación pendiente</title>
-  <!-- Bootstrap CSS -->
+
+  <link rel="stylesheet" href="../../css/reset.css">
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="../../public/css/style-guide.css">
 </head>
+
 <body class="d-flex flex-column align-items-center justify-content-center min-vh-100 bg-light">
 
   <!-- Tarjeta central con mensaje de confirmación -->
@@ -43,4 +49,5 @@ $email = $_SESSION['pending_email'] ?? null;
   </div>
 
 </body>
+
 </html>
