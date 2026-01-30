@@ -216,6 +216,35 @@ class Product
         return $stmt->execute([":id" => $id]);
     }
 
+    public function deleteWithImages(int $productId): bool
+{
+    // 1. Obtener imágenes
+    $sql = "SELECT url FROM Imagenes_prod WHERE id_producto = :pid";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->bindValue(":pid", $productId, PDO::PARAM_INT);
+    $stmt->execute();
+    $imagenes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // 2. Eliminar archivos físicos
+    foreach ($imagenes as $img) {
+        $ruta = __DIR__ . "/../" . $img["url"];
+        if (file_exists($ruta)) {
+            unlink($ruta);
+        }
+    }
+
+    // 3. Eliminar imágenes de BD
+    $sql = "DELETE FROM Imagenes_prod WHERE id_producto = :pid";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute([":pid" => $productId]);
+
+    // 4. Eliminar producto
+    $sql = "DELETE FROM Productos WHERE id = :pid";
+    $stmt = $this->conn->prepare($sql);
+    return $stmt->execute([":pid" => $productId]);
+}
+
+
     /* -----------------------------------------
        Adjuntar imágenes a productos
     ------------------------------------------ */
@@ -355,5 +384,71 @@ class Product
 
     return $productos;
 }
+
+
+/* -----------------------------------------
+   Obtener imágenes ordenadas (para edición)
+------------------------------------------ */
+public function getImagesByProduct(int $productId): array
+{
+    $sql = "SELECT id, url, orden
+            FROM Imagenes_prod
+            WHERE id_producto = :pid
+            ORDER BY orden ASC";
+
+    $stmt = $this->conn->prepare($sql);
+    $stmt->bindValue(":pid", $productId, PDO::PARAM_INT);
+    $stmt->execute();
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+/* -----------------------------------------
+   Insertar imagen nueva (con orden)
+------------------------------------------ */
+public function insertImage(int $productId, string $url, int $orden): bool
+{
+    $sql = "INSERT INTO Imagenes_prod (id_producto, url, orden)
+            VALUES (:pid, :url, :orden)";
+
+    $stmt = $this->conn->prepare($sql);
+    return $stmt->execute([
+        ":pid"   => $productId,
+        ":url"   => $url,
+        ":orden" => $orden
+    ]);
+}
+
+/* -----------------------------------------
+   Eliminar imagen (BD)
+------------------------------------------ */
+public function deleteImage(int $productId, string $url): bool
+{
+    $sql = "DELETE FROM Imagenes_prod
+            WHERE id_producto = :pid AND url = :url";
+
+    $stmt = $this->conn->prepare($sql);
+    return $stmt->execute([
+        ":pid" => $productId,
+        ":url" => $url
+    ]);
+}
+
+/* -----------------------------------------
+   Actualizar orden de una imagen existente
+------------------------------------------ */
+public function updateImageOrder(int $imageId, int $orden): bool
+{
+    $sql = "UPDATE Imagenes_prod
+            SET orden = :orden
+            WHERE id = :id";
+
+    $stmt = $this->conn->prepare($sql);
+    return $stmt->execute([
+        ":orden" => $orden,
+        ":id"    => $imageId
+    ]);
+}
+
 
 }

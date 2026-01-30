@@ -108,8 +108,15 @@ document.addEventListener("DOMContentLoaded", () => {
               <div class="card-footer border-0">
                 ${ES_PROPIETARIO ? `
                   <div class="d-flex justify-content-between">
-                    <a href="editar_producto.php?id=${prod.id}" class="btn btn-sm btn-warning">Editar</a>
-                    <button class="btn btn-sm btn-danger" onclick="eliminarProducto(${prod.id})">Eliminar</button>
+                    <a href="mod_product.php?id=${prod.id}" class="btn btn-sm btn-warning">Editar</a>
+                    <button 
+                          class="btn btn-sm btn-outline-danger"
+                          data-bs-toggle="modal"
+                          data-bs-target="#modalEliminarProducto"
+                          data-product-id="${prod.id}">
+                          Eliminar
+                    </button>
+
                   </div>
                 ` : `
                   <a href="mensaje.php?to=${prod.usuario_id}" class="btn btn-sm btn-primary w-100">Contactar</a>
@@ -195,9 +202,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const stats = data.data;
 
-      document.getElementById("stat-productos").textContent   = stats.productos;
-      document.getElementById("stat-ventas").textContent      = stats.ventas;
-      document.getElementById("stat-valoracion").textContent  = stats.valoracion;
+      document.getElementById("stat-productos").textContent = stats.productos;
+      document.getElementById("stat-ventas").textContent = stats.ventas;
+      document.getElementById("stat-valoracion").textContent = stats.valoracion;
     })
     .catch(err => console.error("Error cargando estadísticas:", err));
 

@@ -169,6 +169,49 @@ $esPropietario = ($perfilId === $usuarioLogueado);
     <?php include __DIR__ . '/footer.php'; ?>
   </footer>
   </main>
+
+  <!-- Modal Eliminar Producto -->
+<div class="modal fade" id="modalEliminarProducto" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">Eliminar producto</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <p>¿Seguro que quieres eliminar este producto? Esta acción no se puede deshacer.</p>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+
+        <a id="btnConfirmarEliminar" class="btn btn-danger">
+          Eliminar definitivamente
+        </a>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const modal = document.getElementById("modalEliminarProducto");
+    const btnConfirmar = document.getElementById("btnConfirmarEliminar");
+
+    modal.addEventListener("show.bs.modal", event => {
+        const button = event.relatedTarget;
+        const productId = button.getAttribute("data-product-id");
+
+        // Establecer la URL del botón de confirmación
+        btnConfirmar.href = `/MercApp/controllers/handlers/delete_product_handler.php?id=${productId}`;
+    });
+
+});
+</script>
+
 </body>
 
 </html>
