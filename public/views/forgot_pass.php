@@ -27,45 +27,46 @@ require __DIR__ . "/../../controllers/handlers/process_forgot_handlers.php";
 </head>
 
 <body class="d-flex flex-column align-items-center justify-content-center min-vh-100">
+  <main>
+    <!-- Botón de cambio de tema -->
+    <button id="themeToggle" class="toggle-btn position-fixed top-0 end-0 m-3" aria-label="Cambiar tema">
+      <i class="bi bi-moon"></i>
+    </button>
 
-  <!-- Botón de cambio de tema -->
-  <button id="themeToggle" class="toggle-btn position-fixed top-0 end-0 m-3" aria-label="Cambiar tema">
-    <i class="bi bi-moon"></i>
-  </button>
+    <!-- Logo de la aplicación -->
+    <div class="imageLogo sinFondo mb-4">
+      <img src="../img/logo_sinfondo.png" alt="Logo de MercaAPP" class="img-fluid" style="max-width: 200px;">
+    </div>
 
-  <!-- Logo de la aplicación -->
-  <div class="imageLogo sinFondo mb-4">
-    <img src="../img/logo_sinfondo.png" alt="Logo de MercaAPP" class="img-fluid" style="max-width: 200px;">
-  </div>
+    <!-- Contenedor del formulario de recuperación -->
+    <div class="container shadow p-4 rounded-3 sinFondo" style="max-width: 400px; width: 100%;">
 
-  <!-- Contenedor del formulario de recuperación -->
-  <div class="container shadow p-4 rounded-3 sinFondo" style="max-width: 400px; width: 100%;">
-    
-    <form id="formReset" method="post" class="form">
-      <h1 class="text-center mb-4">Recuperar Contraseña</h1>
+      <form id="formReset" method="post" class="form">
+        <h1 class="text-center mb-4">Recuperar Contraseña</h1>
 
-      <!-- Campo de correo electrónico -->
-      <div class="mb-3 sinFondo">
-        <label for="email" class="form-label">Correo electrónico</label>
-        <input type="email" class="form-control border border-primary rounded" id="email" name="email" required>
-      </div>
+        <!-- Campo de correo electrónico -->
+        <div class="mb-3 sinFondo">
+          <label for="email" class="form-label">Correo electrónico</label>
+          <input type="email" class="form-control border border-primary rounded" id="email" name="email" required>
+        </div>
 
-      <!-- Botón para enviar enlace de recuperación -->
-      <button type="submit" name="reset" class="btn button-primary">Enviar enlace</button>
-    </form>
+        <!-- Botón para enviar enlace de recuperación -->
+        <button type="submit" name="reset" class="btn button-primary">Enviar enlace</button>
+      </form>
 
-    <!-- Mensaje informativo tras envío del enlace -->
-    <?php if (!empty($mensaje)): ?>
-      <div class="alert alert-info mt-3 text-center">
-        <?= htmlspecialchars($mensaje) ?>
-      </div>
-    <?php endif; ?>
-  </div>
+      <!-- Mensaje informativo tras envío del enlace -->
+      <?php if (!empty($mensaje)): ?>
+        <div class="alert alert-info mt-3 text-center">
+          <?= htmlspecialchars($mensaje) ?>
+        </div>
+      <?php endif; ?>
+    </div>
 
-  <!-- Enlace para volver al login -->
-  <div class="text-center mt-3 sinFondo">
-    <a href="login.php">Volver al inicio de sesión</a>
-  </div>
+    <!-- Enlace para volver al login -->
+    <div class="text-center mt-3 sinFondo">
+      <a href="login.php">Volver al inicio de sesión</a>
+    </div>
+  </main>
 </body>
 
 </html>

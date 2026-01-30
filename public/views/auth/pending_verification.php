@@ -22,32 +22,32 @@ $email = $_SESSION['pending_email'] ?? null;
 </head>
 
 <body class="d-flex flex-column align-items-center justify-content-center min-vh-100 bg-light">
+  <main>
+    <!-- Tarjeta central con mensaje de confirmación -->
+    <div class="card shadow p-4 rounded-3" style="max-width: 480px; width: 100%;">
+      <h1 class="text-center mb-3">Confirma tu correo</h1>
 
-  <!-- Tarjeta central con mensaje de confirmación -->
-  <div class="card shadow p-4 rounded-3" style="max-width: 480px; width: 100%;">
-    <h1 class="text-center mb-3">Confirma tu correo</h1>
+      <!-- Mensaje principal -->
+      <div class="alert alert-info text-center">
+        <?php if ($email): ?>
+          Hemos enviado un enlace de confirmación a <strong><?= htmlspecialchars($email) ?></strong>.
+        <?php else: ?>
+          Hemos enviado un enlace de confirmación a tu correo electrónico.
+        <?php endif; ?>
+        <br>Revisa tu bandeja de entrada y sigue las instrucciones.
+      </div>
 
-    <!-- Mensaje principal -->
-    <div class="alert alert-info text-center">
-      <?php if ($email): ?>
-        Hemos enviado un enlace de confirmación a <strong><?= htmlspecialchars($email) ?></strong>.
-      <?php else: ?>
-        Hemos enviado un enlace de confirmación a tu correo electrónico.
-      <?php endif; ?>
-      <br>Revisa tu bandeja de entrada y sigue las instrucciones.
+      <!-- Mensaje adicional -->
+      <p class="text-center text-muted">
+        Si no ves el correo, revisa la carpeta de spam o espera unos minutos.
+      </p>
+
+      <!-- Botón para volver al login -->
+      <div class="text-center mt-3">
+        <a href="login.php" class="btn btn-primary">Ir a iniciar sesión</a>
+      </div>
     </div>
-
-    <!-- Mensaje adicional -->
-    <p class="text-center text-muted">
-      Si no ves el correo, revisa la carpeta de spam o espera unos minutos.
-    </p>
-
-    <!-- Botón para volver al login -->
-    <div class="text-center mt-3">
-      <a href="login.php" class="btn btn-primary">Ir a iniciar sesión</a>
-    </div>
-  </div>
-
+  </main>
 </body>
 
 </html>

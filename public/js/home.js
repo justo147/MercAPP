@@ -194,7 +194,7 @@ function renderProducts(products) {
 
         col.innerHTML = `
             <div class="card h-100 shadow-sm border">
-                <img src="${img}" class="card-img-top" alt="${p.titulo}" style="height: 180px; object-fit: cover;">
+                <img src="${img}" class="card-img-top" alt="Imagen de ${p.titulo}" style="height: 180px; object-fit: cover;">
 
                 <div class="card-body d-flex flex-column">
                     <h2 class="card-title text-truncate small" title="${p.titulo}">${p.titulo}</h2>

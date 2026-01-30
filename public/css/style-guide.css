@@ -221,6 +221,20 @@ span {
   text-decoration: underline;
 }
 
+/* Solución para el foco del botón de Iniciar Sesión */
+.button-primary:focus-visible {
+    outline: 3px solid #0056b3 !important; /* Azul intenso para contraste */
+    outline-offset: 3px;
+    box-shadow: 0 0 0 5px rgba(0, 86, 179, 0.3);
+}
+
+/* Solución para el contraste del botón Editar */
+.btn-outline-warning {
+    color: #856404 !important; /* Dorado oscuro que sí cumple el ratio 4.5:1 */
+    border-color: #856404 !important;
+    font-weight: 600;
+}
+
 .toggle-btn {
   position: fixed;
   top: 20px;

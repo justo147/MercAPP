@@ -38,66 +38,73 @@ require_once __DIR__ . '/../../../controllers/handlers/register_handlers.php';
 </head>
 
 <body class="d-flex flex-column align-items-center justify-content-center min-vh-100">
+  <main>
+    <!-- Botón para cambiar tema (oscuro/claro) -->
+    <button id="themeToggle" class="toggle-btn position-fixed top-0 end-0 m-3" aria-label="Cambiar tema">🌙</button>
 
-  <!-- Botón para cambiar tema (oscuro/claro) -->
-  <button id="themeToggle" class="toggle-btn position-fixed top-0 end-0 m-3" aria-label="Cambiar tema">🌙</button>
+    <!-- Logo central -->
+    <div class="imageLogo sinFondo mb-4">
+      <img src="../../img/logo_sinfondo.png" alt="Logo de MercaAPP" class="img-fluid" style="max-width: 200px;">
+    </div>
 
-  <!-- Logo central -->
-  <div class="imageLogo sinFondo mb-4">
-    <img src="../../img/logo_sinfondo.png" alt="Logo de MercaAPP" class="img-fluid" style="max-width: 200px;">
-  </div>
+    <!-- Contenedor del formulario de registro -->
+    <div class="container shadow p-4 sinFondo" style="max-width: 400px; width: 100%;">
+      <form id="formRegistro" method="post" class="form">
+        <h1 class="text-center mb-4">Registrar Cuenta</h1>
 
-  <!-- Contenedor del formulario de registro -->
-  <div class="container shadow p-4 sinFondo" style="max-width: 400px; width: 100%;">
-    <form id="formRegistro" method="post" class="form">
-      <h1 class="text-center mb-4">Registrar Cuenta</h1>
+        <!-- Campo Nombre -->
+        <div class="mb-3 sinFondo">
+          <label for="name" class="form-label">Nombre</label>
+          <input type="text" class="form-control border border-primary rounded" id="name" name="name" required>
+        </div>
 
-      <!-- Campo Nombre -->
-      <div class="mb-3 sinFondo">
-        <label for="name" class="form-label">Nombre</label>
-        <input type="text" class="form-control border border-primary rounded" id="name" name="name" required>
-      </div>
+        <!-- Campo Email -->
+        <div class="mb-3 sinFondo">
+          <label for="email" class="form-label">Correo electrónico</label>
+          <input type="email" class="form-control border border-primary rounded" id="email" name="email" required>
+        </div>
 
-      <!-- Campo Email -->
-      <div class="mb-3 sinFondo">
-        <label for="email" class="form-label">Correo electrónico</label>
-        <input type="email" class="form-control border border-primary rounded" id="email" name="email" required>
-      </div>
+        <!-- Campo Contraseña -->
+        <div class="mb-3 sinFondo">
+          <label for="password" class="form-label">Contraseña</label>
+          <input type="password" class="form-control border border-primary rounded" id="password" name="password"
+            required>
+        </div>
 
-      <!-- Campo Contraseña -->
-      <div class="mb-3 sinFondo">
-        <label for="password" class="form-label">Contraseña</label>
-        <input type="password" class="form-control border border-primary rounded" id="password" name="password" required>
-      </div>
+        <!-- Campo Confirmar Contraseña -->
+        <div class="mb-3 sinFondo">
+          <label for="confirmPass" class="form-label">Confirmar contraseña</label>
+          <input type="password" class="form-control border border-primary rounded" id="confirmPass" name="confirmPass"
+            required>
+        </div>
 
-      <!-- Campo Confirmar Contraseña -->
-      <div class="mb-3 sinFondo">
-        <label for="confirmPass" class="form-label">Confirmar contraseña</label>
-        <input type="password" class="form-control border border-primary rounded" id="confirmPass" name="confirmPass" required>
-      </div>
+        <!-- Botón de envío del formulario -->
+        <button type="submit" name="register" class="btn button-primary w-100">Registrarse</button>
+      </form>
 
-      <!-- Botón de envío del formulario -->
-      <button type="submit" name="register" class="btn button-primary w-100">Registrarse</button>
-    </form>
+      <!-- Contenedor de mensajes del servidor -->
+      <div id="respuesta" class="mt-3"></div>
+    </div>
 
-    <!-- Contenedor de mensajes del servidor -->
-    <div id="respuesta" class="mt-3"></div>
-  </div>
+    <!-- Enlace inferior al login -->
+    <div class="text-center mt-3 sinFondo">
+      <a href="login.php">¿Ya estás registrado? Inicia sesión aquí</a>
+    </div>
 
-  <!-- Enlace inferior al login -->
-  <div class="text-center mt-3 sinFondo">
-    <a href="login.php">¿Ya estás registrado? Inicia sesión aquí</a>
-  </div>
+    <div id="modalOverlay"
+      style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:999;">
+    </div>
 
-<div id="modalOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:999;"></div>
-
-<div id="modalSuccess" class="modal-bom" style="display:none; position:absolute; left:50%; transform:translateX(-50%); z-index:1000; background:white; padding:30px; border-radius:15px; width:90%; max-width:400px; text-align:center; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
-    <h2 style="color: #47a881;">¡Registro con éxito!</h2>
-    <p>Hemos enviado un enlace a:</p>
-    <p><strong id="userEmail"></strong></p>
-    <p>Revisa tu correo para activar tu cuenta.</p>
-    <button onclick="window.location.href='login.php'" class="btn" style="background:#47a881; color:white; margin-top:15px;">Ir al Login</button>
-</div>
-
+    <div id="modalSuccess" class="modal-bom"
+      style="display:none; position:absolute; left:50%; transform:translateX(-50%); z-index:1000; background:white; padding:30px; border-radius:15px; width:90%; max-width:400px; text-align:center; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+      <h2 style="color: #47a881;">¡Registro con éxito!</h2>
+      <p>Hemos enviado un enlace a:</p>
+      <p><strong id="userEmail"></strong></p>
+      <p>Revisa tu correo para activar tu cuenta.</p>
+      <button onclick="window.location.href='login.php'" class="btn"
+        style="background:#47a881; color:white; margin-top:15px;">Ir al Login</button>
+    </div>
+  </main>
 </body>
+
 </html>
