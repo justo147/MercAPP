@@ -42,6 +42,7 @@ $esPropietario = ($perfilId === $usuarioLogueado);
 </head>
 
 <body>
+  <main>
   <!-- Navbar con opciones de perfil -->
   <?php
   $showSearch = false;
@@ -166,6 +167,7 @@ $esPropietario = ($perfilId === $usuarioLogueado);
   <footer>
     <?php include __DIR__ . '/footer.php'; ?>
   </footer>
+  </main>
 </body>
 
 </html>

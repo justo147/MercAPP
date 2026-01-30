@@ -1,5 +1,5 @@
 <!-- Navbar principal -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4 shadow-sm">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4 shadow-sm" aria-label="Navegación principal">
   <div class="container-fluid">
 
     <!-- Logo y nombre de la aplicación -->
