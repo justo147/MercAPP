@@ -391,6 +391,18 @@ body.dark-mode .text-muted {
     opacity: 1;
 }
 
+.fade-in {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity .35s ease, transform .35s ease;
+}
+
+.fade-in.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
 /* ---------------------------------------------------------
    MIXINS REUTILIZABLES
    ---------------------------------------------------------

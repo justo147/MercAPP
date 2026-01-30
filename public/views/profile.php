@@ -150,6 +150,7 @@ $esPropietario = ($perfilId === $usuarioLogueado);
 
   <div class="container my-4">
     <h2 class="mb-3">Mis productos</h2>
+    <input type="text" id="buscador-productos" class="form-control mb-3" placeholder="Buscar en mis productos...">
     <div id="productos-usuario" class="row g-3"></div>
   </div>
 

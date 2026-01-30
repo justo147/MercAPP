@@ -88,42 +88,56 @@ class Product
     /* -----------------------------------------
        Obtener productos por usuario (perfil)
     ------------------------------------------ */
-    public function getByUserPaginated(int $userId, int $limit, int $offset): array
-    {
-        try {
-            $sql = "SELECT 
-                        p.id,
-                        p.usuario_id,
-                        p.titulo,
-                        p.descripcion,
-                        p.precio,
-                        p.tipo_transaccion,
-                        p.fecha_publicacion,
-                        p.ubicacion,
-                        c.nombre AS categoria,
-                        ep.nombre AS estado_producto,
-                        epu.nombre AS estado_publicacion
-                    FROM Productos p
-                    JOIN Categorias c ON p.categoria_id = c.id
-                    JOIN EstadoProducto ep ON p.estado_producto_id = ep.id
-                    JOIN EstadoPublicacion epu ON p.estado_publicacion_id = epu.id
-                    WHERE p.usuario_id = :uid
-                    ORDER BY p.fecha_publicacion DESC
-                    LIMIT :limit OFFSET :offset";
+    public function getByUserPaginated(int $userId, int $limit, int $offset, string $q = ""): array
+{
+    try {
+        $sql = "SELECT 
+                    p.id,
+                    p.usuario_id,
+                    p.titulo,
+                    p.descripcion,
+                    p.precio,
+                    p.tipo_transaccion,
+                    p.fecha_publicacion,
+                    p.ubicacion,
+                    c.nombre AS categoria,
+                    ep.nombre AS estado_producto,
+                    epu.nombre AS estado_publicacion
+                FROM Productos p
+                JOIN Categorias c ON p.categoria_id = c.id
+                JOIN EstadoProducto ep ON p.estado_producto_id = ep.id
+                JOIN EstadoPublicacion epu ON p.estado_publicacion_id = epu.id
+                WHERE p.usuario_id = :uid";
 
-            $stmt = $this->conn->prepare($sql);
-            $stmt->bindValue(":uid", $userId, PDO::PARAM_INT);
-            $stmt->bindValue(":limit", $limit, PDO::PARAM_INT);
-            $stmt->bindValue(":offset", $offset, PDO::PARAM_INT);
-            $stmt->execute();
-
-            $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            return $this->attachImages($productos);
-        } catch (PDOException $e) {
-            error_log("Error en Product::getByUserPaginated → " . $e->getMessage());
-            return [];
+        // 🔍 Búsqueda
+        if (!empty($q)) {
+            $sql .= " AND p.titulo LIKE :q";
         }
+
+        $sql .= " ORDER BY p.fecha_publicacion DESC
+                  LIMIT :limit OFFSET :offset";
+
+        $stmt = $this->conn->prepare($sql);
+
+        $stmt->bindValue(":uid", $userId, PDO::PARAM_INT);
+        $stmt->bindValue(":limit", $limit, PDO::PARAM_INT);
+        $stmt->bindValue(":offset", $offset, PDO::PARAM_INT);
+
+        if (!empty($q)) {
+            $stmt->bindValue(":q", "%$q%", PDO::PARAM_STR);
+        }
+
+        $stmt->execute();
+
+        $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $this->attachImages($productos);
+
+    } catch (PDOException $e) {
+        error_log("Error en Product::getByUserPaginated → " . $e->getMessage());
+        return [];
     }
+}
+
 
     /* -----------------------------------------
        Crear producto
@@ -216,19 +230,33 @@ class Product
     /* -----------------------------------------
        Contar productos por usuario
     ------------------------------------------ */
-    public function countByUser(int $userId): int
-    {
-        try {
-            $sql = "SELECT COUNT(*) FROM Productos WHERE usuario_id = :uid";
-            $stmt = $this->conn->prepare($sql);
-            $stmt->bindValue(":uid", $userId, PDO::PARAM_INT);
-            $stmt->execute();
-            return (int)$stmt->fetchColumn();
-        } catch (PDOException $e) {
-            error_log("Error en Product::countByUser → " . $e->getMessage());
-            return 0;
+    public function countByUser(int $userId, string $q = ""): int
+{
+    try {
+        $sql = "SELECT COUNT(*) 
+                FROM Productos 
+                WHERE usuario_id = :uid";
+
+        if (!empty($q)) {
+            $sql .= " AND titulo LIKE :q";
         }
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(":uid", $userId, PDO::PARAM_INT);
+
+        if (!empty($q)) {
+            $stmt->bindValue(":q", "%$q%", PDO::PARAM_STR);
+        }
+
+        $stmt->execute();
+        return (int)$stmt->fetchColumn();
+
+    } catch (PDOException $e) {
+        error_log("Error en Product::countByUser → " . $e->getMessage());
+        return 0;
     }
+}
+
 
 
     public function search(array $filters): array
