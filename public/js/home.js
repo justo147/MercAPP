@@ -105,7 +105,16 @@ async function loadMoreProducts() {
     if (loading || noMore) return;
 
     loading = true;
-    showSkeleton();
+
+    //Retraso antes de mostrar skeleton
+    let skeletonTimeout = null;
+    const isFirstLoad = offset === 0;
+
+    if (isFirstLoad) {
+        skeletonTimeout = setTimeout(() => {
+            showSkeleton();
+        }, 150); // si la carga tarda menos de 150ms, no se muestra
+    }
 
     try {
         let endpoint = "/MercApp/api/getProductsPaginated.php";
@@ -150,11 +159,24 @@ async function loadMoreProducts() {
     } catch (err) {
         console.error(err);
         document.getElementById("error").style.display = "block";
+
     } finally {
         loading = false;
-        hideSkeleton();
+
+        // ⬇️ Cancelamos el timeout si aún no se ejecutó
+        if (skeletonTimeout) {
+            clearTimeout(skeletonTimeout);
+        }
+
+        // ⬇️ Ocultamos skeleton solo si llegó a mostrarse
+        if (isFirstLoad) {
+            hideSkeleton();
+        }
     }
 }
+
+
+
 
 /* ============================================================
    RENDER DE PRODUCTOS
@@ -168,14 +190,14 @@ function renderProducts(products) {
             : "/MercApp/uploads/products/default.jpg";
 
         const col = document.createElement("div");
-        col.classList.add("col-6", "col-md-4", "col-lg-3", "mb-4");
+        col.classList.add("col-6", "col-md-4", "col-lg-3", "mb-4", "sinFondo", "fade-in");
 
         col.innerHTML = `
-            <div class="card h-100 shadow-sm border-0">
+            <div class="card h-100 shadow-sm border">
                 <img src="${img}" class="card-img-top" alt="${p.titulo}" style="height: 180px; object-fit: cover;">
 
                 <div class="card-body d-flex flex-column">
-                    <h2 class="card-title text-truncate">${p.titulo}</h2>
+                    <h2 class="card-title text-truncate small" title="${p.titulo}">${p.titulo}</h2>
 
                     <p class="card-text fw-bold text-primary mb-3">
                         ${p.precio} €
@@ -190,8 +212,14 @@ function renderProducts(products) {
         `;
 
         container.appendChild(col);
+
+        //Forzamos reflow para que la animación SIEMPRE se dispare
+        void col.offsetWidth;
+
+        col.classList.add("show");
     });
 }
+
 
 /* ============================================================
    RESET DE BÚSQUEDA

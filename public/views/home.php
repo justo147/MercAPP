@@ -35,7 +35,7 @@ if (!isset($_SESSION["user_id"])) {
   <link href="../css/style-guide.css" rel="stylesheet">
 </head>
 
-<body class="dark-mode">
+<body>
 
   <!-- Navbar -->
   <?php
@@ -46,7 +46,7 @@ if (!isset($_SESSION["user_id"])) {
   <main class="container">
 
     <!-- Filtros -->
-    <div class="card shadow-sm border-0 mb-4">
+    <div class="card shadow-sm border mb-4 no-hover">
       <div class="card-body">
         <div class="row g-3">
 
