@@ -30,6 +30,7 @@ require_once __DIR__ . '/../../controllers/handlers/detail_account_handlers.php'
 </head>
 
 <body>
+    <main>
     <!-- Navbar -->
     <?php
     $showSearch = false; // Variable para controlar la visibilidad de la búsqueda en navbar
@@ -67,8 +68,8 @@ require_once __DIR__ . '/../../controllers/handlers/detail_account_handlers.php'
                                             class="rounded-circle mb-3" width="120" height="120"
                                             alt="Foto de perfil actual">
                                     <?php else: ?>
-                                        <i class="rounded-circle mb-3 bi bi-people" style="font-size:120px;"
-                                            aria-label="Sin foto de perfil"></i>
+                                        <span class="rounded-circle mb-3 bi bi-people" style="font-size:120px;"
+                                            role="img" aria-label="Sin foto de perfil"></span>
                                     <?php endif; ?>
                                 </div>
                                 <input type="file" id="inputFoto" name="foto" class="form-control">
@@ -113,6 +114,7 @@ require_once __DIR__ . '/../../controllers/handlers/detail_account_handlers.php'
             </div>
         </div>
     </div>
+    </main>
 </body>
 
 </html>

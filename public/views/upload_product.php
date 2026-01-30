@@ -30,7 +30,7 @@ require_once __DIR__ . '/../../controllers/handlers/upload_product_handler.php';
 </head>
 
 <body>
-
+<main>
     <?php
     $showSearch = false;
     include("navbar.php");
@@ -137,7 +137,7 @@ require_once __DIR__ . '/../../controllers/handlers/upload_product_handler.php';
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="../js/uploadProduct.js"></script>
 
-
+</main>
 </body>
 
 </html>
