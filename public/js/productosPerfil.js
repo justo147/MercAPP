@@ -108,8 +108,8 @@ document.addEventListener("DOMContentLoaded", () => {
               <div class="card-footer border-0">
                 ${ES_PROPIETARIO ? `
                   <div class="d-flex justify-content-between">
-                    <a href="editar_producto.php?id=${prod.id}" class="btn btn-sm btn-outline-warning">Editar</a>
-                    <button class="btn btn-sm btn-outline-danger" onclick="eliminarProducto(${prod.id})">Eliminar</button>
+                    <a href="editar_producto.php?id=${prod.id}" class="btn btn-sm btn-warning">Editar</a>
+                    <button class="btn btn-sm btn-danger" onclick="eliminarProducto(${prod.id})">Eliminar</button>
                   </div>
                 ` : `
                   <a href="mensaje.php?to=${prod.usuario_id}" class="btn btn-sm btn-primary w-100">Contactar</a>
