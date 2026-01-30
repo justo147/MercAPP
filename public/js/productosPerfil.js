@@ -2,40 +2,49 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const contenedor = document.getElementById("productos-usuario");
   const paginacion = document.getElementById("paginacion-productos");
+  const buscador = document.getElementById("buscador-productos");
 
   if (!contenedor) return;
 
-  const params = new URLSearchParams(window.location.search);
-  const userId = params.get("id");
-
-  if (!userId) {
-    console.error("No se encontró el ID del usuario en la URL");
-    return;
-  }
+  const userId = PERFIL_ID;
 
   let page = 1;
   const limit = 6;
+  let searchQueryPerfil = "";
 
+  // ============================
+  // CARGAR PRODUCTOS
+  // ============================
   function cargarProductos() {
 
-    fetch(`/MercApp/api/productos_usuario.php?id=${userId}&page=${page}&limit=${limit}`)
+    const url = new URL("/MercApp/api/productos_usuario.php", window.location.origin);
+    url.searchParams.set("id", userId);
+    url.searchParams.set("page", page);
+    url.searchParams.set("limit", limit);
+
+    if (searchQueryPerfil) {
+      url.searchParams.set("q", searchQueryPerfil);
+    }
+
+    fetch(url)
       .then(res => res.json())
       .then(data => {
 
-        if (!data.success && data.error) {
-          contenedor.innerHTML = `<p class="text-danger">${data.error}</p>`;
+        if (!data.success) {
+          contenedor.innerHTML = `<p class="text-danger">${data.error || "Error cargando productos"}</p>`;
+          paginacion.innerHTML = "";
           return;
         }
 
-        const productos = data.productos;
-        const total = data.total;
+        const productos = data.productos || [];
+        const total = data.total || 0;
 
         contenedor.innerHTML = "";
 
-        if (!productos || productos.length === 0) {
+        if (productos.length === 0) {
           contenedor.innerHTML = `
             <div class="col-12">
-              <p class="text-muted">No tienes productos publicados.</p>
+              <p class="text-muted">No se encontraron productos.</p>
             </div>`;
           paginacion.innerHTML = "";
           return;
@@ -43,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         productos.forEach(prod => {
           const col = document.createElement("div");
-          col.className = "col-12 col-md-6 col-lg-4";
+          col.className = "col-12 col-md-6 col-lg-4 fade-in";
 
           const imagenes = prod.imagenes?.length
             ? prod.imagenes
@@ -111,9 +120,14 @@ document.addEventListener("DOMContentLoaded", () => {
           `;
 
           contenedor.appendChild(col);
+
+          // Activar animación suave
+          requestAnimationFrame(() => col.classList.add("show"));
         });
 
+        // ============================
         // PAGINACIÓN
+        // ============================
         const totalPages = Math.ceil(total / limit);
 
         paginacion.innerHTML = `
@@ -163,16 +177,21 @@ document.addEventListener("DOMContentLoaded", () => {
   cargarProductos();
 
   // ============================
+  // BUSCADOR
+  // ============================
+  buscador?.addEventListener("input", e => {
+    searchQueryPerfil = e.target.value.trim();
+    page = 1;
+    cargarProductos();
+  });
+
+  // ============================
   // ESTADÍSTICAS DEL USUARIO
   // ============================
-
   fetch(`/MercApp/api/stats.php?id=${PERFIL_ID}`)
     .then(res => res.json())
     .then(data => {
-      if (!data.success) {
-        console.error("Error en estadísticas:", data.error);
-        return;
-      }
+      if (!data.success) return;
 
       const stats = data.data;
 

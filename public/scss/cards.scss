@@ -17,3 +17,14 @@
 body.dark-mode .text-muted {
   color: #b0b0b0 !important;
 }
+
+.fade-in {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity .35s ease, transform .35s ease;
+}
+
+.fade-in.show {
+  opacity: 1;
+  transform: translateY(0);
+}

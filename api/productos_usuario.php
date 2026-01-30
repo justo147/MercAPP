@@ -19,6 +19,9 @@ $limit  = isset($_GET['limit']) ? intval($_GET['limit']) : 6;
 $page   = isset($_GET['page']) ? intval($_GET['page']) : 1;
 $offset = ($page - 1) * $limit;
 
+// Parámetro de búsqueda
+$q = isset($_GET['q']) ? trim($_GET['q']) : "";
+
 try {
     // Conexión a la BD
     $db = new Database();
@@ -27,11 +30,11 @@ try {
     // Modelo
     $productModel = new Product($conn);
 
-    // Obtener productos paginados
-    $productos = $productModel->getByUserPaginated($userId, $limit, $offset);
+    // Obtener productos paginados con búsqueda
+    $productos = $productModel->getByUserPaginated($userId, $limit, $offset, $q);
 
-    // Obtener total de productos del usuario
-    $total = $productModel->countByUser($userId);
+    // Obtener total filtrado
+    $total = $productModel->countByUser($userId, $q);
 
     echo json_encode([
         "success"   => true,
