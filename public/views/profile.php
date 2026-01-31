@@ -43,174 +43,187 @@ $esPropietario = ($perfilId === $usuarioLogueado);
 
 <body>
   <main>
-  <!-- Navbar con opciones de perfil -->
-  <?php
-  $showSearch = false;
-  include("navbar.php");
-  ?>
+    <!-- Navbar con opciones de perfil -->
+    <?php
+    $showSearch = false;
+    include("navbar.php");
+    ?>
 
-  <br>
+    <br>
 
-  <!-- Contenedor del perfil -->
-  <div class="perfil-box mx-auto my-4 sinFondo">
-    <h1 class="mb-3 text-center">Datos del Usuario</h1>
+    <!-- Contenedor del perfil -->
+    <div class="perfil-box mx-auto my-4 sinFondo">
+      <h1 class="mb-3 text-center">Datos del Usuario</h1>
 
-    <!-- Card con info del usuario -->
-    <div class="col col-md-9 col-lg-7 col-xl-5 sinFondo">
-      <div class="card no-hover sinFondo">
-        <div class="card-body p-4 no-hover sinFondo">
-          <div class="d-flex sinFondo">
+      <!-- Card con info del usuario -->
+      <div class="col col-md-9 col-lg-7 col-xl-5 sinFondo">
+        <div class="card no-hover sinFondo">
+          <div class="card-body p-4 no-hover sinFondo">
+            <div class="d-flex sinFondo">
 
-            <!-- Imagen de perfil -->
-            <div class="flex-shrink-0 sinFondo me-4 mt-3">
-              <?php
-              require_once __DIR__ . '/../../config/db.php';
-              $user = null;
-
-              // Obtener info del usuario según ID en GET
-              if (isset($_GET['id'])) {
-                $id = $_GET['id'];
-                try {
-                  $database = new Database();
-                  $pdo = $database->getConnection();
-                  $stmt = $pdo->prepare("SELECT * FROM usuario WHERE id = ?");
-                  $stmt->execute([$id]);
-                  $user = $stmt->fetch(PDO::FETCH_ASSOC);
-                } catch (PDOException $e) {
-                  error_log("Error de base de datos: " . $e->getMessage());
-                }
-              }
-              ?>
-
-              <!-- Mostrar foto de perfil o icono por defecto -->
-              <?php if ($user && !empty($user['foto_perfil'])): ?>
-                <img src="/MercApp/<?= htmlspecialchars($user['foto_perfil']) ?>" class="rounded-circle mt-5" width="120"
-                  height="120" style="object-fit: cover;" alt="Foto de perfil">
-              <?php else: ?>
-                <i class="bi bi-person-circle mb-3 text-secondary" style="font-size: 120px; display: block;"></i>
-              <?php endif; ?>
-            </div>
-
-            <!-- Información del usuario -->
-            <div class="flex-grow-1 ms-3 sinFondo">
-              <h2 class="mb-1"><?= htmlspecialchars($user['nombre'] . " " . $user["apellidos"]) ?></h2>
-              <p class="mb-2 pb-1 fs-6 text-muted">
-                Cuenta creada:
+              <!-- Imagen de perfil -->
+              <div class="flex-shrink-0 sinFondo me-4 mt-3">
                 <?php
-                $fecha = new DateTime($user['fecha_registro']);
-                $mes = $fecha->format('m');
-                $anio = $fecha->format('Y');
-                echo "$mes/$anio";
-                ?>
-              </p>
+                require_once __DIR__ . '/../../config/db.php';
+                $user = null;
 
-              <!-- Estadísticas del usuario -->
-              <div class="d-flex justify-content-between text-center rounded-3 p-2 mb-2"
-                style="background-color: rgb(245, 245, 245);" role="group" aria-label="Estadísticas de usuario">
-
-                <div class="flex-fill sinFondo">
-                  <p id="label-productos" class="small text-body-secondary mb-1">Productos</p>
-                  <h3 class="mb-0 fs-4 fw-bold" aria-labelledby="label-productos" id="stat-productos">15</h3>
-                </div>
-
-                <div class="flex-fill mx-4 sinFondo">
-                  <p id="label-ventas" class="small text-body-secondary mb-1">Ventas</p>
-                  <h3 class="mb-0 fs-4 fw-bold" aria-labelledby="label-ventas" id="stat-ventas">515</h3>
-                </div>
-
-                <div class="flex-fill sinFondo">
-                  <p id="label-valoracion" class="small text-body-secondary mb-1">Valoración</p>
-                  <h3 class="mb-0 fs-4 fw-bold" aria-labelledby="label-valoracion" id="stat-valoracion">9.2</h3>
-                </div>
-              </div>
-
-              <!-- Botones de acción -->
-              <div class="d-flex">
-                <button type="button" class="btn btn-outline-primary me-1 flex-grow-1 position-relative">
-                  Message
-                  <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger">
-                    10
-                  </span>
-                </button>
-
-                <?php
-                // Mostrar botón Follow si no es el propio perfil
-                if (!$esPropietario) {
-                  echo "<button class='flex-grow-1 btn btn-primary'>Follow</button>";
+                // Obtener info del usuario según ID en GET
+                if (isset($_GET['id'])) {
+                  $id = $_GET['id'];
+                  try {
+                    $database = new Database();
+                    $pdo = $database->getConnection();
+                    $stmt = $pdo->prepare("SELECT * FROM usuario WHERE id = ?");
+                    $stmt->execute([$id]);
+                    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+                  } catch (PDOException $e) {
+                    error_log("Error de base de datos: " . $e->getMessage());
+                  }
                 }
                 ?>
+
+                <!-- Mostrar foto de perfil o icono por defecto -->
+                <?php if ($user && !empty($user['foto_perfil'])): ?>
+                  <img src="/MercApp/<?= htmlspecialchars($user['foto_perfil']) ?>" class="rounded-circle mt-5"
+                    width="120" height="120" style="object-fit: cover;" alt="Foto de perfil">
+                <?php else: ?>
+                  <i class="bi bi-person-circle mb-3 text-secondary" style="font-size: 120px; display: block;"></i>
+                <?php endif; ?>
               </div>
 
+              <!-- Información del usuario -->
+              <div class="flex-grow-1 ms-3 sinFondo">
+                <h2 class="mb-1"><?= htmlspecialchars($user['nombre'] . " " . $user["apellidos"]) ?></h2>
+                <p class="mb-2 pb-1 fs-6 text-muted">
+                  Cuenta creada:
+                  <?php
+                  $fecha = new DateTime($user['fecha_registro']);
+                  $mes = $fecha->format('m');
+                  $anio = $fecha->format('Y');
+                  echo "$mes/$anio";
+                  ?>
+                </p>
+
+                <!-- Estadísticas del usuario -->
+                <div class="d-flex justify-content-between text-center rounded-3 p-2 mb-2"
+                  style="background-color: rgb(245, 245, 245);" role="group" aria-label="Estadísticas de usuario">
+
+                  <div class="flex-fill sinFondo">
+                    <p id="label-productos" class="small text-body-secondary mb-1">Productos</p>
+                    <h3 class="mb-0 fs-4 fw-bold" aria-labelledby="label-productos" id="stat-productos">15</h3>
+                  </div>
+
+                  <div class="flex-fill mx-4 sinFondo">
+                    <p id="label-ventas" class="small text-body-secondary mb-1">Ventas</p>
+                    <h3 class="mb-0 fs-4 fw-bold" aria-labelledby="label-ventas" id="stat-ventas">515</h3>
+                  </div>
+
+                  <div class="flex-fill sinFondo">
+                    <p id="label-valoracion" class="small text-body-secondary mb-1">Valoración</p>
+                    <h3 class="mb-0 fs-4 fw-bold" aria-labelledby="label-valoracion" id="stat-valoracion">9.2</h3>
+                  </div>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="d-flex">
+                  <button type="button" class="btn btn-outline-primary me-1 flex-grow-1 position-relative">
+                    Message
+                    <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger">
+                      10
+                    </span>
+                  </button>
+
+                  <?php
+                  // Mostrar botón Follow si no es el propio perfil
+                  if (!$esPropietario) {
+                    echo "<button class='flex-grow-1 btn btn-primary'>Follow</button>";
+                  }
+                  ?>
+                </div>
+
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <div class="container my-4">
-    <h2 class="mb-3">Mis productos</h2>
-    <input type="text" id="buscador-productos" class="form-control mb-3" placeholder="Buscar en mis productos...">
-    <div id="productos-usuario" class="row g-3"></div>
-  </div>
-
-
-  <div class="d-flex justify-content-center mt-4" id="paginacion-productos"></div>
+    <div class="container my-4">
+      <h2 class="mb-3">Mis productos</h2>
+      <input type="text" id="buscador-productos" class="form-control mb-3" placeholder="Buscar en mis productos...">
+      <div id="productos-usuario" class="row g-3"></div>
+    </div>
 
 
-  <script>
-    const PERFIL_ID = <?= $perfilId ?>;
-    const ES_PROPIETARIO = <?= $esPropietario ? 'true' : 'false' ?>;
-  </script>
+    <div class="d-flex justify-content-center mt-4" id="paginacion-productos"></div>
 
-  <script src="../js/productosPerfil.js"></script>
 
-  <footer>
-    <?php include __DIR__ . '/footer.php'; ?>
-  </footer>
+    <script>
+      const PERFIL_ID = <?= $perfilId ?>;
+      const ES_PROPIETARIO = <?= $esPropietario ? 'true' : 'false' ?>;
+    </script>
+
+    <script src="../js/productosPerfil.js"></script>
+
+    <footer>
+      <?php include __DIR__ . '/footer.php'; ?>
+    </footer>
   </main>
 
   <!-- Modal Eliminar Producto -->
-<div class="modal fade" id="modalEliminarProducto" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
+  <div class="modal fade" id="modalEliminarProducto" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
 
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title">Eliminar producto</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title">Eliminar producto</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <p>¿Seguro que quieres eliminar este producto? Esta acción no se puede deshacer.</p>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+
+          <a id="btnConfirmarEliminar" class="btn btn-danger">
+            Eliminar definitivamente
+          </a>
+        </div>
+
       </div>
-
-      <div class="modal-body">
-        <p>¿Seguro que quieres eliminar este producto? Esta acción no se puede deshacer.</p>
-      </div>
-
-      <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-
-        <a id="btnConfirmarEliminar" class="btn btn-danger">
-          Eliminar definitivamente
-        </a>
-      </div>
-
     </div>
   </div>
-</div>
-<script>
-document.addEventListener("DOMContentLoaded", () => {
 
-    const modal = document.getElementById("modalEliminarProducto");
-    const btnConfirmar = document.getElementById("btnConfirmarEliminar");
+  <!-- Toast de eliminación -->
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
+    <div id="toastEliminado" class="toast align-items-center text-bg-success border-0" role="alert">
+      <div class="d-flex">
+        <div class="toast-body"> Producto eliminado correctamente. </div> <button type="button"
+          class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    </div>
+  </div>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
 
-    modal.addEventListener("show.bs.modal", event => {
+      const modal = document.getElementById("modalEliminarProducto");
+      const btnConfirmar = document.getElementById("btnConfirmarEliminar");
+      const params = new URLSearchParams(window.location.search);
+
+      modal.addEventListener("show.bs.modal", event => {
         const button = event.relatedTarget;
         const productId = button.getAttribute("data-product-id");
 
         // Establecer la URL del botón de confirmación
         btnConfirmar.href = `/MercApp/controllers/handlers/delete_product_handler.php?id=${productId}`;
-    });
+      });
 
-});
-</script>
+      if (params.has("deleted")) { const toast = new bootstrap.Toast(document.getElementById("toastEliminado")); toast.show(); }
+
+    });
+  </script>
 
 </body>
 

@@ -1,7 +1,8 @@
 <?php
 session_start();
+$userId = $_SESSION["user_id"];
 
-if (!isset($_SESSION["user_id"])) {
+if (!isset($userId)) {
     header("Location: ../../public/views/auth/login.php");
     exit;
 }
@@ -32,5 +33,5 @@ if ($owner != $_SESSION["user_id"]) {
 $productModel->deleteWithImages($productId);
 
 // Redirigir al perfil
-header("Location: ../../public/views/perfil.php?deleted=1");
+header("Location: /MercApp/public/views/profile.php?id=$userId&deleted=1");
 exit;
