@@ -46,7 +46,7 @@ class Product
      * @param int $offset Desplazamiento para paginación.
      * @return array Lista de productos con imágenes.
      */
-    public function getPaginated($limit, $offset)
+    public function getPaginated($limit, $offset, $userId = null)
     {
         $sql = "SELECT 
                     p.*, 
@@ -54,13 +54,21 @@ class Product
                     c.nombre AS categoria_nombre
                 FROM Productos p
                 JOIN Usuario u ON p.usuario_id = u.id
-                JOIN Categorias c ON p.categoria_id = c.id
-                ORDER BY p.fecha_publicacion DESC
-                LIMIT :limit OFFSET :offset";
+                JOIN Categorias c ON p.categoria_id = c.id";
+
+        if ($userId !== null) {
+            $sql .= " WHERE p.usuario_id != :uid";
+        }
+        $sql .= " ORDER BY p.fecha_publicacion DESC LIMIT :limit OFFSET :offset";
 
         $stmt = $this->conn->prepare($sql);
-        $stmt->bindValue(":limit", (int)$limit, PDO::PARAM_INT);
-        $stmt->bindValue(":offset", (int)$offset, PDO::PARAM_INT);
+
+        if ($userId !== null) {
+            $stmt->bindValue(":uid", $userId, PDO::PARAM_INT);
+        }
+
+        $stmt->bindValue(":limit", (int) $limit, PDO::PARAM_INT);
+        $stmt->bindValue(":offset", (int) $offset, PDO::PARAM_INT);
         $stmt->execute();
 
         $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -381,7 +389,7 @@ class Product
             }
 
             $stmt->execute();
-            return (int)$stmt->fetchColumn();
+            return (int) $stmt->fetchColumn();
         } catch (PDOException $e) {
             error_log("Error en Product::countByUser → " . $e->getMessage());
             return 0;
@@ -489,8 +497,8 @@ class Product
             $stmt->bindValue($key, $value);
         }
 
-        $stmt->bindValue(":limit", (int)$filters["limit"], PDO::PARAM_INT);
-        $stmt->bindValue(":offset", (int)$filters["offset"], PDO::PARAM_INT);
+        $stmt->bindValue(":limit", (int) $filters["limit"], PDO::PARAM_INT);
+        $stmt->bindValue(":offset", (int) $filters["offset"], PDO::PARAM_INT);
 
         $stmt->execute();
         $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -546,8 +554,8 @@ class Product
 
         $stmt = $this->conn->prepare($sql);
         return $stmt->execute([
-            ":pid"   => $productId,
-            ":url"   => $url,
+            ":pid" => $productId,
+            ":url" => $url,
             ":orden" => $orden
         ]);
     }
@@ -597,7 +605,7 @@ class Product
         $stmt = $this->conn->prepare($sql);
         return $stmt->execute([
             ":orden" => $orden,
-            ":id"    => $imageId
+            ":id" => $imageId
         ]);
     }
 }
