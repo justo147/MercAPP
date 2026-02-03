@@ -13,6 +13,26 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $productId = intval($_POST["id"] ?? 0);
 
+    // Verificar que el producto pertenece al usuario logueado
+    session_start();
+    $userId = $_SESSION["user_id"] ?? 0;
+
+    $stmt = $conn->prepare("SELECT usuario_id FROM Productos WHERE id = ?");
+    $stmt->execute([$productId]);
+    $owner = $stmt->fetchColumn();
+
+    if ($owner != $userId) {
+        $error = "No tienes permiso para editar este producto";
+        return;
+    }
+
+    if (!$owner) {
+        $error = "El producto no existe";
+        return;
+    }
+
+
+
     if ($productId <= 0) {
         $error = "ID de producto inválido";
         return;

@@ -76,7 +76,7 @@ $esPropietario = ($perfilId === $usuarioLogueado);
                     $stmt = $pdo->prepare("SELECT * FROM usuario WHERE id = ?");
                     $stmt->execute([$id]);
                     $user = $stmt->fetch(PDO::FETCH_ASSOC);
-                    //Si usuario no existe
+                    //Si usuario no existe mostrar pagina error
                     if (!$user) {
                 ?>
                       <div class="container text-center mt-5">

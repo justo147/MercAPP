@@ -11,39 +11,37 @@ require_once __DIR__ . '/../../models/Product.php';
 // Handler de actualización
 require_once __DIR__ . '/../../controllers/handlers/mod_product_handler.php';
 
+$fatalError = "";
+
 // Validar ID del producto
 if (!isset($_GET["id"]) || !is_numeric($_GET["id"])) {
-    die("ID de producto no válido");
+    $fatalError = "ID de producto no válido";
+} else {
+
+    $productId = intval($_GET["id"]);
+    $userId = $_SESSION["user_id"];
+
+    // Conexión y modelo
+    $db = new Database();
+    $conn = $db->getConnection();
+    $productModel = new Product($conn);
+
+    // Obtener producto
+    $producto = $productModel->getById($productId);
+
+    if (!$producto) {
+        $fatalError = "Producto no encontrado";
+    } elseif ($producto["usuario_id"] != $userId) {
+        $fatalError = "No tienes permiso para editar este producto";
+    } else {
+        // Cargar selects solo si todo es correcto
+        $stmt = $conn->query("SELECT * FROM Categorias ORDER BY nombre");
+        $categorias = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $stmt = $conn->query("SELECT * FROM EstadoProducto ORDER BY nombre");
+        $estados_producto = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
-
-$productId = intval($_GET["id"]);
-$userId = $_SESSION["user_id"];
-
-// Conexión y modelo
-$db = new Database();
-$conn = $db->getConnection();
-$productModel = new Product($conn);
-
-// Obtener producto
-$producto = $productModel->getById($productId);
-
-if (!$producto) {
-    die("Producto no encontrado");
-}
-
-// Verificar que el producto pertenece al usuario
-if ($producto["usuario_id"] != $userId) {
-    die("No tienes permiso para editar este producto");
-}
-
-// Cargar selects
-$stmt = $conn->query("SELECT * FROM Categorias ORDER BY nombre");
-$categorias = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-$stmt = $conn->query("SELECT * FROM EstadoProducto ORDER BY nombre");
-$estados_producto = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -93,6 +91,15 @@ $estados_producto = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <?php if (!empty($error)): ?>
                             <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
                         <?php endif; ?>
+
+                        <?php if (!empty($fatalError)): ?>
+                            <div class="alert alert-danger">
+                                <?= htmlspecialchars($fatalError) ?>
+                            </div>
+                            <a href="/MercApp/public/views/profile.php?id=<?= $_SESSION["user_id"] ?>" class="btn btn-primary mt-3">
+                                Volver a mi perfil
+                            </a>
+                        <?php else: ?>
 
                         <!-- Formulario -->
                         <form method="POST" enctype="multipart/form-data">
@@ -195,6 +202,8 @@ $estados_producto = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             </div>
 
                         </form>
+
+                        <?php endif; ?>
 
                     </div>
 
