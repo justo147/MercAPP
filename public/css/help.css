@@ -1,3 +1,4 @@
+/* --- Estilos generales de Help --- */
 h1 {
   text-align: center;
 }
@@ -8,7 +9,6 @@ h1 {
   padding-bottom: 10px;
 }
 
-/* Pregunta */
 .faq-question {
   cursor: pointer;
   font-weight: bold;
@@ -16,20 +16,20 @@ h1 {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  /* Quitamos el color fijo de Bootstrap para que mande tu modo oscuro */
+  color: inherit; 
+  background-color: transparent;
 }
 
-/* Flecha */
 .faq-question .arrow {
   display: inline-block;
   transition: transform .3s ease;
 }
 
-/* Flecha girada cuando está abierto */
 .faq-item.open .arrow {
   transform: rotate(180deg);
 }
 
-/* Respuesta */
 .faq-answer {
   display: none;
   margin-top: 8px;
@@ -39,4 +39,18 @@ h1 {
   display: block;
 }
 
-/*# sourceMappingURL=help.css.map */
+/* --- SOLUCIÓN PARA MODO OSCURO --- */
+
+/* Cuando el body tiene la clase dark-mode, cambiamos los colores del Help */
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode p,
+body.dark-mode .faq-question,
+body.dark-mode .faq-answer p {
+  color: var(--color-text-dark) !important;
+}
+
+/* Opcional: ajustar el borde de las FAQ en modo oscuro para que no brille tanto */
+body.dark-mode .faq-item {
+  border-bottom: 1px solid #444;
+}

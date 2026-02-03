@@ -33,7 +33,7 @@
 </head>
 
 
- <body data-bs-theme="dark">
+ <body>
   <?php
   $showSearch = false; // Mostrar barra de búsqueda en el navbar
   include("../../public/views/navbar.php");
@@ -68,17 +68,17 @@
       <span class="arrow">&#9662;</span>
     </div>
     <div class="faq-answer">
-      <p class="text-light">Ve al menú “Subir producto”, añade fotos, descripción y precio. Luego guarda los cambios.</p>
+      <p >Ve al menú “Subir producto”, añade fotos, descripción y precio. Luego guarda los cambios.</p>
     </div>
   </div>
 
   <div class="faq-item">
-    <div class="faq-question">
+    <div class="faq-question ">
       ¿Cómo contacto con un vendedor?
       <span class="arrow">&#9662;</span>
     </div>
     <div class="faq-answer">
-      <p class="text-light">En la página del producto encontrarás un botón para enviar un mensaje al vendedor.</p>
+      <p >En la página del producto encontrarás un botón para enviar un mensaje al vendedor.</p>
     </div>
   </div>
 
@@ -88,7 +88,7 @@
       <span class="arrow">&#9662;</span>
     </div>
     <div class="faq-answer">
-      <p class="text-light">Sí, desde “Mis productos” puedes editar título, precio, fotos y descripción.</p>
+      <p>Sí, desde “Mis productos” puedes editar título, precio, fotos y descripción.</p>
     </div>
   </div>
 
@@ -98,7 +98,7 @@
       <span class="arrow">&#9662;</span>
     </div>
     <div class="faq-answer">
-      <p class="text-light">En “Ajustes de cuenta” encontrarás la opción para desactivar o eliminar tu cuenta.</p>
+      <p>En “Ajustes de cuenta” encontrarás la opción para desactivar o eliminar tu cuenta.</p>
     </div>
   </div> 
 
