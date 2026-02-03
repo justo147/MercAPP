@@ -1,0 +1,21 @@
+{
+    "source": {
+      "include": ["C:/xampp/htdocs/MercApp/public/js"],
+      "includePattern": ".+\\.js$",
+      "excludePattern": "(^|\\/)(node_modules|docs)(\\/|$)"
+    },
+    "opts": {
+      "destination": "./docs/js",
+      "recurse": true,
+      "encoding": "utf8",
+      "template": "node_modules/minami"
+    },
+    "plugins": [
+      "plugins/markdown"
+    ],
+    "templates": {
+      "cleverLinks": true,
+      "monospaceLinks": true
+    }
+  }
+  

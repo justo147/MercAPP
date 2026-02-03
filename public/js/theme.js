@@ -39,7 +39,7 @@ toggleBtn.addEventListener('click', () => {
   /**
    * Guardamos la preferencia del usuario.
    * try...catch necesario porque:
-   * - localStorage.setItem puede lanzar excepciones si:
+   *   - localStorage.setItem puede lanzar excepciones si:
    *   - El almacenamiento está lleno.
    *   - El usuario está en modo incógnito (Safari).
    *   - El navegador bloquea el acceso por políticas de seguridad.

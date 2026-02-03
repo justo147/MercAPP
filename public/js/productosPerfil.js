@@ -1,20 +1,62 @@
+/**
+ * Evento principal que se ejecuta cuando el DOM ha cargado completamente.
+ */
 document.addEventListener("DOMContentLoaded", () => {
 
+  /**
+   * Contenedor donde se renderizan los productos del usuario.
+   * @type {HTMLElement}
+   */
   const contenedor = document.getElementById("productos-usuario");
+
+  /**
+   * Contenedor donde se renderiza la paginación.
+   * @type {HTMLElement}
+   */
   const paginacion = document.getElementById("paginacion-productos");
+
+  /**
+   * Input del buscador de productos del perfil.
+   * @type {HTMLInputElement}
+   */
   const buscador = document.getElementById("buscador-productos");
 
   if (!contenedor) return;
 
+  /**
+   * ID del usuario dueño del perfil.
+   * Variable global proporcionada por PHP.
+   * @type {number}
+   */
   const userId = PERFIL_ID;
 
+  /**
+   * Página actual de la paginación.
+   * @type {number}
+   */
   let page = 1;
+
+  /**
+   * Número de productos por página.
+   * @type {number}
+   */
   const limit = 6;
+
+  /**
+   * Texto de búsqueda aplicado al listado del perfil.
+   * @type {string}
+   */
   let searchQueryPerfil = "";
 
-  // ============================
-  // CARGAR PRODUCTOS
-  // ============================
+
+  /* ============================================================
+     CARGAR PRODUCTOS
+  ============================================================ */
+
+  /**
+   * Carga los productos del usuario desde la API, aplicando paginación
+   * y búsqueda. Renderiza tarjetas, carruseles y controles de paginación.
+   */
   function cargarProductos() {
 
     const url = new URL("/MercApp/api/productos_usuario.php", window.location.origin);
@@ -36,7 +78,16 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
+        /**
+         * Lista de productos devueltos por la API.
+         * @type {Array<Object>}
+         */
         const productos = data.productos || [];
+
+        /**
+         * Total de productos del usuario.
+         * @type {number}
+         */
         const total = data.total || 0;
 
         contenedor.innerHTML = "";
@@ -51,9 +102,19 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         productos.forEach(prod => {
+
+          /**
+           * Columna contenedora de la tarjeta del producto.
+           * @type {HTMLDivElement}
+           */
           const col = document.createElement("div");
           col.className = "col-12 col-md-6 col-lg-4 fade-in";
 
+          /**
+           * Lista de imágenes del producto.
+           * Si no tiene, se usa una imagen por defecto.
+           * @type {{url: string}[]}
+           */
           const imagenes = prod.imagenes?.length
             ? prod.imagenes
             : [{ url: "uploads/products/default.jpg" }];
@@ -116,7 +177,6 @@ document.addEventListener("DOMContentLoaded", () => {
                           data-product-id="${prod.id}">
                           Eliminar
                     </button>
-
                   </div>
                 ` : `
                   <a href="mensaje.php?to=${prod.usuario_id}" class="btn btn-sm btn-primary w-100">Contactar</a>
@@ -132,9 +192,11 @@ document.addEventListener("DOMContentLoaded", () => {
           requestAnimationFrame(() => col.classList.add("show"));
         });
 
-        // ============================
-        // PAGINACIÓN
-        // ============================
+
+        /* ============================================================
+           PAGINACIÓN
+        ============================================================ */
+
         const totalPages = Math.ceil(total / limit);
 
         paginacion.innerHTML = `
@@ -183,18 +245,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
   cargarProductos();
 
-  // ============================
-  // BUSCADOR
-  // ============================
+
+  /* ============================================================
+     BUSCADOR
+  ============================================================ */
+
+  /**
+   * Evento que filtra los productos del usuario según el texto introducido.
+   */
   buscador?.addEventListener("input", e => {
     searchQueryPerfil = e.target.value.trim();
     page = 1;
     cargarProductos();
   });
 
-  // ============================
-  // ESTADÍSTICAS DEL USUARIO
-  // ============================
+
+  /* ============================================================
+     ESTADÍSTICAS DEL USUARIO
+  ============================================================ */
+
   fetch(`/MercApp/api/stats.php?id=${PERFIL_ID}`)
     .then(res => res.json())
     .then(data => {

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>login.js - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <li class="nav-link nav-home-link"><a href="index.html">Home</a></li><li class="nav-heading"><a href="global.html">Globals</a></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#abrirModalExito">abrirModalExito</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#body">body</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#cargarFiltros">cargarFiltros</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#clearError">clearError</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#emailInput">emailInput</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#enviarFormulario">enviarFormulario</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#existingImages">existingImages</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#formLogin">formLogin</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#formRegister">formRegister</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#grid">grid</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#hideSkeleton">hideSkeleton</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#input">input</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#inputEmail">inputEmail</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#inputName">inputName</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#inputPass">inputPass</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#limit">limit</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#loadMoreProducts">loadMoreProducts</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#loading">loading</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#noMore">noMore</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#observer">observer</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#offset">offset</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#onSort">onSort</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#ordenInput">ordenInput</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#pass1">pass1</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#pass2">pass2</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#rebuildFileList">rebuildFileList</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#removeImage">removeImage</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#renderGrid">renderGrid</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#renderProducts">renderProducts</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#resetAndSearch">resetAndSearch</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#searchCategoria">searchCategoria</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#searchEstado">searchEstado</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#searchOrden">searchOrden</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#searchQuery">searchQuery</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#searchTransaccion">searchTransaccion</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#selectedFiles">selectedFiles</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#sentinel">sentinel</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#showError">showError</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#showSkeleton">showSkeleton</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#sumar">sumar</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#toggleBtn">toggleBtn</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#updateOrder">updateOrder</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#validarEmail">validarEmail</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#validateLogin">validateLogin</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#validationForm">validationForm</a></span></li>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">login.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* ===============================
+   SELECTORES DEL FORMULARIO
+   =============================== */
+
+/**
+ * Formulario de inicio de sesión.
+ * @type {HTMLFormElement}
+ */
+const formLogin = document.getElementById('formLogin');
+
+/**
+ * Campo de entrada para el correo electrónico.
+ * @type {HTMLInputElement}
+ */
+const inputEmail = document.getElementById('email');
+
+/**
+ * Campo de entrada para la contraseña.
+ * @type {HTMLInputElement}
+ */
+const inputPass = document.getElementById('password');
+
+
+/* ===============================
+   EVENTO SUBMIT DEL FORMULARIO
+   =============================== */
+
+/**
+ * Evento que intercepta el envío del formulario para validar los datos antes de enviarlo.
+ */
+formLogin.addEventListener('submit', function(e) {
+    e.preventDefault();
+    validateLogin();
+});
+
+
+/* ===============================
+   FUNCIÓN PRINCIPAL DE VALIDACIÓN
+   =============================== */
+
+/**
+ * Valida los campos del formulario de login.
+ * Comprueba correo y contraseña, muestra errores y envía el formulario si todo es válido.
+ */
+function validateLogin() {
+    let valid = true;
+
+    clearError();
+
+    // Validación de correo
+    if (inputEmail.value.trim() === "") {
+        showError(inputEmail, 'El correo es obligatorio');
+        valid = false;
+    } else if (!validarEmail(inputEmail.value.trim())) {
+        showError(inputEmail, 'Añade un email válido');
+        valid = false;
+    }
+
+    // Validación de contraseña
+    if (inputPass.value.trim() === "") {
+        showError(inputPass, 'La contraseña es obligatoria');
+        valid = false;
+    }
+
+    // Si todo es válido, enviar formulario
+    if (valid) {
+        console.log("Formulario de login válido");
+        formLogin.submit();
+    }
+}
+
+
+/* ===============================
+   FUNCIÓN DE VALIDACIÓN DE EMAIL
+   =============================== */
+
+/**
+ * Valida si un correo electrónico tiene un formato correcto.
+ * @param {string} email - Correo electrónico a validar.
+ * @returns {boolean} `true` si el email es válido, `false` en caso contrario.
+ */
+function validarEmail(email) {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+}
+
+
+/* ===============================
+   FUNCIONES DE MANEJO DE ERRORES
+   =============================== */
+
+/**
+ * Muestra un mensaje de error debajo de un input y aplica estilos de Bootstrap.
+ * @param {HTMLInputElement} input - Campo de formulario donde mostrar el error.
+ * @param {string} message - Mensaje de error a mostrar.
+ */
+function showError(input, message) {
+    if (!input) return; // seguridad por si se pasa un input nulo
+
+    // Añade la clase de Bootstrap para marcar el input como inválido
+    input.classList.add('is-invalid');
+
+    const parent = input.parentElement;
+    let existing = parent.querySelector('.invalid-feedback');
+
+    if (existing) {
+        existing.textContent = message;
+    } else {
+        const div = document.createElement('div');
+        div.className = 'invalid-feedback';
+        div.textContent = message;
+        parent.appendChild(div);
+    }
+}
+
+/**
+ * Limpia todos los mensajes de error y estilos de validación del formulario.
+ */
+function clearError() {
+    // elimina todos los mensajes de error de Bootstrap
+    document.querySelectorAll('.invalid-feedback').forEach(e => e.remove());
+
+    // quita la clase de borde rojo de los inputs
+    document.querySelectorAll('.is-invalid').forEach(i => i.classList.remove('is-invalid'));
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Tue Feb 03 2026 21:30:05 GMT+0100 (hora estándar de Europa central) using the Minami theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>
