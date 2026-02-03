@@ -1,6 +1,5 @@
 body {
   font-family: Arial, sans-serif;
-  max-width: 800px;
   margin: auto;
   padding: 20px;
 }
@@ -24,6 +23,9 @@ h1 {
 .faq-answer {
   display: none;
   margin-top: 8px;
+}
+.faq-item.open .faq-answer {
+  display: block;
 }
 
 /*# sourceMappingURL=help.css.map */
