@@ -203,7 +203,7 @@ function renderProducts(products) {
                         ${p.precio} €
                     </p>
 
-                    <a href="detalle_producto.php?id=${p.id}" 
+                    <a href="detail_product.php?id=${p.id}" 
                        class="btn btn-outline-primary mt-auto w-100">
                         Ver más
                     </a>
