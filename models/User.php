@@ -1,14 +1,24 @@
 <?php
+
 /**
  * Clase User
  *
  * Gestiona todas las operaciones relacionadas con los usuarios:
- * registro, autenticación, verificación de email, recuperación de contraseña,
- * edición de perfil, administración y estadísticas.
+ * - Registro
+ * - Autenticación
+ * - Verificación de email
+ * - Recuperación de contraseña
+ * - Edición de perfil
+ * - Administración (roles y estados)
+ * - Estadísticas del usuario
  */
 class User
 {
-    /** @var PDO Conexión a la base de datos */
+    /**
+     * Conexión a la base de datos.
+     *
+     * @var PDO
+     */
     private $db;
 
     /**
@@ -35,9 +45,10 @@ class User
      */
     public function create($email, $password, $nombre)
     {
-        $sql = "INSERT INTO usuario (email, contraseña_hash, nombre) VALUES (:email, :password, :nombre)";
-        $stmt = $this->db->prepare($sql);
+        $sql = "INSERT INTO usuario (email, contraseña_hash, nombre) 
+                VALUES (:email, :password, :nombre)";
 
+        $stmt = $this->db->prepare($sql);
         $hash = password_hash($password, PASSWORD_DEFAULT);
 
         $stmt->bindParam(':email', $email);
@@ -61,8 +72,8 @@ class User
     public function setVerifyToken($email, $token)
     {
         $sql = "UPDATE usuario SET verify_token = :token WHERE email = :email";
-        $stmt = $this->db->prepare($sql);
 
+        $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':token', $token);
         $stmt->bindParam(':email', $email);
 
@@ -78,11 +89,11 @@ class User
      */
     public function verifyEmail($email, $token)
     {
-        $sql = "UPDATE usuario SET email_verificado = 1, verify_token = NULL 
+        $sql = "UPDATE usuario 
+                SET email_verificado = 1, verify_token = NULL 
                 WHERE email = :email AND verify_token = :token";
 
         $stmt = $this->db->prepare($sql);
-
         $stmt->bindParam(':email', $email);
         $stmt->bindParam(':token', $token);
 
@@ -102,8 +113,8 @@ class User
     public function getByEmail($email)
     {
         $sql = "SELECT * FROM usuario WHERE email = :email LIMIT 1";
-        $stmt = $this->db->prepare($sql);
 
+        $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':email', $email);
         $stmt->execute();
 
@@ -143,9 +154,11 @@ class User
      */
     public function setResetToken($email, $token, $expires)
     {
-        $sql = "UPDATE usuario SET reset_token = :token, reset_expires = :expires WHERE email = :email";
-        $stmt = $this->db->prepare($sql);
+        $sql = "UPDATE usuario 
+                SET reset_token = :token, reset_expires = :expires 
+                WHERE email = :email";
 
+        $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':token', $token);
         $stmt->bindParam(':expires', $expires);
         $stmt->bindParam(':email', $email);
@@ -163,13 +176,13 @@ class User
     public function validateResetToken($email, $token)
     {
         $sql = "SELECT * FROM usuario 
-                WHERE email = :email AND reset_token = :token AND reset_expires > NOW()";
+                WHERE email = :email 
+                AND reset_token = :token 
+                AND reset_expires > NOW()";
 
         $stmt = $this->db->prepare($sql);
-
         $stmt->bindParam(':email', $email);
         $stmt->bindParam(':token', $token);
-
         $stmt->execute();
 
         return $stmt->fetch(PDO::FETCH_ASSOC);
@@ -184,11 +197,11 @@ class User
      */
     public function updatePassword($email, $newPassword)
     {
-        $sql = "UPDATE usuario SET contraseña_hash = :password, reset_token = NULL, reset_expires = NULL 
+        $sql = "UPDATE usuario 
+                SET contraseña_hash = :password, reset_token = NULL, reset_expires = NULL 
                 WHERE email = :email";
 
         $stmt = $this->db->prepare($sql);
-
         $hash = password_hash($newPassword, PASSWORD_DEFAULT);
 
         $stmt->bindParam(':password', $hash);
@@ -213,7 +226,8 @@ class User
      */
     public function updateProfile($id, $nombre, $apellidos, $telefono, $foto)
     {
-        $sql = "UPDATE usuario SET nombre = :nombre, apellidos = :apellidos, telefono = :telefono, foto_perfil = :foto 
+        $sql = "UPDATE usuario 
+                SET nombre = :nombre, apellidos = :apellidos, telefono = :telefono, foto_perfil = :foto 
                 WHERE id = :id";
 
         $stmt = $this->db->prepare($sql);
@@ -243,7 +257,6 @@ class User
         $sql = "UPDATE usuario SET estado = :estado WHERE id = :id";
 
         $stmt = $this->db->prepare($sql);
-
         $stmt->bindParam(':estado', $estado);
         $stmt->bindParam(':id', $id);
 
@@ -262,7 +275,6 @@ class User
         $sql = "UPDATE usuario SET rol = :rol WHERE id = :id";
 
         $stmt = $this->db->prepare($sql);
-
         $stmt->bindParam(':rol', $rol);
         $stmt->bindParam(':id', $id);
 
@@ -284,7 +296,6 @@ class User
         $sql = "SELECT id FROM usuario WHERE email = :email";
 
         $stmt = $this->db->prepare($sql);
-
         $stmt->bindParam(':email', $email);
         $stmt->execute();
 
@@ -302,7 +313,6 @@ class User
         $sql = "SELECT * FROM usuario WHERE id = :id";
 
         $stmt = $this->db->prepare($sql);
-
         $stmt->bindParam(':id', $id);
         $stmt->execute();
 
@@ -361,7 +371,6 @@ class User
         $stmt->execute([$userId]);
 
         $valor = $stmt->fetchColumn();
-
         return $valor ? round($valor, 1) : 0;
     }
 
