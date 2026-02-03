@@ -76,6 +76,19 @@ $esPropietario = ($perfilId === $usuarioLogueado);
                     $stmt = $pdo->prepare("SELECT * FROM usuario WHERE id = ?");
                     $stmt->execute([$id]);
                     $user = $stmt->fetch(PDO::FETCH_ASSOC);
+                    //Si usuario no existe
+                    if (!$user) {
+                ?>
+                      <div class="container text-center mt-5">
+                        <h1 class="display-5 fw-bold text-danger">Usuario no encontrado</h1>
+                        <p class="lead">El perfil que intentas ver no existe o ha sido eliminado.</p>
+                        <a href="/MercApp/public/views/home.php" class="btn btn-primary mt-3">
+                          Volver al inicio
+                        </a>
+                      </div>
+                <?php
+                      exit;
+                    }
                   } catch (PDOException $e) {
                     error_log("Error de base de datos: " . $e->getMessage());
                   }
@@ -220,7 +233,10 @@ $esPropietario = ($perfilId === $usuarioLogueado);
         btnConfirmar.href = `/MercApp/controllers/handlers/delete_product_handler.php?id=${productId}`;
       });
 
-      if (params.has("deleted")) { const toast = new bootstrap.Toast(document.getElementById("toastEliminado")); toast.show(); }
+      if (params.has("deleted")) {
+        const toast = new bootstrap.Toast(document.getElementById("toastEliminado"));
+        toast.show();
+      }
 
     });
   </script>
