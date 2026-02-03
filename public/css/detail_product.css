@@ -1,0 +1,126 @@
+.product-detail {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+}
+
+/* Galería */
+.product-gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.product-gallery .main-img {
+    width: 100%;
+    border-radius: 12px;
+    object-fit: cover;
+}
+
+.product-gallery .thumbs {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.product-gallery .thumb {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    object-fit: cover;
+    cursor: pointer;
+    transition: transform .2s ease;
+}
+
+.product-gallery .thumb:hover {
+    transform: scale(1.05);
+}
+
+/* Información del producto */
+.product-info {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.product-info h1 {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.product-location {
+    font-size: 14px;
+    color: var(--color-muted);
+}
+
+/* Precio */
+.price-block {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.price-current {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    line-height: 1.2;
+}
+
+.price-original {
+    font-size: 1rem;
+    color: var(--color-muted);
+    text-decoration: line-through;
+}
+
+.price-discount {
+    font-size: 0.95rem;
+    color: #d10000;
+    font-weight: 600;
+}
+
+/* Botón comprar */
+.buy-button {
+    margin-top: 15px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    background-color: var(--color-primary);
+    color: #fff;
+    font-weight: 600;
+    transition: background .2s ease;
+}
+
+.buy-button:hover {
+    background-color: var(--color-primary-dark);
+}
+
+/* Chat */
+.chat-button {
+    margin-top: 20px;
+}
+
+.chat-button a {
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+/* Extras */
+.extras {
+    margin-top: 30px;
+    font-size: 14px;
+    color: var(--color-muted);
+}
+
+/* Descripción */
+.description {
+    grid-column: span 2;
+    background: var(--color-surface);
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 30px;
+    line-height: 1.7;
+}
