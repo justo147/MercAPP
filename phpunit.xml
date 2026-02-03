@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 Este archivo configura PHPUnit para el proyecto. 
 Indica qué carpeta contiene las pruebas, qué archivo debe cargarse antes de ejecutarlas 
@@ -5,7 +6,6 @@ y qué ajustes de PHP deben aplicarse durante la ejecución.
 Gracias a esto, PHPUnit puede encontrar los tests, cargar las clases automáticamente 
 y mostrar los errores y resultados de forma clara.
 -->
-<?xml version="1.0" encoding="UTF-8"?>
 <phpunit 
     bootstrap="vendor/autoload.php"
     colors="true"

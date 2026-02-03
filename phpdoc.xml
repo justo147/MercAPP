@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<phpdocumentor
+    configVersion="3"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="https://docs.phpdoc.org/latest/phpdoc.xsd"
+>
+
+    <title>MercApp - Documentación</title>
+
+    <paths>
+        <output>docs</output>
+    </paths>
+
+    <versions>
+        <version number="1.0">
+            <api>
+                <source dsn=".">
+                    <path>models</path>
+                    <path>controllers</path>
+                    <path>api</path>
+                    <path>config</path>
+                </source>
+            </api>
+        </version>
+    </versions>
+
+</phpdocumentor>

@@ -2,3 +2,4 @@ vendor/
 uploads/
 # Ignorar caché de phpDocumentor
 .phpdoc/
+.phpunit.result.cache
