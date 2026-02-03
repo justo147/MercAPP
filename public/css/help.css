@@ -1,14 +1,3 @@
-body {
-  font-family: Arial, sans-serif;
-  max-width: 800px;
-  margin: auto;
-  padding: 20px;
-}
-
-h1 {
-  text-align: center;
-}
-
 .faq-item {
   margin-bottom: 15px;
   border-bottom: 1px solid #ddd;
