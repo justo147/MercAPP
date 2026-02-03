@@ -17,98 +17,98 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
   <!-- CSS personalizado -->
-  <link rel="stylesheet" href="../../public/css/reset.css">
-  <link rel="stylesheet" href="../../public/css/style-guide.css">
-  <link rel="stylesheet" href="../../public/css/help.css"> <!-- tu SCSS compilado -->
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/style-guide.css">
+  <link rel="stylesheet" href="../css/help.css?v=999">
+
 
 
   <!-- JS específico de la página de ayuda -->
-  <script src="../../public/js/help.js" defer></script>
+  <script src="../js/help.js" defer></script>
 
   <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
 
 
 </head>
 
 
-<body>
-  <main>
-    <?php
-    $showSearch = false; // Mostrar barra de búsqueda en el navbar
-    include("../../public/views/navbar.php");
-    ?>
+ <body data-bs-theme="dark">
+  <?php
+  $showSearch = false; // Mostrar barra de búsqueda en el navbar
+  include("../../public/views/navbar.php");
+  ?>
 
-    <h1 id="centro-ayuda">Centro de Ayuda</h1>
+  <h1 id="centro-ayuda">Centro de Ayuda</h1>
 
-    <p class="d-flex justify-content-center">Encuentra información útil, guías paso a paso y respuestas a las preguntas
-      más frecuentes sobre el uso de nuestra plataforma. Estamos aquí para ayudarte a comprar y vender de forma segura.
-    </p>
+  <p class="d-flex justify-content-center">Encuentra información útil, guías paso a paso y respuestas a las preguntas
+    más frecuentes sobre el uso de nuestra plataforma. Estamos aquí para ayudarte a comprar y vender de forma segura.
+  </p>
 
-    <!-- Vídeo explicativo -->
-    <h2 class="d-flex justify-content-center">Cómo funciona la plataforma</h2>
+  <!-- Vídeo explicativo -->
+  <h2 class="d-flex justify-content-center">Cómo funciona la plataforma</h2>
 
-    <div class="d-flex justify-content-center">
-      <video width="50%" controls title="Vídeo demostrativo" aria-label="Vídeo de personas colaborando en una oficina">
+  <div class="d-flex justify-content-center">
+    <video width="50%" controls title="Vídeo demostrativo" aria-label="Vídeo de personas colaborando en una oficina">
         <source src="../video/6011533_People_Person_3840x2160.mp4" type="video/mp4">
-
+        
         <track kind="captions" src="captions.vtt" srclang="es" label="Español" default>
-
+        
         Tu navegador no soporta el elemento de vídeo.
-      </video>
+    </video>
+</div>
+
+
+  <h2 id="preguntas-frecuentes" class="mt-4 d-flex justify-content-center">Preguntas Frecuentes</h2>
+
+  <!-- FAQ 1 -->
+  <div class="faq-item mt-4">
+    <div class="faq-question">
+      ¿Cómo puedo subir un producto?
+      <span class="arrow">&#9662;</span>
     </div>
-
-
-    <h2 id="preguntas-frecuentes" class="mt-4 d-flex justify-content-center">Preguntas Frecuentes</h2>
-
-    <!-- FAQ 1 -->
-    <div class="faq-item mt-4">
-      <div class="faq-question">
-        ¿Cómo puedo subir un producto?
-        <span class="arrow">&#9662;</span>
-      </div>
-      <div class="faq-answer">
-        <p>Ve al menú “Subir producto”, añade fotos, descripción y precio. Luego guarda los cambios.</p>
-      </div>
+    <div class="faq-answer">
+      <p class="text-light">Ve al menú “Subir producto”, añade fotos, descripción y precio. Luego guarda los cambios.</p>
     </div>
+  </div>
 
-    <div class="faq-item">
-      <div class="faq-question">
-        ¿Cómo contacto con un vendedor?
-        <span class="arrow">&#9662;</span>
-      </div>
-      <div class="faq-answer">
-        <p>En la página del producto encontrarás un botón para enviar un mensaje al vendedor.</p>
-      </div>
+  <div class="faq-item">
+    <div class="faq-question">
+      ¿Cómo contacto con un vendedor?
+      <span class="arrow">&#9662;</span>
     </div>
-
-    <div class="faq-item">
-      <div class="faq-question">
-        ¿Puedo editar un producto ya publicado?
-        <span class="arrow">&#9662;</span>
-      </div>
-      <div class="faq-answer">
-        <p>Sí, desde “Mis productos” puedes editar título, precio, fotos y descripción.</p>
-      </div>
+    <div class="faq-answer">
+      <p class="text-light">En la página del producto encontrarás un botón para enviar un mensaje al vendedor.</p>
     </div>
+  </div>
 
-    <div class="faq-item">
-      <div class="faq-question">
-        ¿Cómo elimino mi cuenta?
-        <span class="arrow">&#9662;</span>
-      </div>
-      <div class="faq-answer">
-        <p>En “Ajustes de cuenta” encontrarás la opción para desactivar o eliminar tu cuenta.</p>
-      </div>
+  <div class="faq-item">
+    <div class="faq-question">
+      ¿Puedo editar un producto ya publicado?
+      <span class="arrow">&#9662;</span>
     </div>
-
+    <div class="faq-answer">
+      <p class="text-light">Sí, desde “Mis productos” puedes editar título, precio, fotos y descripción.</p>
     </div>
+  </div>
 
-  </main>
+  <div class="faq-item">
+    <div class="faq-question">
+      ¿Cómo elimino mi cuenta?
+      <span class="arrow">&#9662;</span>
+    </div>
+    <div class="faq-answer">
+      <p class="text-light">En “Ajustes de cuenta” encontrarás la opción para desactivar o eliminar tu cuenta.</p>
+    </div>
+  </div> 
 
-  <?php include __DIR__ . '/footer.php'; ?>
+  </div>
 
+  <footer>
+
+    <?php include __DIR__ . '/footer.php'; ?>
+
+  </footer>
 </body>
 
 </html>
