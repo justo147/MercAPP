@@ -59,7 +59,7 @@
   <div class="ratio ratio-16x9">
     <iframe 
       id="docFrame"
-      src="../../docs/api/index.html"  <!-- PHPDoc por defecto -->
+      src="../../docs/index.html"  
       class="rounded"
       style="border: none; width: 100%; height: 100%;">
     </iframe>
@@ -77,7 +77,7 @@
 
       const tipo = tab.dataset.doc;
       if (tipo === "php") {
-        docFrame.src = "../../docs/api/index.html"; // PHPDoc
+        docFrame.src = "../../docs/index.html"; // PHPDoc
       } else if (tipo === "js") {
         docFrame.src = "../../docs/js/index.html"; // JSDoc
       }
