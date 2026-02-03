@@ -1,23 +1,60 @@
 /* ============================================================
    SELECTORES DEL FORMULARIO
-   ============================================================ */
+============================================================ */
+
+/**
+ * Formulario de registro de usuario.
+ * @type {HTMLFormElement}
+ */
 const formRegister = document.getElementById('formRegistro');
+
+/**
+ * Campo de entrada para el nombre del usuario.
+ * @type {HTMLInputElement}
+ */
 const inputName = document.getElementById('name');
+
+/**
+ * Campo de entrada para el correo electrónico.
+ * @type {HTMLInputElement}
+ */
 const emailInput = document.getElementById('email');
+
+/**
+ * Campo de entrada para la contraseña.
+ * @type {HTMLInputElement}
+ */
 const pass1 = document.getElementById('password');
+
+/**
+ * Campo de entrada para confirmar la contraseña.
+ * @type {HTMLInputElement}
+ */
 const pass2 = document.getElementById('confirmPass');
+
 
 /* ============================================================
    EVENTO SUBMIT
-   ============================================================ */
+============================================================ */
+
+/**
+ * Intercepta el envío del formulario para validar los datos antes de enviarlos.
+ */
 formRegister.addEventListener('submit', function (e) {
     e.preventDefault();
     validationForm();
 });
 
+
 /* ============================================================
    FUNCIÓN PRINCIPAL DE VALIDACIÓN
-   ============================================================ */
+============================================================ */
+
+/**
+ * Valida todos los campos del formulario de registro.
+ * Comprueba nombre, email, contraseñas y muestra errores si es necesario.
+ * Si todo es válido, procede a enviar el formulario.
+ */
 function validationForm() {
     let valid = true;
     clearError();
@@ -53,9 +90,17 @@ function validationForm() {
     }
 }
 
+
 /* ============================================================
    ENVÍO ASÍNCRONO Y LÓGICA DEL BOM
-   ============================================================ */
+============================================================ */
+
+/**
+ * Envía el formulario de registro mediante fetch de forma asíncrona.
+ * Gestiona la respuesta del servidor, limpia mensajes previos
+ * y muestra un modal de éxito usando características del BOM.
+ * @async
+ */
 async function enviarFormulario() {
     const formData = new FormData(formRegister);
     const emailUser = emailInput.value.trim();
@@ -90,8 +135,11 @@ async function enviarFormulario() {
     }
 }
 
+
 /**
- * abrirModalExito: Requerimientos del BOM
+ * Muestra un modal de éxito tras el registro.
+ * Utiliza propiedades del BOM como scroll, viewport y pushState.
+ * @param {string} correo - Correo del usuario registrado.
  */
 function abrirModalExito(correo) {
     const modal = document.getElementById('modalSuccess');
@@ -120,17 +168,30 @@ function abrirModalExito(correo) {
     }
 }
 
+
 /* ============================================================
    FUNCIONES AUXILIARES
-   ============================================================ */
+============================================================ */
+
+/**
+ * Valida si un correo electrónico tiene un formato correcto.
+ * @param {string} correo - Correo a validar.
+ * @returns {boolean} `true` si el correo es válido.
+ */
 function validarEmail(correo) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo);
 }
 
+/**
+ * Muestra un mensaje de error debajo de un input y aplica estilos de Bootstrap.
+ * @param {HTMLInputElement} input - Campo donde mostrar el error.
+ * @param {string} message - Mensaje de error.
+ */
 function showError(input, message) {
     input.classList.add('is-invalid');
     const parent = input.parentElement;
     let existing = parent.querySelector('.invalid-feedback');
+
     if (!existing) {
         const div = document.createElement('div');
         div.className = 'invalid-feedback';
@@ -141,6 +202,9 @@ function showError(input, message) {
     }
 }
 
+/**
+ * Limpia todos los mensajes de error y estilos de validación del formulario.
+ */
 function clearError() {
     document.querySelectorAll('.invalid-feedback').forEach(e => e.remove());
     document.querySelectorAll('.is-invalid').forEach(i => i.classList.remove('is-invalid'));

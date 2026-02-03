@@ -76,6 +76,11 @@
                 <i class="bi bi-gear"></i> Ajustes de Cuenta
               </a>
             </li>
+             <!-- Documentación -->
+             <a class="dropdown-item" href="../../public/views/docs.php">
+                <i class="bi bi-book"></i> Documentación
+              </a>
+            </li>
             <li>
               <hr class="dropdown-divider">
             </li>
@@ -85,6 +90,7 @@
                 <i class="bi bi-box-arrow-right"></i> Cerrar sesión
               </a>
             </li>
+            <li>
           </ul>
         </div>
 

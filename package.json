@@ -1,0 +1,30 @@
+{
+  "name": "mercapp",
+  "version": "1.0.0",
+  "description": "Este proyecto consiste en el **diseño y desarrollo de una aplicación web modular** compuesta por **cuatro vistas principales**:",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/justo147/MercAPP.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/justo147/MercAPP/issues"
+  },
+  "homepage": "https://github.com/justo147/MercAPP#readme",
+  "devDependencies": {
+    "jsdoc": "^4.0.5",
+    "minami": "^1.2.3",
+    "taffydb": "^2.7.3"
+  }
+}

@@ -1,21 +1,71 @@
 /* ============================================================
    VARIABLES GLOBALES
 ============================================================ */
+
+/**
+ * Offset actual para la paginación de productos.
+ * @type {number}
+ */
 let offset = 0;
+
+/**
+ * Número máximo de productos cargados por petición.
+ * @type {number}
+ */
 const limit = 12;
+
+/**
+ * Indica si actualmente se está realizando una carga de productos.
+ * @type {boolean}
+ */
 let loading = false;
+
+/**
+ * Indica si ya no hay más productos para cargar.
+ * @type {boolean}
+ */
 let noMore = false;
 
 /* Filtros del buscador */
+
+/**
+ * Texto de búsqueda introducido por el usuario.
+ * @type {string}
+ */
 let searchQuery = "";
+
+/**
+ * ID de la categoría seleccionada.
+ * @type {string}
+ */
 let searchCategoria = "";
+
+/**
+ * ID del estado del producto seleccionado.
+ * @type {string}
+ */
 let searchEstado = "";
+
+/**
+ * Tipo de transacción seleccionada.
+ * @type {string}
+ */
 let searchTransaccion = "";
+
+/**
+ * Orden seleccionado para la búsqueda.
+ * @type {string}
+ */
 let searchOrden = "fecha_desc";
 
 /* ============================================================
    SKELETON LOADER
 ============================================================ */
+
+/**
+ * Muestra un skeleton loader con tarjetas simuladas mientras se cargan productos.
+ * @param {number} [count=8] - Número de tarjetas skeleton a mostrar.
+ */
 function showSkeleton(count = 8) {
     const container = document.getElementById("skeleton-loader");
     container.innerHTML = "";
@@ -52,6 +102,9 @@ function showSkeleton(count = 8) {
     container.style.display = "flex";
 }
 
+/**
+ * Oculta el skeleton loader.
+ */
 function hideSkeleton() {
     document.getElementById("skeleton-loader").style.display = "none";
 }
@@ -59,6 +112,12 @@ function hideSkeleton() {
 /* ============================================================
    CARGA DE FILTROS DESDE LA BD
 ============================================================ */
+
+/**
+ * Carga los filtros disponibles desde la API y los inserta en los select correspondientes.
+ * @async
+ * @returns {Promise<void>}
+ */
 async function cargarFiltros() {
     try {
         const res = await fetch("/MercApp/api/get_filters.php");
@@ -101,19 +160,25 @@ async function cargarFiltros() {
 /* ============================================================
    CARGA DE PRODUCTOS
 ============================================================ */
+
+/**
+ * Carga más productos desde la API aplicando paginación y filtros.
+ * Gestiona el skeleton loader y actualiza el offset.
+ * @async
+ * @returns {Promise<void>}
+ */
 async function loadMoreProducts() {
     if (loading || noMore) return;
 
     loading = true;
 
-    //Retraso antes de mostrar skeleton
     let skeletonTimeout = null;
     const isFirstLoad = offset === 0;
 
     if (isFirstLoad) {
         skeletonTimeout = setTimeout(() => {
             showSkeleton();
-        }, 150); // si la carga tarda menos de 150ms, no se muestra
+        }, 150);
     }
 
     try {
@@ -124,13 +189,14 @@ async function loadMoreProducts() {
             offset
         });
 
-        if (
+        const usingFilters =
             searchQuery ||
             searchCategoria ||
             searchEstado ||
             searchTransaccion ||
-            searchOrden !== "fecha_desc"
-        ) {
+            searchOrden !== "fecha_desc";
+
+        if (usingFilters) {
             endpoint = "/MercApp/api/search_products.php";
 
             params.set("q", searchQuery);
@@ -163,24 +229,19 @@ async function loadMoreProducts() {
     } finally {
         loading = false;
 
-        // ⬇️ Cancelamos el timeout si aún no se ejecutó
-        if (skeletonTimeout) {
-            clearTimeout(skeletonTimeout);
-        }
-
-        // ⬇️ Ocultamos skeleton solo si llegó a mostrarse
-        if (isFirstLoad) {
-            hideSkeleton();
-        }
+        if (skeletonTimeout) clearTimeout(skeletonTimeout);
+        if (isFirstLoad) hideSkeleton();
     }
 }
-
-
-
 
 /* ============================================================
    RENDER DE PRODUCTOS
 ============================================================ */
+
+/**
+ * Renderiza una lista de productos en el contenedor principal.
+ * @param {Array<Object>} products - Lista de productos obtenidos desde la API.
+ */
 function renderProducts(products) {
     const container = document.getElementById("product-list");
 
@@ -215,15 +276,17 @@ function renderProducts(products) {
 
         //Forzamos reflow para que la animación SIEMPRE se dispare
         void col.offsetWidth;
-
         col.classList.add("show");
     });
 }
 
-
 /* ============================================================
    RESET DE BÚSQUEDA
 ============================================================ */
+
+/**
+ * Reinicia los parámetros de búsqueda y vuelve a cargar los productos desde cero.
+ */
 function resetAndSearch() {
     offset = 0;
     noMore = false;
@@ -237,6 +300,10 @@ function resetAndSearch() {
 /* ============================================================
    EVENTOS
 ============================================================ */
+
+/**
+ * Inicializa los eventos de la página, carga filtros y gestiona la búsqueda.
+ */
 document.addEventListener("DOMContentLoaded", async () => {
 
     await cargarFiltros();
@@ -282,8 +349,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 /* ============================================================
    INTERSECTION OBSERVER
 ============================================================ */
+
+/**
+ * Elemento utilizado como referencia para detectar el final del scroll.
+ * @type {HTMLElement}
+ */
 const sentinel = document.getElementById("sentinel");
 
+/**
+ * Observador que detecta cuando el usuario llega al final de la lista para cargar más productos.
+ * @type {IntersectionObserver}
+ */
 const observer = new IntersectionObserver(entries => {
     if (entries[0].isIntersecting) {
         loadMoreProducts();
