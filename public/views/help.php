@@ -19,7 +19,7 @@
   <!-- CSS personalizado -->
   <link rel="stylesheet" href="../css/reset.css">
   <link rel="stylesheet" href="../css/style-guide.css">
-  <link rel="stylesheet" href="../css/help.css?v=999">
+  <link rel="stylesheet" href="../css/help.css">
 
 
 
