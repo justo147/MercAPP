@@ -31,7 +31,7 @@
 
 
 </head>
- <body data-bs-theme="dark">
+ <body>
   <?php
   $showSearch = false; // Mostrar barra de búsqueda en el navbar
   include("../../public/views/navbar.php");

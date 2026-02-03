@@ -54,3 +54,8 @@ body.dark-mode .faq-answer p {
 body.dark-mode .faq-item {
   border-bottom: 1px solid #444;
 }
+
+/* Invierte los colores del iframe en modo oscuro */
+body.dark-mode iframe {
+    filter: invert(90%) hue-rotate(180deg);
+}
