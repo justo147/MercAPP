@@ -278,4 +278,32 @@ document.addEventListener("DOMContentLoaded", () => {
     })
     .catch(err => console.error("Error cargando estadísticas:", err));
 
+
+  function actualizarBadgeMensajes() {
+    fetch("/MercApp/api/chat_unread_count.php")
+      .then(res => res.text())
+      .then(num => {
+        const badge = document.getElementById("badge-mensajes");
+        if (!badge) return;
+
+        num = parseInt(num);
+
+        if (num > 0) {
+          badge.textContent = num;
+          badge.style.display = "inline-block";
+        } else {
+          badge.style.display = "none";
+        }
+        badge.style.opacity = num > 0 ? "1" : "0";
+
+      })
+      .catch(err => console.error("Error actualizando badge:", err));
+  }
+  //no mostrar el badge en otro perfil
+  if (!ES_PROPIETARIO) return;
+
+  actualizarBadgeMensajes(); // primera carga
+  setInterval(actualizarBadgeMensajes, 5000); // actualizaciones periódicas
+
+
 });

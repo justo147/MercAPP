@@ -136,9 +136,14 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
                     <button type="submit" class="buy-button">Comprar</button>
                 </form>
 
+                <a href="/MercApp/controllers/chat_start.php?producto_id=<?= $producto["id"] ?>"
+                    class="btn btn-primary d-flex align-items-center justify-content-center gap-2 py-2 px-4 shadow-sm">
+                    <i class="bi bi-chat-dots"></i> <span>Contactar con el vendedor</span>
+                </a>
+
                 <!-- Enlace al chat con el vendedor -->
                 <div class="chat-button">
-                    <a href="../chat/iniciar.php?producto=<?= $producto['id'] ?>">
+                    <a href="/MercApp/controllers/chat_start.php?producto_id=<?= $producto["id"] ?>">
                         ¿Tienes dudas? Chatea con el vendedor
                     </a>
                 </div>

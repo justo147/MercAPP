@@ -41,5 +41,5 @@ if ($vendedorId === $usuarioActual) {
 $chatId = $chatModel->getOrCreate($productoId, $usuarioActual, $vendedorId);
 
 // Redirigir al chat
-header("Location: ../views/chat.php?id=" . $chatId);
+header("Location: ../public/views/chat.php?id=" . $chatId);
 exit;
