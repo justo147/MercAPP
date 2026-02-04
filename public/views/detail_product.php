@@ -85,7 +85,7 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
 
                 <?php if (!empty($producto['imagenes'])): ?>
                     <!-- Imagen principal del producto -->
-                    <img src="/<?= htmlspecialchars($producto['imagenes'][0]['url']) ?>"
+                    <img src="/MercApp/<?= htmlspecialchars($producto['imagenes'][0]['url']) ?>"
                         class="main-img"
                         alt="Imagen del producto">
                 <?php else: ?>
@@ -184,7 +184,7 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
 
                             <?php
                             // Imagen segura: si no tiene imagen, se usa una por defecto
-                            $img = 'uploads/products/default.jpg';
+                            $img = 'MercApp/uploads/products/default.jpg';
                             if (!empty($s['imagenes']) && isset($s['imagenes'][0]['url'])) {
                                 $img = $s['imagenes'][0]['url'];
                             }

@@ -22,10 +22,10 @@ require_once __DIR__ . '/../../models/Product.php';
 $db = new Database();
 $conn = $db->getConnection();
 
-$chatModel        = new Chat($conn);
-$mensajeModel     = new Message($conn);
+$chatModel = new Chat($conn);
+$mensajeModel = new Message($conn);
 $transactionModel = new Transaction($conn);
-$productoModel    = new Product($conn);
+$productoModel = new Product($conn);
 
 // Seguridad
 if (!$chatModel->userBelongsToChat($chatId, $usuarioActual)) {
@@ -39,7 +39,7 @@ $chat = $chatModel->getById($chatId);
 $transaccion = $transactionModel->getLastTransactionByProduct($chat["producto_id"]);
 
 // Roles
-$esVendedor  = ($usuarioActual == $chat["usuario_vendedor"]);
+$esVendedor = ($usuarioActual == $chat["usuario_vendedor"]);
 $esComprador = ($usuarioActual == $chat["usuario_comprador"]);
 
 // Marcar mensajes como leídos
@@ -84,154 +84,262 @@ $mensajes = $mensajeModel->getByChat($chatId);
 
 <body>
 
-<?php
-$showSearch = false;
-include("navbar.php");
-?>
+    <?php
+    $showSearch = false;
+    include("navbar.php");
+    ?>
 
-<div class="container py-4">
+    <div class="container py-4">
 
-    <h3 class="mb-3">
-        Chat sobre: <?= htmlspecialchars($chat["producto_titulo"] ?? "Producto") ?>
-    </h3>
+        <h3 class="mb-3">
+            Chat sobre: <?= htmlspecialchars($chat["producto_titulo"] ?? "Producto") ?>
+        </h3>
 
-    <!-- Producto -->
-    <div class="d-flex align-items-center mb-3">
-        <?php
-        $img = $chat["producto_imagen"]
-            ? "../../" . htmlspecialchars($chat["producto_imagen"])
-            : "../../uploads/products/default.jpg";
-        ?>
-        <img src="<?= $img ?>" alt="Producto" class="me-3 rounded"
-             style="width: 80px; height: 80px; object-fit: cover;">
+        <!-- Producto -->
+        <div class="d-flex align-items-center mb-3">
+            <?php
+            $img = $chat["producto_imagen"]
+                ? "../../" . htmlspecialchars($chat["producto_imagen"])
+                : "../../uploads/products/default.jpg";
+            ?>
+            <img src="<?= $img ?>" alt="Producto" class="me-3 rounded"
+                style="width: 80px; height: 80px; object-fit: cover;">
 
-        <div>
-            <h5 class="mb-0"><?= htmlspecialchars($chat["producto_titulo"]) ?></h5>
-            <a href="detail_product.php?id=<?= $chat["producto_id"] ?>" class="small text-primary">
-                Ver producto
-            </a>
-        </div>
-    </div>
-
-    <!-- ESTADO DE TRANSACCIÓN -->
-    <?php if ($transaccion): ?>
-        <div class="alert alert-info text-center">
-            Estado de la transacción:
-            <strong><?= htmlspecialchars($transaccion["estado"]) ?></strong>
+            <div>
+                <h5 class="mb-0"><?= htmlspecialchars($chat["producto_titulo"]) ?></h5>
+                <a href="detail_product.php?id=<?= $chat["producto_id"] ?>" class="small text-primary">
+                    Ver producto
+                </a>
+            </div>
         </div>
 
-        <?php $estado = $transaccion["estado"]; ?>
+        <!-- Timeline -->
+        <?php if ($transaccion): ?>
 
-        <!-- BOTONES SEGÚN ESTADO -->
-        <form action="/MercApp/controllers/chat_update_transaction.php" method="POST" class="mb-3">
-            <input type="hidden" name="transaccion_id" value="<?= $transaccion["id"] ?>">
-            <input type="hidden" name="chat_id" value="<?= $chatId ?>">
+            <?php
+            $estado = $transaccion["estado"];
 
-            <?php if ($estado === "pendiente"): ?>
+            // Función para marcar estado activo
+            function stepActive($current, $state)
+            {
+                return $current === $state ? "text-primary fw-bold" : "text-muted";
+            }
 
-                <?php if ($esComprador): ?>
-                    <button name="estado" value="aceptada" class="btn btn-success w-100 mb-2">
-                        Aceptar transacción
-                    </button>
-                <?php endif; ?>
+            // Función para icono activo/inactivo
+            function iconActive($current, $state)
+            {
+                return $current === $state ? "text-primary" : "text-muted";
+            }
+            ?>
 
-                <button name="estado" value="cancelada" class="btn btn-danger w-100">
-                    Cancelar transacción
-                </button>
+            <div class="card mb-3 no-hover">
+                <div class="card-body">
 
-            <?php elseif ($estado === "aceptada"): ?>
+                    <div class="d-flex justify-content-between text-center">
 
-                <?php if ($esVendedor): ?>
-                    <button name="estado" value="enviado" class="btn btn-primary w-100 mb-2">
-                        Marcar como enviado
-                    </button>
-                <?php endif; ?>
-
-                <button name="estado" value="cancelada" class="btn btn-danger w-100">
-                    Cancelar transacción
-                </button>
-
-            <?php elseif ($estado === "enviado"): ?>
-
-                <?php if ($esComprador): ?>
-                    <button name="estado" value="entregado" class="btn btn-success w-100 mb-2">
-                        Marcar como entregado
-                    </button>
-                <?php endif; ?>
-
-                <button name="estado" value="cancelada" class="btn btn-danger w-100">
-                    Cancelar transacción
-                </button>
-
-            <?php endif; ?>
-        </form>
-
-    <?php endif; ?>
-
-    <!-- BOTÓN INICIAR TRANSACCIÓN -->
-    <?php if ($esVendedor && !$transaccion): ?>
-        <form action="/MercApp/controllers/chat_start_transaction.php" method="POST" class="mb-3">
-            <input type="hidden" name="chat_id" value="<?= $chatId ?>">
-            <button class="btn btn-success w-100">
-                Iniciar transacción
-            </button>
-        </form>
-    <?php endif; ?>
-
-    <!-- CHAT -->
-    <div class="card mb-3 no-hover">
-        <div class="card-body" style="max-height: 400px; overflow-y: auto;">
-            <?php foreach ($mensajes as $msg): ?>
-                <div class="mb-2 <?= $msg["usuario_id"] == $usuarioActual ? 'text-end' : 'text-start' ?>">
-
-                    <div class="small text-muted">
-                        <?= $msg["usuario_id"] === null ? "Sistema" : htmlspecialchars($msg["sender_name"]) ?>
-                        · <?= $msg["fecha_envio"] ?>
-                    </div>
-
-                    <div class="d-inline-block px-3 py-2 rounded 
-                        <?= $msg["usuario_id"] == $usuarioActual ? 'bg-primary text-white' : 'bg-secondary text-white' ?>">
-                        <?= nl2br(htmlspecialchars($msg["contenido"])) ?>
-                    </div>
-
-                    <?php if ($msg["usuario_id"] == $usuarioActual): ?>
-                        <div class="small text-muted mt-1">
-                            <?= $msg["leido"] ? "✓✓ Leído" : "✓ Enviado" ?>
+                        <!-- Pendiente -->
+                        <div class="flex-fill">
+                            <i class="bi bi-hourglass-split fs-3 <?= iconActive('pendiente', $estado) ?>"></i>
+                            <div class="<?= stepActive('pendiente', $estado) ?>">Pendiente</div>
                         </div>
-                    <?php endif; ?>
+
+                        <!-- Aceptada -->
+                        <div class="flex-fill">
+                            <i class="bi bi-hand-thumbs-up fs-3 <?= iconActive('aceptada', $estado) ?>"></i>
+                            <div class="<?= stepActive('aceptada', $estado) ?>">Aceptada</div>
+                        </div>
+
+                        <!-- Enviado -->
+                        <div class="flex-fill">
+                            <i class="bi bi-truck fs-3 <?= iconActive('enviado', $estado) ?>"></i>
+                            <div class="<?= stepActive('enviado', $estado) ?>">Enviado</div>
+                        </div>
+
+                        <!-- Entregado -->
+                        <div class="flex-fill">
+                            <i class="bi bi-check-circle fs-3 <?= iconActive('entregado', $estado) ?>"></i>
+                            <div class="<?= stepActive('entregado', $estado) ?>">Entregado</div>
+                        </div>
+
+                        <!-- Cancelada -->
+                        <div class="flex-fill">
+                            <i class="bi bi-x-circle fs-3 <?= iconActive('cancelada', $estado) ?>"></i>
+                            <div class="<?= stepActive('cancelada', $estado) ?>">Cancelada</div>
+                        </div>
+
+                    </div>
 
                 </div>
-            <?php endforeach; ?>
+            </div>
+
+        <?php endif; ?>
+
+
+        <!-- Avisos inteligentes -->
+        <?php if ($transaccion): ?>
+
+            <?php if ($estado === "pendiente"): ?>
+                <div class="alert alert-warning text-center">
+                    Esperando que el comprador acepte la transacción.
+                </div>
+
+            <?php elseif ($estado === "aceptada"): ?>
+                <?php if ($esVendedor): ?>
+                    <div class="alert alert-info text-center">
+                        Debes marcar el producto como enviado.
+                    </div>
+                <?php else: ?>
+                    <div class="alert alert-info text-center">
+                        El vendedor debe marcar el producto como enviado.
+                    </div>
+                <?php endif; ?>
+
+            <?php elseif ($estado === "enviado"): ?>
+                <?php if ($esComprador): ?>
+                    <div class="alert alert-success text-center">
+                        Marca como entregado cuando recibas el producto.
+                    </div>
+                <?php else: ?>
+                    <div class="alert alert-success text-center">
+                        Esperando que el comprador confirme la entrega.
+                    </div>
+                <?php endif; ?>
+
+            <?php elseif ($estado === "entregado"): ?>
+                <div class="alert alert-success text-center">
+                    La transacción ha sido completada con éxito.
+                </div>
+
+            <?php elseif ($estado === "cancelada"): ?>
+                <div class="alert alert-danger text-center">
+                    La transacción ha sido cancelada.
+                </div>
+            <?php endif; ?>
+
+        <?php endif; ?>
+
+
+        <!-- ESTADO DE TRANSACCIÓN -->
+        <?php if ($transaccion): ?>
+            <div class="alert alert-info text-center">
+                Estado de la transacción:
+                <strong><?= htmlspecialchars($transaccion["estado"]) ?></strong>
+            </div>
+
+            <?php $estado = $transaccion["estado"]; ?>
+
+            <!-- BOTONES SEGÚN ESTADO -->
+            <form action="/MercApp/controllers/chat_update_transaction.php" method="POST" class="mb-3">
+                <input type="hidden" name="transaccion_id" value="<?= $transaccion["id"] ?>">
+                <input type="hidden" name="chat_id" value="<?= $chatId ?>">
+
+                <?php if ($estado === "pendiente"): ?>
+
+                    <?php if ($esComprador): ?>
+                        <button name="estado" value="aceptada" class="btn btn-success w-100 mb-2">
+                            Aceptar transacción
+                        </button>
+                    <?php endif; ?>
+
+                    <button name="estado" value="cancelada" class="btn btn-danger w-100">
+                        Cancelar transacción
+                    </button>
+
+                <?php elseif ($estado === "aceptada"): ?>
+
+                    <?php if ($esVendedor): ?>
+                        <button name="estado" value="enviado" class="btn btn-primary w-100 mb-2">
+                            Marcar como enviado
+                        </button>
+                    <?php endif; ?>
+
+                    <button name="estado" value="cancelada" class="btn btn-danger w-100">
+                        Cancelar transacción
+                    </button>
+
+                <?php elseif ($estado === "enviado"): ?>
+
+                    <?php if ($esComprador): ?>
+                        <button name="estado" value="entregado" class="btn btn-success w-100 mb-2">
+                            Marcar como entregado
+                        </button>
+                    <?php endif; ?>
+
+                    <button name="estado" value="cancelada" class="btn btn-danger w-100">
+                        Cancelar transacción
+                    </button>
+
+                <?php endif; ?>
+            </form>
+
+        <?php endif; ?>
+
+        <!-- BOTÓN INICIAR TRANSACCIÓN -->
+        <?php if ($esVendedor && !$transaccion): ?>
+            <form action="/MercApp/controllers/chat_start_transaction.php" method="POST" class="mb-3">
+                <input type="hidden" name="chat_id" value="<?= $chatId ?>">
+                <button class="btn btn-success w-100">
+                    Iniciar transacción
+                </button>
+            </form>
+        <?php endif; ?>
+
+        <!-- CHAT -->
+        <div class="card mb-3 no-hover">
+            <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                <?php foreach ($mensajes as $msg): ?>
+                    <div class="mb-2 <?= $msg["usuario_id"] == $usuarioActual ? 'text-end' : 'text-start' ?>">
+
+                        <div class="small text-muted">
+                            <?= $msg["usuario_id"] === null ? "Sistema" : htmlspecialchars($msg["sender_name"]) ?>
+                            · <?= $msg["fecha_envio"] ?>
+                        </div>
+
+                        <div
+                            class="d-inline-block px-3 py-2 rounded 
+                        <?= $msg["usuario_id"] == $usuarioActual ? 'bg-primary text-white' : 'bg-secondary text-white' ?>">
+                            <?= nl2br(htmlspecialchars($msg["contenido"])) ?>
+                        </div>
+
+                        <?php if ($msg["usuario_id"] == $usuarioActual): ?>
+                            <div class="small text-muted mt-1">
+                                <?= $msg["leido"] ? "✓✓ Leído" : "✓ Enviado" ?>
+                            </div>
+                        <?php endif; ?>
+
+                    </div>
+                <?php endforeach; ?>
+            </div>
         </div>
+
+        <!-- BLOQUEO DEL CHAT -->
+        <?php if ($transaccion && in_array($transaccion["estado"], ["entregado", "cancelada"])): ?>
+
+            <div class="alert alert-secondary text-center">
+                La transacción ha finalizado. Este chat está cerrado.
+            </div>
+
+        <?php else: ?>
+
+            <form method="POST" class="d-flex gap-2">
+                <textarea name="mensaje" class="form-control" rows="2" placeholder="Escribe un mensaje..."></textarea>
+                <button class="btn btn-primary">Enviar</button>
+            </form>
+
+        <?php endif; ?>
+
+        <div class="mt-3">
+            <a href="chat_list.php" class="btn btn-outline-secondary">
+                Volver a la lista de Chats
+            </a>
+        </div>
+
     </div>
 
-    <!-- BLOQUEO DEL CHAT -->
-    <?php if ($transaccion && in_array($transaccion["estado"], ["entregado", "cancelada"])): ?>
-
-        <div class="alert alert-secondary text-center">
-            La transacción ha finalizado. Este chat está cerrado.
-        </div>
-
-    <?php else: ?>
-
-        <form method="POST" class="d-flex gap-2">
-            <textarea name="mensaje" class="form-control" rows="2" placeholder="Escribe un mensaje..."></textarea>
-            <button class="btn btn-primary">Enviar</button>
-        </form>
-
-    <?php endif; ?>
-
-    <div class="mt-3">
-        <a href="detail_product.php?id=<?= $chat["producto_id"] ?>" class="btn btn-outline-secondary">
-            Volver al producto
-        </a>
-    </div>
-
-</div>
-
-<footer>
-    <?php include __DIR__ . '/footer.php'; ?>
-</footer>
+    <footer>
+        <?php include __DIR__ . '/footer.php'; ?>
+    </footer>
 
 </body>
+
 </html>
