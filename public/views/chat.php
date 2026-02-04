@@ -16,24 +16,37 @@ $usuarioActual = intval($_SESSION["user_id"]);
 require_once __DIR__ . '/../../config/db.php';
 require_once __DIR__ . '/../../models/Chat.php';
 require_once __DIR__ . '/../../models/Message.php';
+require_once __DIR__ . '/../../models/Transaction.php';
+require_once __DIR__ . '/../../models/Product.php';
 
 $db = new Database();
 $conn = $db->getConnection();
 
-$chatModel = new Chat($conn);
-$mensajeModel = new Message($conn);
+$chatModel        = new Chat($conn);
+$mensajeModel     = new Message($conn);
+$transactionModel = new Transaction($conn);
+$productoModel    = new Product($conn);
 
 // Seguridad
 if (!$chatModel->userBelongsToChat($chatId, $usuarioActual)) {
     die("No tienes acceso a este chat");
 }
 
+// Info del chat
+$chat = $chatModel->getById($chatId);
+
+// Obtener última transacción del producto
+$transaccion = $transactionModel->getLastTransactionByProduct($chat["producto_id"]);
+
+// Roles
+$esVendedor  = ($usuarioActual == $chat["usuario_vendedor"]);
+$esComprador = ($usuarioActual == $chat["usuario_comprador"]);
+
 // Marcar mensajes como leídos
 $mensajeModel->markAsRead($chatId, $usuarioActual);
 
-
-// Enviar mensaje
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
+// Enviar mensaje normal
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["mensaje"])) {
     $contenido = trim($_POST["mensaje"] ?? "");
 
     if ($contenido !== "") {
@@ -46,7 +59,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 // Obtener mensajes
 $mensajes = $mensajeModel->getByChat($chatId);
-$chat = $chatModel->getById($chatId);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -54,109 +66,172 @@ $chat = $chatModel->getById($chatId);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfil de <?php echo $_SESSION["name"] ?? 'Usuario' ?></title>
+    <title>Chat</title>
 
-    <!-- Favicon -->
     <link rel="icon" href="../ico/logo_sinfondo.ico" type="image/x-icon">
     <link rel="shortcut icon" href="../ico/logo_sinfondo.ico" type="image/x-icon">
 
-    <!-- Bootstrap CSS y JS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
-
-    <!-- CSS personalizado -->
     <link rel="stylesheet" href="../css/reset.css">
     <link rel="stylesheet" href="../css/style-guide.css">
     <link rel="stylesheet" href="../css/homeStyle.css">
 
-    <!-- JS de tema -->
     <script src="../js/theme.js" defer></script>
 </head>
 
 <body>
 
-    <!-- Navbar con opciones de perfil -->
-    <?php
-    $showSearch = false;
-    include("navbar.php");
-    ?>
+<?php
+$showSearch = false;
+include("navbar.php");
+?>
 
-    <br>
-    <!-- titulo -->
-    <div class="container py-4">
-        <h3 class="mb-3">
-            Chat sobre: <?= htmlspecialchars($chat["producto_titulo"] ?? "Producto") ?>
-        </h3>
-        <!-- foto -->
-        <div class="d-flex align-items-center mb-3">
-            <?php
-            $img = $chat["producto_imagen"]
-                ? "../../" . htmlspecialchars($chat["producto_imagen"])
-                : "../../uploads/products/default.jpg";
-            ?>
-            <img src="<?= $img ?>" alt="Producto" class="me-3 rounded"
-                style="width: 80px; height: 80px; object-fit: cover;">
+<div class="container py-4">
 
+    <h3 class="mb-3">
+        Chat sobre: <?= htmlspecialchars($chat["producto_titulo"] ?? "Producto") ?>
+    </h3>
 
-            <div>
-                <h5 class="mb-0">
-                    <?= htmlspecialchars($chat["producto_titulo"]) ?>
-                </h5>
-                <a href="detail_product.php?id=<?= $chat["producto_id"] ?>" class="small text-primary">
-                    Ver producto
-                </a>
-            </div>
+    <!-- Producto -->
+    <div class="d-flex align-items-center mb-3">
+        <?php
+        $img = $chat["producto_imagen"]
+            ? "../../" . htmlspecialchars($chat["producto_imagen"])
+            : "../../uploads/products/default.jpg";
+        ?>
+        <img src="<?= $img ?>" alt="Producto" class="me-3 rounded"
+             style="width: 80px; height: 80px; object-fit: cover;">
+
+        <div>
+            <h5 class="mb-0"><?= htmlspecialchars($chat["producto_titulo"]) ?></h5>
+            <a href="detail_product.php?id=<?= $chat["producto_id"] ?>" class="small text-primary">
+                Ver producto
+            </a>
+        </div>
+    </div>
+
+    <!-- ESTADO DE TRANSACCIÓN -->
+    <?php if ($transaccion): ?>
+        <div class="alert alert-info text-center">
+            Estado de la transacción:
+            <strong><?= htmlspecialchars($transaccion["estado"]) ?></strong>
         </div>
 
-        <!-- chat -->
-        <div class="card mb-3 no-hover">
-            <div class="card-body" style="max-height: 400px; overflow-y: auto;">
-                <?php foreach ($mensajes as $msg): ?>
-                    <div class="mb-2 <?= $msg["usuario_id"] == $usuarioActual ? 'text-end' : 'text-start' ?>">
+        <?php $estado = $transaccion["estado"]; ?>
 
-                        <!-- Nombre y fecha -->
-                        <div class="small text-muted">
-                            <?= htmlspecialchars($msg["sender_name"]) ?> · <?= $msg["fecha_envio"] ?>
-                        </div>
+        <!-- BOTONES SEGÚN ESTADO -->
+        <form action="/MercApp/controllers/chat_update_transaction.php" method="POST" class="mb-3">
+            <input type="hidden" name="transaccion_id" value="<?= $transaccion["id"] ?>">
+            <input type="hidden" name="chat_id" value="<?= $chatId ?>">
 
-                        <!-- Burbuja del mensaje -->
-                        <div class="d-inline-block px-3 py-2 rounded 
-                    <?= $msg["usuario_id"] == $usuarioActual ? 'bg-primary text-white' : 'bg-secondary text-white' ?>">
-                            <?= nl2br(htmlspecialchars($msg["contenido"])) ?>
-                        </div>
+            <?php if ($estado === "pendiente"): ?>
 
-                        <!-- Indicador de leído SOLO para mensajes del usuario actual -->
-                        <?php if ($msg["usuario_id"] == $usuarioActual): ?>
-                            <div class="small text-muted mt-1">
-                                <?= $msg["leido"] ? "✓✓ Leído" : "✓ Enviado" ?>
-                            </div>
-                        <?php endif; ?>
+                <?php if ($esComprador): ?>
+                    <button name="estado" value="aceptada" class="btn btn-success w-100 mb-2">
+                        Aceptar transacción
+                    </button>
+                <?php endif; ?>
 
+                <button name="estado" value="cancelada" class="btn btn-danger w-100">
+                    Cancelar transacción
+                </button>
+
+            <?php elseif ($estado === "aceptada"): ?>
+
+                <?php if ($esVendedor): ?>
+                    <button name="estado" value="enviado" class="btn btn-primary w-100 mb-2">
+                        Marcar como enviado
+                    </button>
+                <?php endif; ?>
+
+                <button name="estado" value="cancelada" class="btn btn-danger w-100">
+                    Cancelar transacción
+                </button>
+
+            <?php elseif ($estado === "enviado"): ?>
+
+                <?php if ($esComprador): ?>
+                    <button name="estado" value="entregado" class="btn btn-success w-100 mb-2">
+                        Marcar como entregado
+                    </button>
+                <?php endif; ?>
+
+                <button name="estado" value="cancelada" class="btn btn-danger w-100">
+                    Cancelar transacción
+                </button>
+
+            <?php endif; ?>
+        </form>
+
+    <?php endif; ?>
+
+    <!-- BOTÓN INICIAR TRANSACCIÓN -->
+    <?php if ($esVendedor && !$transaccion): ?>
+        <form action="/MercApp/controllers/chat_start_transaction.php" method="POST" class="mb-3">
+            <input type="hidden" name="chat_id" value="<?= $chatId ?>">
+            <button class="btn btn-success w-100">
+                Iniciar transacción
+            </button>
+        </form>
+    <?php endif; ?>
+
+    <!-- CHAT -->
+    <div class="card mb-3 no-hover">
+        <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+            <?php foreach ($mensajes as $msg): ?>
+                <div class="mb-2 <?= $msg["usuario_id"] == $usuarioActual ? 'text-end' : 'text-start' ?>">
+
+                    <div class="small text-muted">
+                        <?= $msg["usuario_id"] === null ? "Sistema" : htmlspecialchars($msg["sender_name"]) ?>
+                        · <?= $msg["fecha_envio"] ?>
                     </div>
-                <?php endforeach; ?>
-            </div>
+
+                    <div class="d-inline-block px-3 py-2 rounded 
+                        <?= $msg["usuario_id"] == $usuarioActual ? 'bg-primary text-white' : 'bg-secondary text-white' ?>">
+                        <?= nl2br(htmlspecialchars($msg["contenido"])) ?>
+                    </div>
+
+                    <?php if ($msg["usuario_id"] == $usuarioActual): ?>
+                        <div class="small text-muted mt-1">
+                            <?= $msg["leido"] ? "✓✓ Leído" : "✓ Enviado" ?>
+                        </div>
+                    <?php endif; ?>
+
+                </div>
+            <?php endforeach; ?>
         </div>
+    </div>
+
+    <!-- BLOQUEO DEL CHAT -->
+    <?php if ($transaccion && in_array($transaccion["estado"], ["entregado", "cancelada"])): ?>
+
+        <div class="alert alert-secondary text-center">
+            La transacción ha finalizado. Este chat está cerrado.
+        </div>
+
+    <?php else: ?>
 
         <form method="POST" class="d-flex gap-2">
             <textarea name="mensaje" class="form-control" rows="2" placeholder="Escribe un mensaje..."></textarea>
             <button class="btn btn-primary">Enviar</button>
         </form>
-    </div>
-    <!-- Volver al producto -->
+
+    <?php endif; ?>
+
     <div class="mt-3">
         <a href="detail_product.php?id=<?= $chat["producto_id"] ?>" class="btn btn-outline-secondary">
             Volver al producto
         </a>
     </div>
 
+</div>
 
-    <!-- footer de la pagina -->
-    <footer>
-        <?php include __DIR__ . '/footer.php'; ?>
-    </footer>
+<footer>
+    <?php include __DIR__ . '/footer.php'; ?>
+</footer>
 
 </body>
-
 </html>

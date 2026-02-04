@@ -33,7 +33,7 @@ if (!$producto) {
 $vendedorId = intval($producto["usuario_id"]);
 
 if ($vendedorId === $usuarioActual) {
-    header("Location: ../views/profile.php?id=" . $usuarioActual);
+    header("Location: ../public/views/profile.php?id=" . $usuarioActual);
     exit;
 }
 

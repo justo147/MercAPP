@@ -145,4 +145,63 @@ class Transaction
         $stmt = $this->conn->prepare($sql);
         return $stmt->execute([':id' => $id]);
     }
+
+
+    public function getActiveTransactionByProduct($productoId)
+{
+    $sql = "SELECT * FROM transacciones
+            WHERE producto_id = :producto_id
+            AND estado IN ('pendiente', 'aceptada')
+            ORDER BY id DESC
+            LIMIT 1";
+
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute([':producto_id' => $productoId]);
+
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+public function createFromChat($productoId, $compradorId, $vendedorId)
+{
+    $sql = "INSERT INTO transacciones 
+            (producto_id, comprador_id, vendedor_id, tipo, estado, fecha_transaccion)
+            VALUES 
+            (:producto_id, :comprador_id, :vendedor_id, 'venta', 'pendiente', NOW())";
+
+    $stmt = $this->conn->prepare($sql);
+
+    $stmt->execute([
+        ':producto_id'  => $productoId,
+        ':comprador_id' => $compradorId,
+        ':vendedor_id'  => $vendedorId
+    ]);
+
+    return $this->conn->lastInsertId();
+}
+
+public function getById($id)
+{
+    $sql = "SELECT * FROM transacciones WHERE id = :id LIMIT 1";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute([':id' => $id]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+
+public function getLastTransactionByProduct($productoId)
+{
+    $sql = "SELECT * FROM transacciones
+            WHERE producto_id = :producto_id
+            ORDER BY id DESC
+            LIMIT 1";
+
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute([':producto_id' => $productoId]);
+
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+
+
+
 }

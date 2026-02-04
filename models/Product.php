@@ -608,4 +608,54 @@ class Product
             ":id" => $imageId
         ]);
     }
+
+
+    /**
+     * Cambia el estado de publicación de un producto.
+     */
+   /**
+ * Cambia el estado de publicación del producto.
+ */
+public function cambiarEstadoPublicacion(int $productoId, string $estadoNombre): bool
+{
+    // Obtener ID del estado por nombre
+    $sql = "UPDATE Productos 
+            SET estado_publicacion_id = (
+                SELECT id FROM EstadoPublicacion WHERE nombre = :estado
+            )
+            WHERE id = :id";
+
+    $stmt = $this->conn->prepare($sql);
+
+    return $stmt->execute([
+        ':estado' => $estadoNombre,
+        ':id'     => $productoId
+    ]);
+}
+
+/**
+ * Poner producto en estado 'pausado' (reservado).
+ */
+public function reservarProducto(int $productoId): bool
+{
+    return $this->cambiarEstadoPublicacion($productoId, 'pausado');
+}
+
+
+    /**
+     * Marca la publicación como vendida.
+     */
+    public function marcarComoVendido(int $productoId): bool
+    {
+        return $this->cambiarEstadoPublicacion($productoId, 'vendido');
+    }
+
+    /**
+     * Reactiva la publicación (por ejemplo, si se cancela la transacción).
+     */
+    public function reactivarPublicacion(int $productoId): bool
+    {
+        return $this->cambiarEstadoPublicacion($productoId, 'activo');
+    }
+
 }
