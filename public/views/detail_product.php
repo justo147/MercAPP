@@ -56,7 +56,8 @@ if (!$producto) {
             <div class="product-gallery">
 
                 <?php if (!empty($producto['imagenes'])): ?>
-                    <img src="/MercApp/<?= htmlspecialchars($producto['imagenes'][0]['url']) ?>" class="main-img" alt="Imagen del producto">
+                    <img src="/MercApp/<?= htmlspecialchars($producto['imagenes'][0]['url']) ?>" class="main-img"
+                        alt="Imagen del producto">
                 <?php else: ?>
                     <img src="/MercApp/public/img/default.jpg" class="main-img" alt="Imagen por defecto">
                 <?php endif; ?>
@@ -85,10 +86,11 @@ if (!$producto) {
                     <?php endif; ?>
                 </div>
 
-                <form method="post" action="cart.php">
-                    <input type="hidden" name="product_id" value="<?= $producto['id'] ?>">
-                    <button type="submit" class="buy-button">Comprar</button>
-                </form>
+
+                <a href="/MercApp/controllers/chat_start.php?producto_id=<?= $producto["id"] ?>"
+                    class="btn btn-primary d-flex align-items-center justify-content-center gap-2 py-2 px-4 shadow-sm">
+                    <i class="bi bi-chat-dots"></i> <span>Contactar con el vendedor</span>
+                </a>
 
                 <div class="chat-button">
                     <a href="/MercApp/controllers/chat_start.php?producto_id=<?= $producto["id"] ?>">

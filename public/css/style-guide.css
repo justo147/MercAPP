@@ -184,6 +184,24 @@ span {
 /* ------------------------------
    BOTONES
 --------------------------------*/
+/* Asegura que el botón use tus colores de marca */
+.btn-primary {
+    background-color: var(--color-primary) !important;
+    border-color: var(--color-primary) !important;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: var(--color-primary-dark) !important;
+    border-color: var(--color-primary-dark) !important;
+    transform: translateY(-2px); /* Efecto de elevación */
+}
+
+/* En modo oscuro, podemos darle un toque sutil para que resalte */
+body.dark-mode .btn-primary {
+    box-shadow: 0 4px 15px rgba(3, 128, 101, 0.3);
+}
+
 .button-primary {
   background-color: var(--color-primary);
   color: #fff;
