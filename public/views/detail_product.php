@@ -1,103 +1,75 @@
 <?php
-// Cargar configuración de base de datos y el modelo Product
 require_once __DIR__ . '/../../config/db.php';
 require_once __DIR__ . '/../../models/Product.php';
 
-// Crear instancia de la base de datos y obtener conexión PDO
 $db = new Database();
 $conn = $db->getConnection();
 
-// Obtener el ID del producto desde la URL (GET)
-$productId = 0;
+$productId = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
-if (isset($_GET['id'])) {
-    $productId = (int) $_GET['id'];
-}
-
-// Validar que el ID sea correcto
 if ($productId <= 0) {
     echo "Producto no válido.";
     exit;
 }
 
-// Crear instancia del modelo Product
 $productModel = new Product($conn);
-
-// Obtener los datos del producto por ID
 $producto = $productModel->getById($productId);
 
-// Si no existe el producto, mostrar mensaje y detener ejecución
 if (!$producto) {
     echo "Producto no encontrado.";
     exit;
 }
 ?>
 
-
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title><?= htmlspecialchars($producto['titulo']) ?></title>
 
-    <!-- Favicon -->
-    <link rel="icon" href="../ico/logo_sinfondo.ico" type="image/x-icon">
-    <link rel="shortcut icon" href="../ico/logo_sinfondo.ico" type="image/x-icon">
-
-    <!-- CSS -->
-    <link rel="stylesheet" href="../css/reset.css">
-    <link rel="stylesheet" href="../css/detail_product.css">
-    <link rel="stylesheet" href="../css/style-guide.css">
-
-
-    <!-- Bootstrap -->
+    <link rel="icon" href="../ico/logo_sinfondo.ico">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
 
-    <!-- Icons -->
+    <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" href="../css/style-guide.css">
+    <link rel="stylesheet" href="../css/detail_product.css">
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
-    <link href="../css/style-guide.css" rel="stylesheet">
 </head>
 
 <body>
+
     <?php
     $showSearch = true;
     include("navbar.php");
     ?>
 
     <main>
-     <div class="product-gallery">
+        <div class="product-detail">
 
-    <?php if (!empty($producto['imagenes'])): ?>
-        <!-- 
-            Si el producto tiene imágenes, se muestra la primera como imagen principal.
-            htmlspecialchars() evita que una URL maliciosa pueda romper el HTML o ejecutar código.
-        -->
-        <img src="/MercApp/<?= htmlspecialchars($producto['imagenes'][0]['url']) ?>" class="main-img">
-    <?php else: ?>
-        <!-- 
-            Si el producto NO tiene imágenes, se muestra una imagen por defecto.
-            Esto evita errores visuales y mantiene la estructura de la página.
-        -->
-        <img src="/MercApp/public/img/default.jpg" class="main-img">
-    <?php endif; ?>
+            <!-- GALERÍA -->
+            <div class="product-gallery">
 
-    <div class="thumbs">
-        <?php foreach ($producto['imagenes'] as $img): ?>
-            <!-- 
-                Se recorren todas las imágenes del producto y se muestran como miniaturas.
-                Estas miniaturas suelen servir para cambiar la imagen principal al hacer clic.
-                htmlspecialchars() protege la URL de cada miniatura.
-            -->
-            <img src="/MercApp/<?= htmlspecialchars($img['url']) ?>" class="thumb">
-        <?php endforeach; ?>
-    </div>
+                <?php if (!empty($producto['imagenes'])): ?>
+                    <img src="/MercApp/<?= htmlspecialchars($producto['imagenes'][0]['url']) ?>" class="main-img" alt="Imagen del producto">
+                <?php else: ?>
+                    <img src="/MercApp/public/img/default.jpg" class="main-img" alt="Imagen por defecto">
+                <?php endif; ?>
 
-</div>
+                <div class="thumbs">
+                    <?php foreach ($producto['imagenes'] as $img): ?>
+                        <img src="/MercApp/<?= htmlspecialchars($img['url']) ?>" class="thumb" alt="Miniatura">
+                    <?php endforeach; ?>
+                </div>
 
+            </div>
 
-            <!-- Información a la derecha -->
+            <!-- INFORMACIÓN -->
             <div class="product-info">
                 <h1><?= htmlspecialchars($producto['titulo']) ?></h1>
                 <p class="product-location">Ubicación: <?= htmlspecialchars($producto['ubicacion']) ?></p>
@@ -130,15 +102,18 @@ if (!$producto) {
                 </div>
             </div>
 
-            <!-- Descripción abajo -->
+            <!-- DESCRIPCIÓN -->
             <p class="description">
                 <?= nl2br(htmlspecialchars($producto['descripcion'])) ?>
             </p>
+
         </div>
     </main>
 
     <footer>
         <?php include __DIR__ . '/footer.php'; ?>
     </footer>
+
 </body>
+
 </html>

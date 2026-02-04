@@ -1,4 +1,10 @@
 /**
+ * @typedef {Object} ExistingImage
+ * @property {string} url - URL de la imagen existente.
+ * @property {number} orden - Orden asignado a la imagen.
+ */
+
+/**
  * Lista de nuevas imágenes seleccionadas por el usuario.
  * @type {File[]}
  */
@@ -6,7 +12,7 @@ let selectedFiles = [];
 
 /**
  * Lista de imágenes ya existentes cargadas desde el servidor.
- * @type {{url: string, orden: number}[]}
+ * @type {ExistingImage[]}
  */
 let existingImages = [];
 
@@ -40,7 +46,7 @@ const ordenInput = document.getElementById("ordenImagenes");
 document.querySelectorAll(".img-actual").forEach(img => {
     existingImages.push({
         url: img.dataset.url,
-        orden: parseInt(img.dataset.orden)
+        orden: Number(img.dataset.orden)
     });
 });
 
@@ -53,6 +59,8 @@ document.querySelectorAll(".img-actual").forEach(img => {
  * Evento que se ejecuta cuando el usuario selecciona nuevas imágenes.
  * Agrega los archivos seleccionados a `selectedFiles`, renderiza la vista previa
  * y reconstruye la lista interna de archivos.
+ * 
+ * @param {Event} e - Evento change del input file.
  */
 input.addEventListener("change", function(e) {
     const files = Array.from(e.target.files);
@@ -77,7 +85,7 @@ function renderGrid() {
     selectedFiles.forEach((file, index) => {
         const col = document.createElement("div");
         col.className = "col-4";
-        col.dataset.index = index;
+        col.dataset.index = String(index);
 
         const reader = new FileReader();
 
@@ -107,6 +115,7 @@ function renderGrid() {
 
 /**
  * Elimina una imagen seleccionada según su índice.
+ * 
  * @param {number} index - Índice de la imagen a eliminar.
  */
 function removeImage(index) {
@@ -125,7 +134,7 @@ function removeImage(index) {
  */
 function updateOrder() {
     const items = Array.from(grid.children);
-    const order = items.map(col => col.dataset.index);
+    const order = items.map(col => Number(col.dataset.index));
     ordenInput.value = order.join(",");
 }
 
@@ -151,7 +160,9 @@ new Sortable(grid, {
 
         selectedFiles = newOrder;
 
-        items.forEach((col, idx) => col.dataset.index = idx);
+        items.forEach((col, idx) => {
+            col.dataset.index = String(idx);
+        });
 
         updateOrder();
         rebuildFileList();
