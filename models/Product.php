@@ -607,5 +607,66 @@ class Product
             ":orden" => $orden,
             ":id" => $imageId
         ]);
+    }public function getRandomProducts(int $limit = 10, int $excludeId = 0): array
+{
+    // -------------------------------------------------------------
+    // 1. Construcción de la consulta base
+    // -------------------------------------------------------------
+    // Selecciona productos que estén publicados (estado_publicacion_id = 1)
+    // Esto evita mostrar productos pausados o vendidos.
+    $sql = "SELECT *
+            FROM Productos
+            WHERE estado_publicacion_id = 1";
+
+    // -------------------------------------------------------------
+    // 2. Exclusión opcional del producto actual
+    // -------------------------------------------------------------
+    // Si se pasa un ID para excluir, se añade a la consulta.
+    // Esto evita que el producto que se está viendo aparezca en sugeridos.
+    if ($excludeId > 0) {
+        $sql .= " AND id != :excludeId";
     }
+
+    // -------------------------------------------------------------
+    // 3. Orden aleatorio y límite de resultados
+    // -------------------------------------------------------------
+    // ORDER BY RAND() genera productos aleatorios.
+    // LIMIT controla cuántos productos se devuelven.
+    $sql .= " ORDER BY RAND() LIMIT :lim";
+
+    // Se prepara la consulta
+    $stmt = $this->conn->prepare($sql);
+
+    // -------------------------------------------------------------
+    // 4. Enlace de parámetros seguros
+    // -------------------------------------------------------------
+    // Se enlaza el ID a excluir si corresponde
+    if ($excludeId > 0) {
+        $stmt->bindValue(":excludeId", $excludeId, PDO::PARAM_INT);
+    }
+
+    // Se enlaza el límite de productos a devolver
+    $stmt->bindValue(":lim", $limit, PDO::PARAM_INT);
+
+    // -------------------------------------------------------------
+    // 5. Ejecución de la consulta
+    // -------------------------------------------------------------
+    $stmt->execute();
+
+    // -------------------------------------------------------------
+    // 6. Obtención de los productos como array asociativo
+    // -------------------------------------------------------------
+    $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // -------------------------------------------------------------
+    // 7. Adjuntar imágenes a cada producto
+    // -------------------------------------------------------------
+    // attachImages() es un método del modelo que añade las imágenes
+    // correspondientes a cada producto antes de devolverlos.
+    return $this->attachImages($productos);
 }
+
+
+
+}
+
