@@ -56,6 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
   /**
    * Carga los productos del usuario desde la API, aplicando paginación
    * y búsqueda. Renderiza tarjetas, carruseles y controles de paginación.
+   * @returns {void}
    */
   function cargarProductos() {
 
@@ -80,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         /**
          * Lista de productos devueltos por la API.
-         * @type {Array<Object>}
+         * @type {Object[]}
          */
         const productos = data.productos || [];
 
@@ -112,8 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
           /**
            * Lista de imágenes del producto.
-           * Si no tiene, se usa una imagen por defecto.
-           * @type {{url: string}[]}
+           * @type {Array<{url: string}>}
            */
           const imagenes = prod.imagenes?.length
             ? prod.imagenes
@@ -252,6 +252,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /**
    * Evento que filtra los productos del usuario según el texto introducido.
+   * @param {Event} e
    */
   buscador?.addEventListener("input", e => {
     searchQueryPerfil = e.target.value.trim();
