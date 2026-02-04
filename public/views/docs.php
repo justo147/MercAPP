@@ -39,19 +39,19 @@
 
 <h1 id="centro-ayuda">Documentación técnica</h1>
 
-<p class="d-flex justify-content-center">
+<p class="d-flex justify-content-center" title="Breve descripción">
   Esta vista reúne la documentación técnica completa del proyecto,
   permitiendo un acceso rápido y centralizado a todos los detalles relevantes.
 </p>
 
-<h2 class="d-flex justify-content-center">Lenguajes</h2>
+<h2 class="d-flex justify-content-center fs-4" title="Lenguajes documentados">Lenguajes</h2>
 
 <ul class="nav nav-tabs justify-content-center gap-3" id="docTabs">
   <li class="nav-item">
-    <button class="nav-link active" data-doc="php">PHP</button>
+    <button class="nav-link active" data-doc="php" title="PHP">Documentación PHPDoc</button>
   </li>
   <li class="nav-item">
-    <button class="nav-link" data-doc="js">JavaScript</button>
+    <button class="nav-link" data-doc="js" title="JavaScript">Documentación JSDoc</button>
   </li>
 </ul>
 
