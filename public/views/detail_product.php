@@ -119,7 +119,7 @@ if (!$producto) {
                 </form>
 
                 <div class="chat-button">
-                    <a href="../chat/iniciar.php?producto=<?= $producto['id'] ?>">
+                    <a href="/MercApp/controllers/chat_start.php?producto_id=<?= $producto["id"] ?>">
                         ¿Tienes dudas? Chatea con el vendedor
                     </a>
                 </div>

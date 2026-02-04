@@ -5,10 +5,16 @@
  * Redirige a login si no hay sesión activa
  */
 session_start();
+//si no esta iniciada la session
 if (!isset($_SESSION["user_id"])) {
   header("location:auth/login.php");
 }
+
 $perfilId = intval($_GET["id"] ?? 0);
+//si la url no tiene parametro id
+if ($perfilId == 0) {
+  header("location:auth/login.php");
+}
 $usuarioLogueado = $_SESSION["user_id"];
 
 $esPropietario = ($perfilId === $usuarioLogueado);
@@ -36,9 +42,11 @@ $esPropietario = ($perfilId === $usuarioLogueado);
   <link rel="stylesheet" href="../css/reset.css">
   <link rel="stylesheet" href="../css/style-guide.css">
   <link rel="stylesheet" href="../css/homeStyle.css">
-
-  <!-- JS de tema -->
-  <script src="../js/theme.js" defer></script>
+  <style>
+    #badge-mensajes {
+      transition: opacity 0.2s ease;
+    }
+  </style>
 </head>
 
 <body>
@@ -78,7 +86,7 @@ $esPropietario = ($perfilId === $usuarioLogueado);
                     $user = $stmt->fetch(PDO::FETCH_ASSOC);
                     //Si usuario no existe mostrar pagina error
                     if (!$user) {
-                ?>
+                      ?>
                       <div class="container text-center mt-5">
                         <h1 class="display-5 fw-bold text-danger">Usuario no encontrado</h1>
                         <p class="lead">El perfil que intentas ver no existe o ha sido eliminado.</p>
@@ -86,7 +94,7 @@ $esPropietario = ($perfilId === $usuarioLogueado);
                           Volver al inicio
                         </a>
                       </div>
-                <?php
+                      <?php
                       exit;
                     }
                   } catch (PDOException $e) {
@@ -139,12 +147,13 @@ $esPropietario = ($perfilId === $usuarioLogueado);
 
                 <!-- Botones de acción -->
                 <div class="d-flex">
-                  <button type="button" class="btn btn-outline-primary me-1 flex-grow-1 position-relative">
+                  <a href="/MercApp/public/views/chat_list.php"
+                    class="btn btn-outline-primary me-1 flex-grow-1 position-relative">
                     Message
-                    <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger">
-                      10
+                    <span id="badge-mensajes"
+                      class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger">
                     </span>
-                  </button>
+                  </a>
 
                   <?php
                   // Mostrar botón Follow si no es el propio perfil

@@ -39,16 +39,20 @@ class Chat
      */
     public function getById(int $chatId)
     {
-        $sql = "SELECT c.*, p.titulo AS producto_titulo
-                FROM Chat c
-                LEFT JOIN Productos p ON c.producto_id = p.id
-                WHERE c.id = :id";
+        $sql = "SELECT c.*, 
+                   p.titulo AS producto_titulo,
+                   img.url AS producto_imagen
+            FROM Chat c
+            LEFT JOIN Productos p ON c.producto_id = p.id
+            LEFT JOIN Imagenes_prod img ON img.id_producto = p.id AND img.orden = 1
+            WHERE c.id = :id";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->execute([":id" => $chatId]);
 
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
 
     /* -----------------------------------------
        Obtener chat existente entre comprador y vendedor
@@ -162,4 +166,63 @@ class Chat
 
         return $stmt->fetchColumn() > 0;
     }
+
+
+    /**
+ * Obtiene todos los chats activos en los que participa un usuario.
+ *
+ * Incluye:
+ * - título del producto
+ * - primera imagen del producto
+ * - último mensaje
+ * - número de mensajes sin leer
+ */
+public function getChatsByUser(int $userId)
+{
+    $sql = "
+        SELECT 
+            c.id AS chat_id,
+            c.producto_id,
+            p.titulo AS producto_titulo,
+            img.url AS producto_imagen,
+
+            -- Último mensaje
+            (
+                SELECT contenido 
+                FROM Mensajes 
+                WHERE chat_id = c.id 
+                ORDER BY fecha_envio DESC 
+                LIMIT 1
+            ) AS ultimo_mensaje,
+
+            (
+                SELECT fecha_envio 
+                FROM Mensajes 
+                WHERE chat_id = c.id 
+                ORDER BY fecha_envio DESC 
+                LIMIT 1
+            ) AS fecha_ultimo_mensaje,
+
+            -- Mensajes sin leer
+            (
+                SELECT COUNT(*) 
+                FROM Mensajes 
+                WHERE chat_id = c.id 
+                AND usuario_id != :uid 
+                AND leido = 0
+            ) AS no_leidos
+
+        FROM Chat c
+        JOIN Productos p ON c.producto_id = p.id
+        LEFT JOIN Imagenes_prod img ON img.id_producto = p.id AND img.orden = 1
+        WHERE c.usuario_comprador = :uid OR c.usuario_vendedor = :uid
+        ORDER BY fecha_ultimo_mensaje DESC
+    ";
+
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute([":uid" => $userId]);
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 }
