@@ -73,7 +73,7 @@ if (!$producto) {
             <!-- INFORMACIÓN -->
             <div class="product-info">
                 <h1><?= htmlspecialchars($producto['titulo']) ?></h1>
-                <p class="product-location">Ubicación: <?= htmlspecialchars($producto['ubicacion']) ?></p>
+                <h2 style="color:black" class="product-location">Ubicación: <?= htmlspecialchars($producto['ubicacion']) ?></h2>
 
                 <div class="price-block">
                     <span class="price-current"><?= number_format($producto['precio'], 2) ?> €</span>
@@ -112,9 +112,7 @@ if (!$producto) {
         </div>
     </main>
 
-    <footer>
-        <?php include __DIR__ . '/footer.php'; ?>
-    </footer>
+    <?php include __DIR__ . '/footer.php'; ?>
 
 </body>
 
