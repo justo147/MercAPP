@@ -129,7 +129,7 @@ CREATE TABLE Transacciones (
   comprador_id INT NOT NULL,
   vendedor_id INT NOT NULL,
   tipo ENUM('venta','intercambio','mixto') NOT NULL,
-  estado ENUM('pendiente','aceptada','completada','cancelada') DEFAULT 'pendiente',
+  estado ENUM('pendiente','aceptada','enviado','entregado','cancelada') DEFAULT 'pendiente',
   fecha_transaccion DATETIME DEFAULT CURRENT_TIMESTAMP,
   precio_final DECIMAL(10,2) DEFAULT 0.00, -- usado si venta o mixto
   dinero_extra DECIMAL(10,2) DEFAULT 0.00, -- diferencia aportada en mixto
@@ -232,7 +232,7 @@ CREATE TABLE Chat (
 CREATE TABLE Mensajes (
   id INT AUTO_INCREMENT PRIMARY KEY,
   chat_id INT NOT NULL,
-  usuario_id INT NOT NULL,
+  usuario_id INT,
   contenido TEXT NOT NULL,
   fecha_envio DATETIME DEFAULT CURRENT_TIMESTAMP,
   leido BOOLEAN DEFAULT FALSE,

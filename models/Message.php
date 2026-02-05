@@ -131,6 +131,26 @@ public function countAllUnread(int $userId)
     return $stmt->fetchColumn();
 }
 
+/**
+ * Envía un mensaje automático del sistema al chat.
+ *
+ * @param int $chatId
+ * @param string $texto
+ * @return bool
+ */
+public function enviarMensajeSistema(int $chatId, string $texto): bool
+{
+    $sql = "INSERT INTO Mensajes (chat_id, usuario_id, contenido, leido)
+            VALUES (:chat, NULL, :contenido, 0)";
+
+    $stmt = $this->conn->prepare($sql);
+
+    return $stmt->execute([
+        ':chat' => $chatId,
+        ':contenido' => '[SISTEMA] ' . $texto
+    ]);
+}
+
 
 
 }
