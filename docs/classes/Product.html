@@ -57,6 +57,10 @@
                     <section class="phpdocumentor-sidebar__category -packages">
             <h2 class="phpdocumentor-sidebar__category-header">Packages</h2>
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="packages/Application.html" class="">Application</a>
+</h4>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="packages/MercApp.html" class="">MercApp</a>
 </h4>
     <ul class="phpdocumentor-list">
@@ -65,10 +69,6 @@
                 
             </li>
             </ul>
-
-                                    <h4 class="phpdocumentor-sidebar__root-namespace">
-    <a href="packages/Application.html" class="">Application</a>
-</h4>
 
                         </section>
             
@@ -178,6 +178,13 @@
 <dd>Constructor del modelo.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Product.html#method_cambiarEstadoPublicacion">cambiarEstadoPublicacion()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>Cambia el estado de publicación del producto.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Product.html#method_countByUser">countByUser()</a>
     <span>
                                 &nbsp;: int    </span>
@@ -253,11 +260,38 @@
 <dd>Obtiene productos paginados para la página principal.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Product.html#method_getRandomProducts">getRandomProducts()</a>
+    <span>
+                                &nbsp;: array&lt;string|int, mixed&gt;    </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Product.html#method_insertImage">insertImage()</a>
     <span>
                                 &nbsp;: bool    </span>
 </dt>
 <dd>Inserta una nueva imagen asociada a un producto.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Product.html#method_marcarComoVendido">marcarComoVendido()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>Marca la publicación como vendida.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Product.html#method_reactivarPublicacion">reactivarPublicacion()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>Reactiva la publicación (por ejemplo, si se cancela la transacción).</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Product.html#method_reservarProducto">reservarProducto()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>Poner producto en estado &#039;pausado&#039; (reservado).</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Product.html#method_search">search()</a>
@@ -407,6 +441,62 @@
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_cambiarEstadoPublicacion">
+        cambiarEstadoPublicacion()
+        <a href="classes/Product.html#method_cambiarEstadoPublicacion" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="models/Product.php"><a href="files/models-product.html"><abbr title="models/Product.php">Product.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">684</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Cambia el estado de publicación del producto.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">cambiarEstadoPublicacion</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$productoId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$estadoNombre</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$productoId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$estadoNombre</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">bool</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_countByUser">
         countByUser()
         <a href="classes/Product.html#method_countByUser" class="headerlink"><i class="fas fa-link"></i></a>
@@ -415,7 +505,7 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="models/Product.php"><a href="files/models-product.html"><abbr title="models/Product.php">Product.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">365</span>
+    <span class="phpdocumentor-element-found-in__line">373</span>
 
     </aside>
 
@@ -479,7 +569,7 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="models/Product.php"><a href="files/models-product.html"><abbr title="models/Product.php">Product.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">210</span>
+    <span class="phpdocumentor-element-found-in__line">218</span>
 
     </aside>
 
@@ -534,7 +624,7 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="models/Product.php"><a href="files/models-product.html"><abbr title="models/Product.php">Product.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">292</span>
+    <span class="phpdocumentor-element-found-in__line">300</span>
 
     </aside>
 
@@ -589,7 +679,7 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="models/Product.php"><a href="files/models-product.html"><abbr title="models/Product.php">Product.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">568</span>
+    <span class="phpdocumentor-element-found-in__line">576</span>
 
     </aside>
 
@@ -655,7 +745,7 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="models/Product.php"><a href="files/models-product.html"><abbr title="models/Product.php">Product.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">308</span>
+    <span class="phpdocumentor-element-found-in__line">316</span>
 
     </aside>
 
@@ -713,7 +803,7 @@ No es testeable unitariamente sin mocks de filesystem.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="models/Product.php"><a href="files/models-product.html"><abbr title="models/Product.php">Product.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">110</span>
+    <span class="phpdocumentor-element-found-in__line">118</span>
 
     </aside>
 
@@ -773,7 +863,7 @@ No es testeable unitariamente sin mocks de filesystem.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="models/Product.php"><a href="files/models-product.html"><abbr title="models/Product.php">Product.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">152</span>
+    <span class="phpdocumentor-element-found-in__line">160</span>
 
     </aside>
 
@@ -855,7 +945,7 @@ No es testeable unitariamente sin mocks de filesystem.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="models/Product.php"><a href="files/models-product.html"><abbr title="models/Product.php">Product.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">81</span>
+    <span class="phpdocumentor-element-found-in__line">89</span>
 
     </aside>
 
@@ -910,7 +1000,7 @@ No es testeable unitariamente sin mocks de filesystem.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="models/Product.php"><a href="files/models-product.html"><abbr title="models/Product.php">Product.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">516</span>
+    <span class="phpdocumentor-element-found-in__line">524</span>
 
     </aside>
 
@@ -973,7 +1063,7 @@ No es testeable unitariamente sin mocks de filesystem.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">getPaginated</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$limit</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$offset</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;</span></code>
+                    <span class="phpdocumentor-signature__name">getPaginated</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$limit</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$offset</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$userId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -1006,6 +1096,13 @@ No es testeable unitariamente sin mocks de filesystem.</p>
 </section>
 
             </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$userId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">mixed</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
             </dl>
 
     
@@ -1028,6 +1125,61 @@ No es testeable unitariamente sin mocks de filesystem.</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_getRandomProducts">
+        getRandomProducts()
+        <a href="classes/Product.html#method_getRandomProducts" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="models/Product.php"><a href="files/models-product.html"><abbr title="models/Product.php">Product.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">611</span>
+
+    </aside>
+
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">getRandomProducts</span><span>(</span><span class="phpdocumentor-signature__argument"><span>[</span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$limit</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">10</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$excludeId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">0</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$limit</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">10</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$excludeId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">0</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_insertImage">
         insertImage()
         <a href="classes/Product.html#method_insertImage" class="headerlink"><i class="fas fa-link"></i></a>
@@ -1036,7 +1188,7 @@ No es testeable unitariamente sin mocks de filesystem.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="models/Product.php"><a href="files/models-product.html"><abbr title="models/Product.php">Product.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">542</span>
+    <span class="phpdocumentor-element-found-in__line">550</span>
 
     </aside>
 
@@ -1101,6 +1253,153 @@ No es testeable unitariamente sin mocks de filesystem.</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_marcarComoVendido">
+        marcarComoVendido()
+        <a href="classes/Product.html#method_marcarComoVendido" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="models/Product.php"><a href="files/models-product.html"><abbr title="models/Product.php">Product.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">713</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Marca la publicación como vendida.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">marcarComoVendido</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$productoId</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$productoId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">bool</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_reactivarPublicacion">
+        reactivarPublicacion()
+        <a href="classes/Product.html#method_reactivarPublicacion" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="models/Product.php"><a href="files/models-product.html"><abbr title="models/Product.php">Product.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">721</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Reactiva la publicación (por ejemplo, si se cancela la transacción).</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">reactivarPublicacion</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$productoId</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$productoId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">bool</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_reservarProducto">
+        reservarProducto()
+        <a href="classes/Product.html#method_reservarProducto" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="models/Product.php"><a href="files/models-product.html"><abbr title="models/Product.php">Product.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">704</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Poner producto en estado &#039;pausado&#039; (reservado).</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">reservarProducto</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$productoId</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$productoId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">bool</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_search">
         search()
         <a href="classes/Product.html#method_search" class="headerlink"><i class="fas fa-link"></i></a>
@@ -1109,7 +1408,7 @@ No es testeable unitariamente sin mocks de filesystem.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="models/Product.php"><a href="files/models-product.html"><abbr title="models/Product.php">Product.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">409</span>
+    <span class="phpdocumentor-element-found-in__line">417</span>
 
     </aside>
 
@@ -1172,7 +1471,7 @@ No es testeable unitariamente sin mocks de filesystem.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="models/Product.php"><a href="files/models-product.html"><abbr title="models/Product.php">Product.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">249</span>
+    <span class="phpdocumentor-element-found-in__line">257</span>
 
     </aside>
 
@@ -1236,7 +1535,7 @@ No es testeable unitariamente sin mocks de filesystem.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="models/Product.php"><a href="files/models-product.html"><abbr title="models/Product.php">Product.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">591</span>
+    <span class="phpdocumentor-element-found-in__line">599</span>
 
     </aside>
 
@@ -1300,7 +1599,7 @@ No es testeable unitariamente sin mocks de filesystem.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="models/Product.php"><a href="files/models-product.html"><abbr title="models/Product.php">Product.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">346</span>
+    <span class="phpdocumentor-element-found-in__line">354</span>
 
     </aside>
 
@@ -1464,6 +1763,7 @@ No es testeable unitariamente sin mocks de filesystem.</p>
             <li>
                 <ul class="phpdocumentor-list -clean">
                                             <li class=""><a href="classes/Product.html#method___construct">__construct()</a></li>
+                                            <li class=""><a href="classes/Product.html#method_cambiarEstadoPublicacion">cambiarEstadoPublicacion()</a></li>
                                             <li class=""><a href="classes/Product.html#method_countByUser">countByUser()</a></li>
                                             <li class=""><a href="classes/Product.html#method_create">create()</a></li>
                                             <li class=""><a href="classes/Product.html#method_delete">delete()</a></li>
@@ -1474,7 +1774,11 @@ No es testeable unitariamente sin mocks de filesystem.</p>
                                             <li class=""><a href="classes/Product.html#method_getImages">getImages()</a></li>
                                             <li class=""><a href="classes/Product.html#method_getImagesByProduct">getImagesByProduct()</a></li>
                                             <li class=""><a href="classes/Product.html#method_getPaginated">getPaginated()</a></li>
+                                            <li class=""><a href="classes/Product.html#method_getRandomProducts">getRandomProducts()</a></li>
                                             <li class=""><a href="classes/Product.html#method_insertImage">insertImage()</a></li>
+                                            <li class=""><a href="classes/Product.html#method_marcarComoVendido">marcarComoVendido()</a></li>
+                                            <li class=""><a href="classes/Product.html#method_reactivarPublicacion">reactivarPublicacion()</a></li>
+                                            <li class=""><a href="classes/Product.html#method_reservarProducto">reservarProducto()</a></li>
                                             <li class=""><a href="classes/Product.html#method_search">search()</a></li>
                                             <li class=""><a href="classes/Product.html#method_update">update()</a></li>
                                             <li class=""><a href="classes/Product.html#method_updateImageOrder">updateImageOrder()</a></li>

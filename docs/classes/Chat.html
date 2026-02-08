@@ -57,6 +57,10 @@
                     <section class="phpdocumentor-sidebar__category -packages">
             <h2 class="phpdocumentor-sidebar__category-header">Packages</h2>
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="packages/Application.html" class="">Application</a>
+</h4>
+
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="packages/MercApp.html" class="">MercApp</a>
 </h4>
     <ul class="phpdocumentor-list">
@@ -65,10 +69,6 @@
                 
             </li>
             </ul>
-
-                                    <h4 class="phpdocumentor-sidebar__root-namespace">
-    <a href="packages/Application.html" class="">Application</a>
-</h4>
 
                         </section>
             
@@ -184,6 +184,13 @@ entre comprador y vendedor dentro de la plataforma.</p>
                                 &nbsp;: array&lt;string|int, mixed&gt;|null    </span>
 </dt>
 <dd>Obtiene un chat por su ID.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Chat.html#method_getChatsByUser">getChatsByUser()</a>
+    <span>
+                                &nbsp;: mixed    </span>
+</dt>
+<dd>Obtiene todos los chats activos en los que participa un usuario.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Chat.html#method_getExistingChat">getExistingChat()</a>
@@ -327,7 +334,7 @@ para un producto concreto.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="models/Chat.php"><a href="files/models-chat.html"><abbr title="models/Chat.php">Chat.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">97</span>
+    <span class="phpdocumentor-element-found-in__line">101</span>
 
     </aside>
 
@@ -449,6 +456,59 @@ para un producto concreto.</dd>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_getChatsByUser">
+        getChatsByUser()
+        <a href="classes/Chat.html#method_getChatsByUser" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="models/Chat.php"><a href="files/models-chat.html"><abbr title="models/Chat.php">Chat.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">180</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Obtiene todos los chats activos en los que participa un usuario.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">getChatsByUser</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$userId</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>Incluye:</p>
+<ul>
+<li>título del producto</li>
+<li>primera imagen del producto</li>
+<li>último mensaje</li>
+<li>número de mensajes sin leer</li>
+</ul>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$userId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_getExistingChat">
         getExistingChat()
         <a href="classes/Chat.html#method_getExistingChat" class="headerlink"><i class="fas fa-link"></i></a>
@@ -457,7 +517,7 @@ para un producto concreto.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="models/Chat.php"><a href="files/models-chat.html"><abbr title="models/Chat.php">Chat.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">67</span>
+    <span class="phpdocumentor-element-found-in__line">71</span>
 
     </aside>
 
@@ -531,7 +591,7 @@ para un producto concreto.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="models/Chat.php"><a href="files/models-chat.html"><abbr title="models/Chat.php">Chat.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">127</span>
+    <span class="phpdocumentor-element-found-in__line">131</span>
 
     </aside>
 
@@ -607,7 +667,7 @@ siempre devuelve un único chat por producto y usuarios.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="models/Chat.php"><a href="files/models-chat.html"><abbr title="models/Chat.php">Chat.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">151</span>
+    <span class="phpdocumentor-element-found-in__line">155</span>
 
     </aside>
 
@@ -784,6 +844,7 @@ siempre devuelve un único chat por producto y usuarios.</p>
                                             <li class=""><a href="classes/Chat.html#method___construct">__construct()</a></li>
                                             <li class=""><a href="classes/Chat.html#method_create">create()</a></li>
                                             <li class=""><a href="classes/Chat.html#method_getById">getById()</a></li>
+                                            <li class=""><a href="classes/Chat.html#method_getChatsByUser">getChatsByUser()</a></li>
                                             <li class=""><a href="classes/Chat.html#method_getExistingChat">getExistingChat()</a></li>
                                             <li class=""><a href="classes/Chat.html#method_getOrCreate">getOrCreate()</a></li>
                                             <li class=""><a href="classes/Chat.html#method_userBelongsToChat">userBelongsToChat()</a></li>

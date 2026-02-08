@@ -93,7 +93,7 @@
 
     <article class="phpdocumentor-element -class">
         <h2 class="phpdocumentor-content__title">
-    Message
+    Notification
 
     
             <div class="phpdocumentor-element__package">
@@ -112,18 +112,14 @@
 </div>
 
         <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="models/Message.php"><a href="files/models-message.html"><abbr title="models/Message.php">Message.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="models/Notification.php"><a href="files/models-notification.html"><abbr title="models/Notification.php">Notification.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">9</span>
+    <span class="phpdocumentor-element-found-in__line">4</span>
 
     </aside>
 
-            <p class="phpdocumentor-summary">Modelo Message</p>
+        
 
-
-    <section class="phpdocumentor-description"><p>Gestiona los mensajes enviados dentro de un chat.
-Permite obtener todos los mensajes de un chat y enviar nuevos mensajes.</p>
-</section>
 
 
 
@@ -131,7 +127,7 @@ Permite obtener todos los mensajes de un chat y enviar nuevos mensajes.</p>
     
 <h3 id="toc">
     Table of Contents
-    <a href="classes/Message.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="classes/Notification.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h3>
 
@@ -145,12 +141,12 @@ Permite obtener todos los mensajes de un chat y enviar nuevos mensajes.</p>
 
 <h4 id="toc-properties">
     Properties
-    <a href="classes/Message.html#toc-properties" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="classes/Notification.html#toc-properties" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -property -private">
-    <a class="" href="classes/Message.html#property_conn">$conn</a>
+    <a class="" href="classes/Notification.html#property_conn">$conn</a>
     <span>
                         &nbsp;: <abbr title="\PDO">PDO</abbr>            </span>
 </dt>
@@ -160,56 +156,58 @@ Permite obtener todos los mensajes de un chat y enviar nuevos mensajes.</p>
 
 <h4 id="toc-methods">
     Methods
-    <a href="classes/Message.html#toc-methods" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="classes/Notification.html#toc-methods" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Message.html#method___construct">__construct()</a>
+    <a class="" href="classes/Notification.html#method___construct">__construct()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
 <dd>Constructor del modelo.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Message.html#method_countAllUnread">countAllUnread()</a>
-    <span>
-                                &nbsp;: int    </span>
-</dt>
-<dd>Cuenta todos los mensajes sin leer del usuario en todos sus chats.</dd>
-
-            <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Message.html#method_countUnread">countUnread()</a>
-    <span>
-                                &nbsp;: mixed    </span>
-</dt>
-
-            <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Message.html#method_enviarMensajeSistema">enviarMensajeSistema()</a>
+    <a class="" href="classes/Notification.html#method_create">create()</a>
     <span>
                                 &nbsp;: bool    </span>
 </dt>
-<dd>Envía un mensaje automático del sistema al chat.</dd>
+<dd>Crea una nueva notificación para un usuario.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Message.html#method_getByChat">getByChat()</a>
+    <a class="" href="classes/Notification.html#method_delete">delete()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>Elimina una notificación por ID.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Notification.html#method_getByUser">getByUser()</a>
     <span>
                                 &nbsp;: array&lt;string|int, mixed&gt;    </span>
 </dt>
-<dd>Obtiene todos los mensajes pertenecientes a un chat.</dd>
+<dd>Obtiene todas las notificaciones de un usuario.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Message.html#method_markAsRead">markAsRead()</a>
+    <a class="" href="classes/Notification.html#method_getUnread">getUnread()</a>
     <span>
-                                &nbsp;: mixed    </span>
+                                &nbsp;: array&lt;string|int, mixed&gt;    </span>
 </dt>
+<dd>Obtiene solo las notificaciones no leídas de un usuario.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Message.html#method_send">send()</a>
+    <a class="" href="classes/Notification.html#method_markAllAsRead">markAllAsRead()</a>
     <span>
                                 &nbsp;: bool    </span>
 </dt>
-<dd>Envía un mensaje dentro de un chat.</dd>
+<dd>Marca todas las notificaciones de un usuario como leídas.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Notification.html#method_markAsRead">markAsRead()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>Marca una notificación como leída.</dd>
 
     </dl>
 
@@ -221,7 +219,7 @@ Permite obtener todos los mensajes de un chat y enviar nuevos mensajes.</p>
     <section class="phpdocumentor-properties">
         <h3 class="phpdocumentor-elements__header" id="properties">
             Properties
-            <a href="classes/Message.html#properties" class="headerlink"><i class="fas fa-link"></i></a>
+            <a href="classes/Notification.html#properties" class="headerlink"><i class="fas fa-link"></i></a>
 
         </h3>
                     <article
@@ -233,15 +231,15 @@ Permite obtener todos los mensajes de un chat y enviar nuevos mensajes.</p>
 >
     <h4 class="phpdocumentor-element__name" id="property_conn">
         $conn
-        <a href="classes/Message.html#property_conn" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="classes/Notification.html#property_conn" class="headerlink"><i class="fas fa-link"></i></a>
 
         <span class="phpdocumentor-element__modifiers">
                                             </span>
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="models/Message.php"><a href="files/models-message.html"><abbr title="models/Message.php">Message.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="models/Notification.php"><a href="files/models-notification.html"><abbr title="models/Notification.php">Notification.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">16</span>
+    <span class="phpdocumentor-element-found-in__line">10</span>
 
     </aside>
 
@@ -267,7 +265,7 @@ Permite obtener todos los mensajes de un chat y enviar nuevos mensajes.</p>
             <section class="phpdocumentor-methods">
         <h3 class="phpdocumentor-elements__header" id="methods">
             Methods
-            <a href="classes/Message.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
+            <a href="classes/Notification.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
 
         </h3>
                     <article
@@ -278,13 +276,13 @@ Permite obtener todos los mensajes de un chat y enviar nuevos mensajes.</p>
 >
     <h4 class="phpdocumentor-element__name" id="method___construct">
         __construct()
-        <a href="classes/Message.html#method___construct" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="classes/Notification.html#method___construct" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="models/Message.php"><a href="files/models-message.html"><abbr title="models/Message.php">Message.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="models/Notification.php"><a href="files/models-notification.html"><abbr title="models/Notification.php">Notification.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">23</span>
+    <span class="phpdocumentor-element-found-in__line">17</span>
 
     </aside>
 
@@ -323,23 +321,23 @@ Permite obtener todos los mensajes de un chat y enviar nuevos mensajes.</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_countAllUnread">
-        countAllUnread()
-        <a href="classes/Message.html#method_countAllUnread" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_create">
+        create()
+        <a href="classes/Notification.html#method_create" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="models/Message.php"><a href="files/models-message.html"><abbr title="models/Message.php">Message.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="models/Notification.php"><a href="files/models-notification.html"><abbr title="models/Notification.php">Notification.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">119</span>
+    <span class="phpdocumentor-element-found-in__line">34</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Cuenta todos los mensajes sin leer del usuario en todos sus chats.</p>
+        <p class="phpdocumentor-summary">Crea una nueva notificación para un usuario.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">countAllUnread</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$userId</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int</span></code>
+                    <span class="phpdocumentor-signature__name">create</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$usuarioId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tipo</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$contenido</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -348,114 +346,21 @@ Permite obtener todos los mensajes de un chat y enviar nuevos mensajes.</p>
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$userId</span>
-                : <span class="phpdocumentor-argument-list__argument__type">int</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                
-            </dd>
-            </dl>
-
-    
-
-        
-    
-            <section>
-        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-        <span class="phpdocumentor-signature__response_type">int</span>
-            </section>
-
-</article>
-                    <article
-        class="phpdocumentor-element
-            -method
-            -public
-                                                        "
->
-    <h4 class="phpdocumentor-element__name" id="method_countUnread">
-        countUnread()
-        <a href="classes/Message.html#method_countUnread" class="headerlink"><i class="fas fa-link"></i></a>
-
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="models/Message.php"><a href="files/models-message.html"><abbr title="models/Message.php">Message.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">97</span>
-
-    </aside>
-
-    
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">countUnread</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$chatId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$userId</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
-
-    <div class="phpdocumentor-label-line">
-        </div>
-    
-    
-        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
-    <dl class="phpdocumentor-argument-list">
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$chatId</span>
+                <span class="phpdocumentor-argument-list__argument__name">$usuarioId</span>
                 : <span class="phpdocumentor-argument-list__argument__type">int</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                 
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$userId</span>
-                : <span class="phpdocumentor-argument-list__argument__type">int</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                
-            </dd>
-            </dl>
-
-    
-
-        
-    
-    
-</article>
-                    <article
-        class="phpdocumentor-element
-            -method
-            -public
-                                                        "
->
-    <h4 class="phpdocumentor-element__name" id="method_enviarMensajeSistema">
-        enviarMensajeSistema()
-        <a href="classes/Message.html#method_enviarMensajeSistema" class="headerlink"><i class="fas fa-link"></i></a>
-
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="models/Message.php"><a href="files/models-message.html"><abbr title="models/Message.php">Message.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">141</span>
-
-    </aside>
-
-        <p class="phpdocumentor-summary">Envía un mensaje automático del sistema al chat.</p>
-
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">enviarMensajeSistema</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$chatId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$texto</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
-
-    <div class="phpdocumentor-label-line">
-        </div>
-    
-    
-        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
-    <dl class="phpdocumentor-argument-list">
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$chatId</span>
-                : <span class="phpdocumentor-argument-list__argument__type">int</span>
+                <span class="phpdocumentor-argument-list__argument__name">$tipo</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                 
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$texto</span>
+                <span class="phpdocumentor-argument-list__argument__name">$contenido</span>
                 : <span class="phpdocumentor-argument-list__argument__type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
@@ -479,41 +384,85 @@ Permite obtener todos los mensajes de un chat y enviar nuevos mensajes.</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_getByChat">
-        getByChat()
-        <a href="classes/Message.html#method_getByChat" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_delete">
+        delete()
+        <a href="classes/Notification.html#method_delete" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="models/Message.php"><a href="files/models-message.html"><abbr title="models/Message.php">Message.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="models/Notification.php"><a href="files/models-notification.html"><abbr title="models/Notification.php">Notification.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">41</span>
+    <span class="phpdocumentor-element-found-in__line">130</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Obtiene todos los mensajes pertenecientes a un chat.</p>
+        <p class="phpdocumentor-summary">Elimina una notificación por ID.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">getByChat</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$chatId</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;</span></code>
+                    <span class="phpdocumentor-signature__name">delete</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$id</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p>Incluye el nombre del usuario que envía cada mensaje.
-Los mensajes se devuelven ordenados por fecha de envío.</p>
-</section>
-
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$chatId</span>
+                <span class="phpdocumentor-argument-list__argument__name">$id</span>
                 : <span class="phpdocumentor-argument-list__argument__type">int</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>ID del chat.</p>
-</section>
+                
+            </dd>
+            </dl>
 
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">bool</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_getByUser">
+        getByUser()
+        <a href="classes/Notification.html#method_getByUser" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="models/Notification.php"><a href="files/models-notification.html"><abbr title="models/Notification.php">Notification.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">58</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Obtiene todas las notificaciones de un usuario.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">getByUser</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$usuarioId</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$usuarioId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
             </dd>
             </dl>
 
@@ -524,10 +473,104 @@ Los mensajes se devuelven ordenados por fecha de envío.</p>
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;</span>
-                    &mdash;
-                <section class="phpdocumentor-description"><p>Lista de mensajes con información del remitente.</p>
-</section>
+            </section>
 
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_getUnread">
+        getUnread()
+        <a href="classes/Notification.html#method_getUnread" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="models/Notification.php"><a href="files/models-notification.html"><abbr title="models/Notification.php">Notification.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">76</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Obtiene solo las notificaciones no leídas de un usuario.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">getUnread</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$usuarioId</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$usuarioId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_markAllAsRead">
+        markAllAsRead()
+        <a href="classes/Notification.html#method_markAllAsRead" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="models/Notification.php"><a href="files/models-notification.html"><abbr title="models/Notification.php">Notification.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">112</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Marca todas las notificaciones de un usuario como leídas.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">markAllAsRead</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$usuarioId</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$usuarioId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">bool</span>
             </section>
 
 </article>
@@ -539,20 +582,21 @@ Los mensajes se devuelven ordenados por fecha de envío.</p>
 >
     <h4 class="phpdocumentor-element__name" id="method_markAsRead">
         markAsRead()
-        <a href="classes/Message.html#method_markAsRead" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="classes/Notification.html#method_markAsRead" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="models/Message.php"><a href="files/models-message.html"><abbr title="models/Message.php">Message.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="models/Notification.php"><a href="files/models-notification.html"><abbr title="models/Notification.php">Notification.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">82</span>
+    <span class="phpdocumentor-element-found-in__line">98</span>
 
     </aside>
 
-    
+        <p class="phpdocumentor-summary">Marca una notificación como leída.</p>
+
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">markAsRead</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$chatId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$userId</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">markAsRead</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$id</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -561,85 +605,11 @@ Los mensajes se devuelven ordenados por fecha de envío.</p>
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$chatId</span>
+                <span class="phpdocumentor-argument-list__argument__name">$id</span>
                 : <span class="phpdocumentor-argument-list__argument__type">int</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                 
-            </dd>
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$userId</span>
-                : <span class="phpdocumentor-argument-list__argument__type">int</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                
-            </dd>
-            </dl>
-
-    
-
-        
-    
-    
-</article>
-                    <article
-        class="phpdocumentor-element
-            -method
-            -public
-                                                        "
->
-    <h4 class="phpdocumentor-element__name" id="method_send">
-        send()
-        <a href="classes/Message.html#method_send" class="headerlink"><i class="fas fa-link"></i></a>
-
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="models/Message.php"><a href="files/models-message.html"><abbr title="models/Message.php">Message.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">69</span>
-
-    </aside>
-
-        <p class="phpdocumentor-summary">Envía un mensaje dentro de un chat.</p>
-
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">send</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$chatId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$userId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$content</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
-
-    <div class="phpdocumentor-label-line">
-        </div>
-    
-        <section class="phpdocumentor-description"><p>Inserta un nuevo registro en la tabla Mensajes.</p>
-</section>
-
-        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
-    <dl class="phpdocumentor-argument-list">
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$chatId</span>
-                : <span class="phpdocumentor-argument-list__argument__type">int</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>ID del chat.</p>
-</section>
-
-            </dd>
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$userId</span>
-                : <span class="phpdocumentor-argument-list__argument__type">int</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>ID del usuario que envía el mensaje.</p>
-</section>
-
-            </dd>
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$content</span>
-                : <span class="phpdocumentor-argument-list__argument__type">string</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Contenido del mensaje.</p>
-</section>
-
             </dd>
             </dl>
 
@@ -650,10 +620,6 @@ Los mensajes se devuelven ordenados por fecha de envío.</p>
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type">bool</span>
-                    &mdash;
-                <section class="phpdocumentor-description"><p>True si el mensaje se envió correctamente, false si falló.</p>
-</section>
-
             </section>
 
 </article>
@@ -663,7 +629,7 @@ Los mensajes se devuelven ordenados por fecha de envío.</p>
     <div class="phpdocumentor-modal-bg" data-exit-button></div>
     <div class="phpdocumentor-modal-container">
         <div class="phpdocumentor-modal-content">
-            <pre style="max-height: 500px; overflow-y: scroll" data-src="files/models/Message.php.txt" class="language-php line-numbers linkable-line-numbers"></pre>
+            <pre style="max-height: 500px; overflow-y: scroll" data-src="files/models/Notification.php.txt" class="language-php line-numbers linkable-line-numbers"></pre>
         </div>
         <button data-exit-button class="phpdocumentor-modal__close">&times;</button>
     </div>
@@ -764,28 +730,28 @@ Los mensajes se devuelven ordenados por fecha de envío.</p>
             <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                                            <li><a href="classes/Message.html#toc-properties">Properties</a></li>
-                                                            <li><a href="classes/Message.html#toc-methods">Methods</a></li>
+                                                            <li><a href="classes/Notification.html#toc-properties">Properties</a></li>
+                                                            <li><a href="classes/Notification.html#toc-methods">Methods</a></li>
                                     </ul>
             </li>
             
                             <li class="phpdocumentor-on-this-page-section__title">Properties</li>
                 <li>
                     <ul class="phpdocumentor-list -clean">
-                                                    <li class=""><a href="classes/Message.html#property_conn">$conn</a></li>
+                                                    <li class=""><a href="classes/Notification.html#property_conn">$conn</a></li>
                                             </ul>
                 </li>
             
                         <li class="phpdocumentor-on-this-page-section__title">Methods</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                            <li class=""><a href="classes/Message.html#method___construct">__construct()</a></li>
-                                            <li class=""><a href="classes/Message.html#method_countAllUnread">countAllUnread()</a></li>
-                                            <li class=""><a href="classes/Message.html#method_countUnread">countUnread()</a></li>
-                                            <li class=""><a href="classes/Message.html#method_enviarMensajeSistema">enviarMensajeSistema()</a></li>
-                                            <li class=""><a href="classes/Message.html#method_getByChat">getByChat()</a></li>
-                                            <li class=""><a href="classes/Message.html#method_markAsRead">markAsRead()</a></li>
-                                            <li class=""><a href="classes/Message.html#method_send">send()</a></li>
+                                            <li class=""><a href="classes/Notification.html#method___construct">__construct()</a></li>
+                                            <li class=""><a href="classes/Notification.html#method_create">create()</a></li>
+                                            <li class=""><a href="classes/Notification.html#method_delete">delete()</a></li>
+                                            <li class=""><a href="classes/Notification.html#method_getByUser">getByUser()</a></li>
+                                            <li class=""><a href="classes/Notification.html#method_getUnread">getUnread()</a></li>
+                                            <li class=""><a href="classes/Notification.html#method_markAllAsRead">markAllAsRead()</a></li>
+                                            <li class=""><a href="classes/Notification.html#method_markAsRead">markAsRead()</a></li>
                                     </ul>
             </li>
                     </ul>
@@ -805,7 +771,7 @@ Los mensajes se devuelven ordenados por fecha de envío.</p>
     </section>
 </section>
         </div>
-        <a href="classes/Message.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+        <a href="classes/Notification.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
 
     </main>
 
