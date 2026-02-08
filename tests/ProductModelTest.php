@@ -408,4 +408,142 @@ class ProductModelTest extends TestCase
 
         $this->assertTrue($resultado);
     }
+
+        /* ============================================================
+       getRandomProducts()
+       ============================================================ */
+
+    public function testGetRandomProducts()
+    {
+        $fakeProducts = [
+            ["id" => 1, "titulo" => "Prod 1"],
+            ["id" => 2, "titulo" => "Prod 2"]
+        ];
+
+        $this->pdo->method('prepare')->willReturn($this->stmt);
+        $this->stmt->method('fetchAll')->willReturn($fakeProducts);
+
+        $mock = $this->getMockBuilder(Product::class)
+            ->setConstructorArgs([$this->pdo])
+            ->onlyMethods(['getImages'])
+            ->getMock();
+
+        $mock->method('getImages')->willReturn([]);
+
+        $resultado = $mock->getRandomProducts(5, 10);
+
+        $this->assertCount(2, $resultado);
+    }
+
+    /* ============================================================
+       cambiarEstadoPublicacion()
+       ============================================================ */
+
+    public function testCambiarEstadoPublicacion()
+    {
+        $this->pdo->method('prepare')->willReturn($this->stmt);
+
+        $this->stmt->expects($this->once())
+            ->method('execute')
+            ->with([
+                ':estado' => 'activo',
+                ':id'     => 5
+            ])
+            ->willReturn(true);
+
+        $resultado = $this->product->cambiarEstadoPublicacion(5, 'activo');
+
+        $this->assertTrue($resultado);
+    }
+
+    /* ============================================================
+       reservarProducto()
+       ============================================================ */
+
+    public function testReservarProducto()
+    {
+        $mock = $this->getMockBuilder(Product::class)
+            ->setConstructorArgs([$this->pdo])
+            ->onlyMethods(['cambiarEstadoPublicacion'])
+            ->getMock();
+
+        $mock->expects($this->once())
+            ->method('cambiarEstadoPublicacion')
+            ->with(7, 'pausado')
+            ->willReturn(true);
+
+        $resultado = $mock->reservarProducto(7);
+
+        $this->assertTrue($resultado);
+    }
+
+    /* ============================================================
+       marcarComoVendido()
+       ============================================================ */
+
+    public function testMarcarComoVendido()
+    {
+        $mock = $this->getMockBuilder(Product::class)
+            ->setConstructorArgs([$this->pdo])
+            ->onlyMethods(['cambiarEstadoPublicacion'])
+            ->getMock();
+
+        $mock->expects($this->once())
+            ->method('cambiarEstadoPublicacion')
+            ->with(3, 'vendido')
+            ->willReturn(true);
+
+        $resultado = $mock->marcarComoVendido(3);
+
+        $this->assertTrue($resultado);
+    }
+
+    /* ============================================================
+       reactivarPublicacion()
+       ============================================================ */
+
+    public function testReactivarPublicacion()
+    {
+        $mock = $this->getMockBuilder(Product::class)
+            ->setConstructorArgs([$this->pdo])
+            ->onlyMethods(['cambiarEstadoPublicacion'])
+            ->getMock();
+
+        $mock->expects($this->once())
+            ->method('cambiarEstadoPublicacion')
+            ->with(9, 'activo')
+            ->willReturn(true);
+
+        $resultado = $mock->reactivarPublicacion(9);
+
+        $this->assertTrue($resultado);
+    }
+
+    /* ============================================================
+       deleteWithImages()
+       ============================================================ */
+
+    public function testDeleteWithImages()
+{
+    $fakeImages = [
+        ["url" => "uploads/img1.jpg"],
+        ["url" => "uploads/img2.jpg"]
+    ];
+
+    $mock = $this->getMockBuilder(Product::class)
+        ->setConstructorArgs([$this->pdo])
+        ->onlyMethods(['getImages'])
+        ->getMock();
+
+    $mock->method('getImages')->willReturn($fakeImages);
+
+    $this->pdo->method('prepare')->willReturn($this->stmt);
+    $this->stmt->method('execute')->willReturn(true);
+
+    $resultado = $mock->deleteWithImages(1);
+
+    $this->assertTrue($resultado);
+}
+
+
 }
