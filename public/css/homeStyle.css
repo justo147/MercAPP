@@ -2,6 +2,10 @@
 body.dark-mode p {
   color: var(--color-text-dark); /* Color de texto en modo oscuro */
 }
+body.dark-mode .card .text-body-secondary {
+  color: var(--color-text) !important;
+}
+
 
 /* Caja de perfil */
 .perfil-box {

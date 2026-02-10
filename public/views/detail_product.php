@@ -6,6 +6,8 @@
 require_once __DIR__ . '/../../config/db.php';
 require_once __DIR__ . '/../../models/Product.php';
 
+session_start();
+
 // Se crea la conexión a la base de datos
 $db = new Database();
 $conn = $db->getConnection();
