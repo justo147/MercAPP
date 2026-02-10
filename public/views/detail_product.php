@@ -72,151 +72,162 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
 <body>
 
     <?php
-    // Navbar con buscador activado
     $showSearch = true;
     include("navbar.php");
     ?>
 
-    <main>
-        <div class="product-detail">
+    <main class="container my-5">
 
-            <!-- ---------------------------------------------------------
-                 GALERÍA DE IMÁGENES DEL PRODUCTO
-            ---------------------------------------------------------- -->
-            <div class="product-gallery">
+        <div class="row g-4">
 
-                <?php if (!empty($producto['imagenes'])): ?>
-                    <!-- Imagen principal del producto -->
-                    <img src="/MercApp/<?= htmlspecialchars($producto['imagenes'][0]['url']) ?>"
-                        class="main-img"
-                        alt="Imagen del producto">
-                <?php else: ?>
-                    <!-- Imagen por defecto si no tiene fotos -->
-                    <img src="/uploads/products/default.jpg"
-                        class="main-img"
-                        alt="Imagen por defecto">
-                <?php endif; ?>
+            <!-- Galería de imágenes -->
+            <div class="col-md-6">
 
-                <!-- Miniaturas adicionales -->
-                <div class="thumbs">
-                    <?php foreach ($producto['imagenes'] as $img): ?>
-                        <img src="/<?= htmlspecialchars($img['url']) ?>"
-                            class="thumb"
-                            alt="Miniatura">
-                    <?php endforeach; ?>
+                <div class="card p-3">
+
+                    <!-- Imagen principal -->
+                    <?php if (!empty($producto['imagenes'])): ?>
+                        <img src="/MercApp/<?= htmlspecialchars($producto['imagenes'][0]['url']) ?>"
+                            class="img-fluid rounded mb-3"
+                            alt="Imagen del producto">
+                    <?php else: ?>
+                        <img src="/uploads/products/default.jpg"
+                            class="img-fluid rounded mb-3"
+                            alt="Imagen por defecto">
+                    <?php endif; ?>
+
+                    <!-- Miniaturas -->
+                    <div class="d-flex flex-wrap gap-2">
+                        <?php foreach ($producto['imagenes'] as $img): ?>
+                            <img src="/<?= htmlspecialchars($img['url']) ?>"
+                                class="img-thumbnail"
+                                style="width: 80px; height: 80px; object-fit: cover;"
+                                alt="Miniatura">
+                        <?php endforeach; ?>
+                    </div>
+
                 </div>
 
             </div>
 
-            <!-- ---------------------------------------------------------
+        </div>
+
+
+        <!-- ---------------------------------------------------------
                  INFORMACIÓN DEL PRODUCTO
             ---------------------------------------------------------- -->
-            <div class="product-info">
+        <div class="col-md-6">
 
-                <!-- Título y ubicación -->
-                <h1><?= htmlspecialchars($producto['titulo']) ?></h1>
-                <h2 style="color:black" class="product-location">Ubicación: <?= htmlspecialchars($producto['ubicacion']) ?></h2>
+            <div class="card p-4">
 
-                <!-- Bloque de precios -->
-                <div class="price-block">
-                    <span class="price-current"><?= number_format($producto['precio'], 2) ?> €</span>
+                <h1 class="h3"><?= htmlspecialchars($producto['titulo']) ?></h1>
+                <p class="text-muted mb-2">
+                    <i class="bi bi-geo-alt"></i>
+                    Ubicación: <?= htmlspecialchars($producto['ubicacion']) ?>
+                </p>
+
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <span class="fs-3 fw-bold text-success">
+                        <?= number_format($producto['precio'], 2) ?> €
+                    </span>
 
                     <?php if (!empty($producto['precio_original']) && $producto['precio_original'] > $producto['precio']): ?>
-                        <!-- Precio original tachado -->
-                        <span class="price-original"><?= number_format($producto['precio_original'], 2) ?> €</span>
+                        <span class="text-muted text-decoration-line-through">
+                            <?= number_format($producto['precio_original'], 2) ?> €
+                        </span>
 
-                        <!-- Porcentaje de descuento -->
-                        <span class="price-discount">
+                        <span class="badge bg-danger">
                             -<?= round(100 * ($producto['precio_original'] - $producto['precio']) / $producto['precio_original']) ?>%
                         </span>
                     <?php endif; ?>
                 </div>
 
-                <!-- Botón de compra -->
-                <form method="post" action="cart.php">
+                <form method="post" action="cart.php" class="mb-3">
                     <input type="hidden" name="product_id" value="<?= $producto['id'] ?>">
-                    <button type="submit" class="buy-button">Comprar</button>
+                    <button type="submit" class="btn btn-success w-100 py-2">
+                        Comprar
+                    </button>
                 </form>
 
                 <a href="/MercApp/controllers/chat_start.php?producto_id=<?= $producto["id"] ?>"
-                    class="btn btn-primary d-flex align-items-center justify-content-center gap-2 py-2 px-4 shadow-sm">
-                    <i class="bi bi-chat-dots"></i> <span>Contactar con el vendedor</span>
+                    class="btn btn-primary w-100 mb-3 d-flex align-items-center justify-content-center gap-2">
+                    <i class="bi bi-chat-dots"></i>
+                    Contactar con el vendedor
                 </a>
 
-                <!-- Enlace al chat con el vendedor -->
-                <div class="chat-button">
+                <div class="text-center mb-3">
                     <a href="/MercApp/controllers/chat_start.php?producto_id=<?= $producto["id"] ?>">
                         ¿Tienes dudas? Chatea con el vendedor
                     </a>
                 </div>
 
-                <!-- Extras informativos -->
-                <div class="extras">
+                <div class="border-top pt-3">
                     <p>📦 Envío a acordar con el vendedor</p>
                     <p>🛡️ Compra segura</p>
                 </div>
+
             </div>
 
-            <!-- ---------------------------------------------------------
-                 DESCRIPCIÓN DEL PRODUCTO
-            ---------------------------------------------------------- -->
-            <p class="description">
-                <?= nl2br(htmlspecialchars($producto['descripcion'])) ?>
-            </p>
+        </div>
 
+        </div>
+
+        <!-- ---------------------------------------------------------
+             DESCRIPCIÓN DEL PRODUCTO
+        ---------------------------------------------------------- -->
+        <div class="card mt-4 p-4">
+            <h4>Descripción</h4>
+            <p><?= nl2br(htmlspecialchars($producto['descripcion'])) ?></p>
         </div>
 
         <!-- ---------------------------------------------------------
              PRODUCTOS SUGERIDOS (CARRUSEL)
         ---------------------------------------------------------- -->
-        <section class="suggested-products">
-            <h2>Productos sugeridos</h2>
+        <section class="mt-5">
+            <h2 class="mb-3">Productos sugeridos</h2>
 
             <?php if (!empty($productosSugeridos)): ?>
 
-                <div class="carousel-wrapper">
+                <div id="carouselSugeridos" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
 
-                    <!-- Flecha izquierda del carrusel -->
-                    <button class="arrow left" onclick="scrollCarousel(-1)">❮</button>
-
-                    <!-- Contenedor horizontal con scroll -->
-                    <div class="carousel" id="carousel">
-
-                        <?php foreach ($productosSugeridos as $s): ?>
-
+                        <?php foreach ($productosSugeridos as $index => $s): ?>
                             <?php
-                            // Imagen segura: si no tiene imagen, se usa una por defecto
                             $img = 'MercApp/uploads/products/default.jpg';
                             if (!empty($s['imagenes']) && isset($s['imagenes'][0]['url'])) {
                                 $img = $s['imagenes'][0]['url'];
                             }
                             ?>
 
-                            <!-- Tarjeta individual del producto sugerido -->
-                            <div class="item">
-                                <a href="detail_product.php?id=<?= $s['id'] ?>">
+                            <div class="carousel-item <?= $index === 0 ? 'active' : '' ?>">
+                                <div class="d-flex justify-content-center">
+                                    <a href="detail_product.php?id=<?= $s['id'] ?>" class="text-center">
+                                        <img src="/<?= htmlspecialchars($img) ?>"
+                                            class="d-block"
+                                            style="width: 200px; height: 200px; object-fit: cover;"
+                                            alt="Producto sugerido">
 
-                                    <!-- Imagen del producto sugerido -->
-                                    <img src="/<?= htmlspecialchars($img) ?>" alt="Producto sugerido">
-
-                                    <!-- Título -->
-                                    <p class="title"><?= htmlspecialchars($s['titulo']) ?></p>
-
-                                    <!-- Precio -->
-                                    <p class="price"><?= number_format($s['precio'], 2) ?> €</p>
-                                </a>
+                                        <p class="mt-2 fw-bold"><?= htmlspecialchars($s['titulo']) ?></p>
+                                        <p class="text-success"><?= number_format($s['precio'], 2) ?> €</p>
+                                    </a>
+                                </div>
                             </div>
 
                         <?php endforeach; ?>
+
                     </div>
 
-                    <!-- Flecha derecha del carrusel -->
-                    <button class="arrow right" onclick="scrollCarousel(1)">❯</button>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselSugeridos" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon"></span>
+                    </button>
+
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselSugeridos" data-bs-slide="next">
+                        <span class="carousel-control-next-icon"></span>
+                    </button>
 
                 </div>
 
             <?php else: ?>
-                <!-- Mensaje si no hay sugerencias -->
                 <p>No hay productos sugeridos por ahora.</p>
             <?php endif; ?>
         </section>
@@ -226,5 +237,6 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
     <?php include __DIR__ . '/footer.php'; ?>
 
 </body>
+
 
 </html>
