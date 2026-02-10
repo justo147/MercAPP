@@ -49,8 +49,8 @@
   <h2 class="d-flex justify-content-center">Cómo funciona la plataforma</h2>
 
   <div class="d-flex justify-content-center">
-    <video width="50%" controls title="Vídeo demostrativo" aria-label="Vídeo de personas colaborando en una oficina">
-        <source src="../video/6011533_People_Person_3840x2160.mp4" type="video/mp4">
+    <video width="50%" controls title="Vídeo demostrativo" aria-label="Vídeo">
+        <source src="../video/MercApp.mp4" type="video/mp4">
         
         <track kind="captions" src="captions.vtt" srclang="es" label="Español" default>
         
