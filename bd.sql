@@ -55,6 +55,12 @@ CREATE TABLE Categorias (
   icono VARCHAR(255)
 ) ENGINE=InnoDB;
 
+
+INSERT INTO Categorias (nombre, descripcion, icono) VALUES
+('Electrónica', 'Dispositivos y gadgets', 'bi bi-phone'),
+('Hogar', 'Artículos para el hogar', 'bi bi-house'),
+('Deportes', 'Material deportivo', 'bi bi-bicycle'),
+('Moda', 'Ropa y accesorios', 'bi bi-bag');
 -- -----------------------------
 -- Productos e imágenes
 -- -----------------------------
