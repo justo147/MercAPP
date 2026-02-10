@@ -81,7 +81,7 @@ if (!isset($_SESSION["user_id"])) {
               <option value="fecha_desc">Más recientes</option>
               <option value="fecha_asc">Más antiguos</option>
               <option value="precio_asc">Precio: menor a mayor</option>
-              <option value="precio_desc">Precio: mayor a mayor</option>
+              <option value="precio_desc">Precio: mayor a menor</option>
             </select>
           </div>
 

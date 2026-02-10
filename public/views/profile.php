@@ -170,11 +170,12 @@ $esPropietario = ($perfilId === $usuarioLogueado);
       </div>
     </div>
 
-    <div class="container my-4">
-      <h2 class="mb-3">Mis productos</h2>
-      <input type="text" id="buscador-productos" class="form-control mb-3" placeholder="Buscar en mis productos...">
-      <div id="productos-usuario" class="row g-3"></div>
-    </div>
+   <div class="container my-4">
+    <h2 class="mb-3">Mis productos</h2>
+    <label for="buscador-productos" class="form-label">Buscar en mis productos:</label>
+    <input type="text" id="buscador-productos" class="form-control mb-3" placeholder="Ej: Camiseta de algodón...">
+    <div id="productos-usuario" class="row g-3"></div>
+</div>
 
 
     <div class="d-flex justify-content-center mt-4" id="paginacion-productos"></div>
@@ -198,7 +199,7 @@ $esPropietario = ($perfilId === $usuarioLogueado);
       <div class="modal-content">
 
         <div class="modal-header bg-danger text-white">
-          <h5 class="modal-title">Eliminar producto</h5>
+          <h4 class="modal-title">Eliminar producto</h4>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
 

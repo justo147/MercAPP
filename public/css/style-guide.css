@@ -1,4 +1,5 @@
 @charset "UTF-8";
+
 /* ---------------------------------------------------------
    ESTRUCTURA DEL PROYECTO SCSS
    ---------------------------------------------------------
@@ -55,7 +56,8 @@
 }
 
 /* Asegura que html y body ocupen toda la altura */
-html, body {
+html,
+body {
   height: 100%;
 }
 
@@ -66,7 +68,8 @@ body {
 }
 
 /* Quita estilos por defecto de listas */
-ul, ol {
+ul,
+ol {
   list-style: none;
 }
 
@@ -112,7 +115,12 @@ body {
 }
 
 /* Títulos */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-weight: 700;
   color: var(--color-primary);
   line-height: 1.2;
@@ -186,20 +194,21 @@ span {
 --------------------------------*/
 /* Asegura que el botón use tus colores de marca */
 .btn-primary {
-    background-color: var(--color-primary) !important;
-    border-color: var(--color-primary) !important;
-    transition: all 0.3s ease;
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  transition: all 0.3s ease;
 }
 
 .btn-primary:hover {
-    background-color: var(--color-primary-dark) !important;
-    border-color: var(--color-primary-dark) !important;
-    transform: translateY(-2px); /* Efecto de elevación */
+  background-color: var(--color-primary-dark) !important;
+  border-color: var(--color-primary-dark) !important;
+  transform: translateY(-2px);
+  /* Efecto de elevación */
 }
 
 /* En modo oscuro, podemos darle un toque sutil para que resalte */
 body.dark-mode .btn-primary {
-    box-shadow: 0 4px 15px rgba(3, 128, 101, 0.3);
+  box-shadow: 0 4px 15px rgba(3, 128, 101, 0.3);
 }
 
 .button-primary {
@@ -241,16 +250,18 @@ body.dark-mode .btn-primary {
 
 /* Solución para el foco del botón de Iniciar Sesión */
 .button-primary:focus-visible {
-    outline: 3px solid #0056b3 !important; /* Azul intenso para contraste */
-    outline-offset: 3px;
-    box-shadow: 0 0 0 5px rgba(0, 86, 179, 0.3);
+  outline: 3px solid #0056b3 !important;
+  /* Azul intenso para contraste */
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px rgba(0, 86, 179, 0.3);
 }
 
 /* Solución para el contraste del botón Editar */
 .btn-outline-warning {
-    color: #856404 !important; /* Dorado oscuro que sí cumple el ratio 4.5:1 */
-    border-color: #856404 !important;
-    font-weight: 600;
+  color: #856404 !important;
+  /* Dorado oscuro que sí cumple el ratio 4.5:1 */
+  border-color: #856404 !important;
+  font-weight: 600;
 }
 
 .toggle-btn {
@@ -362,6 +373,12 @@ body.dark-mode .text-muted {
   color: #b0b0b0 !important;
 }
 
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode p {
+  color: var(--color-text-dark) !important;
+}
+
 /* ------------------------------
    CARDS
 --------------------------------*/
@@ -382,31 +399,34 @@ body.dark-mode .text-muted {
 }
 
 .page-item.disabled .page-link {
-    background-color: #f8f9fa !important; 
-    color: #444444 !important; /* Gris más oscuro para asegurar el pase de contraste */
-    opacity: 1 !important; 
-    border-color: #dee2e6 !important; /* Color de borde estándar de Bootstrap para disabled */
+  background-color: #f8f9fa !important;
+  color: #444444 !important;
+  /* Gris más oscuro para asegurar el pase de contraste */
+  opacity: 1 !important;
+  border-color: #dee2e6 !important;
+  /* Color de borde estándar de Bootstrap para disabled */
 }
 
 .page-item.disabled .bg-primary.text-white {
-    background-color: var(--bs-primary) !important;
-    color: #ffffff !important;
-    opacity: 1 !important;
+  background-color: var(--bs-primary) !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
 }
 
 .page-link.text-primary {
-    color: var(--bs-primary) !important;
+  color: var(--bs-primary) !important;
 }
 
 /* Mejora la visibilidad de los bordes de los campos de texto */
 .form-control.border-primary {
-    border-color: #025a47 !important; /* Usar el verde oscuro de contraste */
+  border-color: #025a47 !important;
+  /* Usar el verde oscuro de contraste */
 }
 
 /* Color para el texto del placeholder (debe ser legible) */
 ::placeholder {
-    color: #555555 !important;
-    opacity: 1;
+  color: #555555 !important;
+  opacity: 1;
 }
 
 .fade-in {

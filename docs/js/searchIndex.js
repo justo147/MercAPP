@@ -101,6 +101,11 @@ Search.appendIndex(
             "summary": "Verifica\u0020si\u0020un\u0020usuario\u0020forma\u0020parte\u0020del\u0020chat.",
             "url": "classes/Chat.html#method_userBelongsToChat"
         },                {
+            "fqsen": "\\Chat\u003A\u003AgetChatsByUser\u0028\u0029",
+            "name": "getChatsByUser",
+            "summary": "Obtiene\u0020todos\u0020los\u0020chats\u0020activos\u0020en\u0020los\u0020que\u0020participa\u0020un\u0020usuario.",
+            "url": "classes/Chat.html#method_getChatsByUser"
+        },                {
             "fqsen": "\\Chat\u003A\u003A\u0024conn",
             "name": "conn",
             "summary": "Conexi\u00F3n\u0020a\u0020la\u0020base\u0020de\u0020datos.",
@@ -126,10 +131,75 @@ Search.appendIndex(
             "summary": "Env\u00EDa\u0020un\u0020mensaje\u0020dentro\u0020de\u0020un\u0020chat.",
             "url": "classes/Message.html#method_send"
         },                {
+            "fqsen": "\\Message\u003A\u003AmarkAsRead\u0028\u0029",
+            "name": "markAsRead",
+            "summary": "",
+            "url": "classes/Message.html#method_markAsRead"
+        },                {
+            "fqsen": "\\Message\u003A\u003AcountUnread\u0028\u0029",
+            "name": "countUnread",
+            "summary": "",
+            "url": "classes/Message.html#method_countUnread"
+        },                {
+            "fqsen": "\\Message\u003A\u003AcountAllUnread\u0028\u0029",
+            "name": "countAllUnread",
+            "summary": "Cuenta\u0020todos\u0020los\u0020mensajes\u0020sin\u0020leer\u0020del\u0020usuario\u0020en\u0020todos\u0020sus\u0020chats.",
+            "url": "classes/Message.html#method_countAllUnread"
+        },                {
+            "fqsen": "\\Message\u003A\u003AenviarMensajeSistema\u0028\u0029",
+            "name": "enviarMensajeSistema",
+            "summary": "Env\u00EDa\u0020un\u0020mensaje\u0020autom\u00E1tico\u0020del\u0020sistema\u0020al\u0020chat.",
+            "url": "classes/Message.html#method_enviarMensajeSistema"
+        },                {
             "fqsen": "\\Message\u003A\u003A\u0024conn",
             "name": "conn",
             "summary": "Conexi\u00F3n\u0020a\u0020la\u0020base\u0020de\u0020datos.",
             "url": "classes/Message.html#property_conn"
+        },                {
+            "fqsen": "\\Notification",
+            "name": "Notification",
+            "summary": "",
+            "url": "classes/Notification.html"
+        },                {
+            "fqsen": "\\Notification\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructor\u0020del\u0020modelo.",
+            "url": "classes/Notification.html#method___construct"
+        },                {
+            "fqsen": "\\Notification\u003A\u003Acreate\u0028\u0029",
+            "name": "create",
+            "summary": "Crea\u0020una\u0020nueva\u0020notificaci\u00F3n\u0020para\u0020un\u0020usuario.",
+            "url": "classes/Notification.html#method_create"
+        },                {
+            "fqsen": "\\Notification\u003A\u003AgetByUser\u0028\u0029",
+            "name": "getByUser",
+            "summary": "Obtiene\u0020todas\u0020las\u0020notificaciones\u0020de\u0020un\u0020usuario.",
+            "url": "classes/Notification.html#method_getByUser"
+        },                {
+            "fqsen": "\\Notification\u003A\u003AgetUnread\u0028\u0029",
+            "name": "getUnread",
+            "summary": "Obtiene\u0020solo\u0020las\u0020notificaciones\u0020no\u0020le\u00EDdas\u0020de\u0020un\u0020usuario.",
+            "url": "classes/Notification.html#method_getUnread"
+        },                {
+            "fqsen": "\\Notification\u003A\u003AmarkAsRead\u0028\u0029",
+            "name": "markAsRead",
+            "summary": "Marca\u0020una\u0020notificaci\u00F3n\u0020como\u0020le\u00EDda.",
+            "url": "classes/Notification.html#method_markAsRead"
+        },                {
+            "fqsen": "\\Notification\u003A\u003AmarkAllAsRead\u0028\u0029",
+            "name": "markAllAsRead",
+            "summary": "Marca\u0020todas\u0020las\u0020notificaciones\u0020de\u0020un\u0020usuario\u0020como\u0020le\u00EDdas.",
+            "url": "classes/Notification.html#method_markAllAsRead"
+        },                {
+            "fqsen": "\\Notification\u003A\u003Adelete\u0028\u0029",
+            "name": "delete",
+            "summary": "Elimina\u0020una\u0020notificaci\u00F3n\u0020por\u0020ID.",
+            "url": "classes/Notification.html#method_delete"
+        },                {
+            "fqsen": "\\Notification\u003A\u003A\u0024conn",
+            "name": "conn",
+            "summary": "Conexi\u00F3n\u0020a\u0020la\u0020base\u0020de\u0020datos.",
+            "url": "classes/Notification.html#property_conn"
         },                {
             "fqsen": "\\Product",
             "name": "Product",
@@ -216,10 +286,200 @@ Search.appendIndex(
             "summary": "Actualiza\u0020el\u0020orden\u0020de\u0020visualizaci\u00F3n\u0020de\u0020una\u0020imagen.",
             "url": "classes/Product.html#method_updateImageOrder"
         },                {
+            "fqsen": "\\Product\u003A\u003AgetRandomProducts\u0028\u0029",
+            "name": "getRandomProducts",
+            "summary": "",
+            "url": "classes/Product.html#method_getRandomProducts"
+        },                {
+            "fqsen": "\\Product\u003A\u003AcambiarEstadoPublicacion\u0028\u0029",
+            "name": "cambiarEstadoPublicacion",
+            "summary": "Cambia\u0020el\u0020estado\u0020de\u0020publicaci\u00F3n\u0020del\u0020producto.",
+            "url": "classes/Product.html#method_cambiarEstadoPublicacion"
+        },                {
+            "fqsen": "\\Product\u003A\u003AreservarProducto\u0028\u0029",
+            "name": "reservarProducto",
+            "summary": "Poner\u0020producto\u0020en\u0020estado\u0020\u0027pausado\u0027\u0020\u0028reservado\u0029.",
+            "url": "classes/Product.html#method_reservarProducto"
+        },                {
+            "fqsen": "\\Product\u003A\u003AmarcarComoVendido\u0028\u0029",
+            "name": "marcarComoVendido",
+            "summary": "Marca\u0020la\u0020publicaci\u00F3n\u0020como\u0020vendida.",
+            "url": "classes/Product.html#method_marcarComoVendido"
+        },                {
+            "fqsen": "\\Product\u003A\u003AreactivarPublicacion\u0028\u0029",
+            "name": "reactivarPublicacion",
+            "summary": "Reactiva\u0020la\u0020publicaci\u00F3n\u0020\u0028por\u0020ejemplo,\u0020si\u0020se\u0020cancela\u0020la\u0020transacci\u00F3n\u0029.",
+            "url": "classes/Product.html#method_reactivarPublicacion"
+        },                {
             "fqsen": "\\Product\u003A\u003A\u0024conn",
             "name": "conn",
             "summary": "Conexi\u00F3n\u0020a\u0020la\u0020base\u0020de\u0020datos.",
             "url": "classes/Product.html#property_conn"
+        },                {
+            "fqsen": "\\Rating",
+            "name": "Rating",
+            "summary": "",
+            "url": "classes/Rating.html"
+        },                {
+            "fqsen": "\\Rating\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructor\u0020del\u0020modelo.",
+            "url": "classes/Rating.html#method___construct"
+        },                {
+            "fqsen": "\\Rating\u003A\u003Acreate\u0028\u0029",
+            "name": "create",
+            "summary": "Crea\u0020una\u0020nueva\u0020valoraci\u00F3n\u0020asociada\u0020a\u0020una\u0020transacci\u00F3n.",
+            "url": "classes/Rating.html#method_create"
+        },                {
+            "fqsen": "\\Rating\u003A\u003AgetAll\u0028\u0029",
+            "name": "getAll",
+            "summary": "Obtiene\u0020todas\u0020las\u0020valoraciones\u0020registradas.",
+            "url": "classes/Rating.html#method_getAll"
+        },                {
+            "fqsen": "\\Rating\u003A\u003AgetReceivedByUser\u0028\u0029",
+            "name": "getReceivedByUser",
+            "summary": "Obtiene\u0020las\u0020valoraciones\u0020recibidas\u0020por\u0020un\u0020usuario.",
+            "url": "classes/Rating.html#method_getReceivedByUser"
+        },                {
+            "fqsen": "\\Rating\u003A\u003AgetGivenByUser\u0028\u0029",
+            "name": "getGivenByUser",
+            "summary": "Obtiene\u0020las\u0020valoraciones\u0020realizadas\u0020por\u0020un\u0020usuario.",
+            "url": "classes/Rating.html#method_getGivenByUser"
+        },                {
+            "fqsen": "\\Rating\u003A\u003AgetByTransaction\u0028\u0029",
+            "name": "getByTransaction",
+            "summary": "Obtiene\u0020la\u0020valoraci\u00F3n\u0020asociada\u0020a\u0020una\u0020transacci\u00F3n\u0020espec\u00EDfica.",
+            "url": "classes/Rating.html#method_getByTransaction"
+        },                {
+            "fqsen": "\\Rating\u003A\u003AgetAverageScore\u0028\u0029",
+            "name": "getAverageScore",
+            "summary": "Obtiene\u0020la\u0020puntuaci\u00F3n\u0020media\u0020general\u0020de\u0020un\u0020usuario.",
+            "url": "classes/Rating.html#method_getAverageScore"
+        },                {
+            "fqsen": "\\Rating\u003A\u003AgetDetailedAverages\u0028\u0029",
+            "name": "getDetailedAverages",
+            "summary": "Obtiene\u0020los\u0020promedios\u0020detallados\u0020de\u0020fiabilidad,\u0020comunicaci\u00F3n\u0020y\u0020puntualidad.",
+            "url": "classes/Rating.html#method_getDetailedAverages"
+        },                {
+            "fqsen": "\\Rating\u003A\u003Adelete\u0028\u0029",
+            "name": "delete",
+            "summary": "Elimina\u0020una\u0020valoraci\u00F3n\u0020por\u0020su\u0020ID.",
+            "url": "classes/Rating.html#method_delete"
+        },                {
+            "fqsen": "\\Rating\u003A\u003A\u0024conn",
+            "name": "conn",
+            "summary": "Conexi\u00F3n\u0020a\u0020la\u0020base\u0020de\u0020datos.",
+            "url": "classes/Rating.html#property_conn"
+        },                {
+            "fqsen": "\\Report",
+            "name": "Report",
+            "summary": "",
+            "url": "classes/Report.html"
+        },                {
+            "fqsen": "\\Report\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructor\u0020del\u0020modelo.",
+            "url": "classes/Report.html#method___construct"
+        },                {
+            "fqsen": "\\Report\u003A\u003Acreate\u0028\u0029",
+            "name": "create",
+            "summary": "Crea\u0020un\u0020nuevo\u0020reporte.",
+            "url": "classes/Report.html#method_create"
+        },                {
+            "fqsen": "\\Report\u003A\u003AgetAll\u0028\u0029",
+            "name": "getAll",
+            "summary": "Obtiene\u0020todos\u0020los\u0020reportes.",
+            "url": "classes/Report.html#method_getAll"
+        },                {
+            "fqsen": "\\Report\u003A\u003AgetByProduct\u0028\u0029",
+            "name": "getByProduct",
+            "summary": "Obtiene\u0020los\u0020reportes\u0020de\u0020un\u0020producto.",
+            "url": "classes/Report.html#method_getByProduct"
+        },                {
+            "fqsen": "\\Report\u003A\u003AgetByUser\u0028\u0029",
+            "name": "getByUser",
+            "summary": "Obtiene\u0020los\u0020reportes\u0020hechos\u0020por\u0020un\u0020usuario.",
+            "url": "classes/Report.html#method_getByUser"
+        },                {
+            "fqsen": "\\Report\u003A\u003AupdateStatus\u0028\u0029",
+            "name": "updateStatus",
+            "summary": "Cambia\u0020el\u0020estado\u0020de\u0020un\u0020reporte.",
+            "url": "classes/Report.html#method_updateStatus"
+        },                {
+            "fqsen": "\\Report\u003A\u003Adelete\u0028\u0029",
+            "name": "delete",
+            "summary": "Elimina\u0020un\u0020reporte\u0020por\u0020ID.",
+            "url": "classes/Report.html#method_delete"
+        },                {
+            "fqsen": "\\Report\u003A\u003A\u0024conn",
+            "name": "conn",
+            "summary": "Conexi\u00F3n\u0020a\u0020la\u0020base\u0020de\u0020datos.",
+            "url": "classes/Report.html#property_conn"
+        },                {
+            "fqsen": "\\Transaction",
+            "name": "Transaction",
+            "summary": "",
+            "url": "classes/Transaction.html"
+        },                {
+            "fqsen": "\\Transaction\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructor\u0020del\u0020modelo.",
+            "url": "classes/Transaction.html#method___construct"
+        },                {
+            "fqsen": "\\Transaction\u003A\u003Acreate\u0028\u0029",
+            "name": "create",
+            "summary": "Crea\u0020una\u0020nueva\u0020transacci\u00F3n.",
+            "url": "classes/Transaction.html#method_create"
+        },                {
+            "fqsen": "\\Transaction\u003A\u003AgetAll\u0028\u0029",
+            "name": "getAll",
+            "summary": "Obtiene\u0020todas\u0020las\u0020transacciones.",
+            "url": "classes/Transaction.html#method_getAll"
+        },                {
+            "fqsen": "\\Transaction\u003A\u003AgetByUser\u0028\u0029",
+            "name": "getByUser",
+            "summary": "Obtiene\u0020las\u0020transacciones\u0020de\u0020un\u0020usuario\u0020\u0028como\u0020comprador\u0020o\u0020vendedor\u0029.",
+            "url": "classes/Transaction.html#method_getByUser"
+        },                {
+            "fqsen": "\\Transaction\u003A\u003AgetByProduct\u0028\u0029",
+            "name": "getByProduct",
+            "summary": "Obtiene\u0020las\u0020transacciones\u0020de\u0020un\u0020producto.",
+            "url": "classes/Transaction.html#method_getByProduct"
+        },                {
+            "fqsen": "\\Transaction\u003A\u003AupdateStatus\u0028\u0029",
+            "name": "updateStatus",
+            "summary": "Actualiza\u0020el\u0020estado\u0020de\u0020una\u0020transacci\u00F3n.",
+            "url": "classes/Transaction.html#method_updateStatus"
+        },                {
+            "fqsen": "\\Transaction\u003A\u003Adelete\u0028\u0029",
+            "name": "delete",
+            "summary": "Elimina\u0020una\u0020transacci\u00F3n\u0020por\u0020ID.",
+            "url": "classes/Transaction.html#method_delete"
+        },                {
+            "fqsen": "\\Transaction\u003A\u003AgetActiveTransactionByProduct\u0028\u0029",
+            "name": "getActiveTransactionByProduct",
+            "summary": "",
+            "url": "classes/Transaction.html#method_getActiveTransactionByProduct"
+        },                {
+            "fqsen": "\\Transaction\u003A\u003AcreateFromChat\u0028\u0029",
+            "name": "createFromChat",
+            "summary": "",
+            "url": "classes/Transaction.html#method_createFromChat"
+        },                {
+            "fqsen": "\\Transaction\u003A\u003AgetById\u0028\u0029",
+            "name": "getById",
+            "summary": "",
+            "url": "classes/Transaction.html#method_getById"
+        },                {
+            "fqsen": "\\Transaction\u003A\u003AgetLastTransactionByProduct\u0028\u0029",
+            "name": "getLastTransactionByProduct",
+            "summary": "",
+            "url": "classes/Transaction.html#method_getLastTransactionByProduct"
+        },                {
+            "fqsen": "\\Transaction\u003A\u003A\u0024conn",
+            "name": "conn",
+            "summary": "Conexi\u00F3n\u0020a\u0020la\u0020base\u0020de\u0020datos.",
+            "url": "classes/Transaction.html#property_conn"
         },                {
             "fqsen": "\\User",
             "name": "User",

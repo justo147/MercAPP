@@ -85,7 +85,7 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
 
                 <?php if (!empty($producto['imagenes'])): ?>
                     <!-- Imagen principal del producto -->
-                    <img src="/<?= htmlspecialchars($producto['imagenes'][0]['url']) ?>"
+                    <img src="/MercApp/<?= htmlspecialchars($producto['imagenes'][0]['url']) ?>"
                         class="main-img"
                         alt="Imagen del producto">
                 <?php else: ?>
@@ -113,7 +113,7 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
 
                 <!-- Título y ubicación -->
                 <h1><?= htmlspecialchars($producto['titulo']) ?></h1>
-                <p class="product-location">Ubicación: <?= htmlspecialchars($producto['ubicacion']) ?></p>
+                <h2 style="color:black" class="product-location">Ubicación: <?= htmlspecialchars($producto['ubicacion']) ?></h2>
 
                 <!-- Bloque de precios -->
                 <div class="price-block">
@@ -184,7 +184,7 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
 
                             <?php
                             // Imagen segura: si no tiene imagen, se usa una por defecto
-                            $img = 'uploads/products/default.jpg';
+                            $img = 'MercApp/uploads/products/default.jpg';
                             if (!empty($s['imagenes']) && isset($s['imagenes'][0]['url'])) {
                                 $img = $s['imagenes'][0]['url'];
                             }
@@ -221,9 +221,7 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
 
     </main>
 
-    <footer>
-        <?php include __DIR__ . '/footer.php'; ?>
-    </footer>
+    <?php include __DIR__ . '/footer.php'; ?>
 
 </body>
 

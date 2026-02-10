@@ -6,47 +6,20 @@ require_once __DIR__ . '/../models/Message.php';
 
 /**
  * Clases fake específicas para este archivo de test.
- * Se usan para evitar conflictos con otros tests que también
- * mockean PDO y PDOStatement.
  */
 class FakePDOMessage extends PDO {}
 class FakeStatementMessage extends PDOStatement {}
 
-/**
- * Class MessageModelTest
- *
- * Pruebas unitarias del modelo Message.
- * Se utilizan mocks de PDO y PDOStatement para simular la base de datos.
- */
 class MessageModelTest extends TestCase
 {
-    /**
-     * @var FakePDOMessage|\PHPUnit\Framework\MockObject\MockObject
-     * Mock de la conexión PDO.
-     */
     private $pdo;
-
-    /**
-     * @var FakeStatementMessage|\PHPUnit\Framework\MockObject\MockObject
-     * Mock del statement PDO.
-     */
     private $stmt;
-
-    /**
-     * @var Message
-     * Instancia del modelo a testear.
-     */
     private $message;
 
-    /**
-     * Configuración inicial antes de cada test.
-     *
-     * Se crean los mocks de PDO y PDOStatement y se instancia el modelo.
-     */
     protected function setUp(): void
     {
         $this->stmt = $this->createMock(FakeStatementMessage::class);
-        $this->pdo = $this->createMock(FakePDOMessage::class);
+        $this->pdo  = $this->createMock(FakePDOMessage::class);
 
         $this->message = new Message($this->pdo);
     }
@@ -55,13 +28,7 @@ class MessageModelTest extends TestCase
        getByChat()
        ============================================================ */
 
-    /**
-     * Test: getByChat()
-     *
-     * Verifica que se obtienen correctamente los mensajes de un chat.
-     * Se mockea fetchAll() para devolver un array simulado.
-     */
-    public function testGetByChat()
+    public function testGetByChatDevuelveMensajes()
     {
         $fakeMessages = [
             [
@@ -81,6 +48,7 @@ class MessageModelTest extends TestCase
         ];
 
         $this->pdo->method('prepare')->willReturn($this->stmt);
+        $this->stmt->method('execute')->with([":chat" => 5]);
         $this->stmt->method('fetchAll')->willReturn($fakeMessages);
 
         $resultado = $this->message->getByChat(5);
@@ -93,34 +61,135 @@ class MessageModelTest extends TestCase
        send()
        ============================================================ */
 
-    /**
-     * Test: send() devuelve true
-     *
-     * Verifica que el método send retorna true cuando execute()
-     * se ejecuta correctamente.
-     */
     public function testSendDevuelveTrue()
     {
         $this->pdo->method('prepare')->willReturn($this->stmt);
-        $this->stmt->method('execute')->willReturn(true);
+
+        $this->stmt->expects($this->once())
+            ->method('execute')
+            ->with([
+                ":chat" => 5,
+                ":uid" => 2,
+                ":content" => "Hola mundo"
+            ])
+            ->willReturn(true);
 
         $resultado = $this->message->send(5, 2, "Hola mundo");
 
         $this->assertTrue($resultado);
     }
 
-    /**
-     * Test: send() devuelve false si falla
-     *
-     * Verifica que el método send retorna false cuando execute()
-     * devuelve false, simulando un fallo en la inserción.
-     */
     public function testSendDevuelveFalseSiFalla()
     {
         $this->pdo->method('prepare')->willReturn($this->stmt);
+
         $this->stmt->method('execute')->willReturn(false);
 
         $resultado = $this->message->send(5, 2, "Hola mundo");
+
+        $this->assertFalse($resultado);
+    }
+
+    /* ============================================================
+       markAsRead()
+       ============================================================ */
+
+    public function testMarkAsReadEjecutaUpdateCorrectamente()
+    {
+        $this->pdo->method('prepare')->willReturn($this->stmt);
+
+        $this->stmt->expects($this->once())
+            ->method('execute')
+            ->with([
+                ":chat" => 10,
+                ":uid"  => 3
+            ]);
+
+        $this->message->markAsRead(10, 3);
+
+        $this->assertTrue(true); // Si no lanza excepción, pasa
+    }
+
+    /* ============================================================
+       countUnread()
+       ============================================================ */
+
+    public function testCountUnreadDevuelveNumero()
+    {
+        $this->pdo->method('prepare')->willReturn($this->stmt);
+
+        $this->stmt->expects($this->once())
+            ->method('execute')
+            ->with([
+                ":chat" => 10,
+                ":uid"  => 3
+            ]);
+
+        $this->stmt->method('fetchColumn')->willReturn("4");
+
+        $resultado = $this->message->countUnread(10, 3);
+
+        $this->assertSame("4", $resultado);
+    }
+
+    public function testCountUnreadDevuelveCeroSiNoHayMensajes()
+    {
+        $this->pdo->method('prepare')->willReturn($this->stmt);
+        $this->stmt->method('execute');
+        $this->stmt->method('fetchColumn')->willReturn("0");
+
+        $resultado = $this->message->countUnread(10, 3);
+
+        $this->assertSame("0", $resultado);
+    }
+
+    /* ============================================================
+       countAllUnread()
+       ============================================================ */
+
+    public function testCountAllUnreadDevuelveNumero()
+    {
+        $this->pdo->method('prepare')->willReturn($this->stmt);
+
+        $this->stmt->expects($this->once())
+            ->method('execute')
+            ->with([":uid" => 7]);
+
+        $this->stmt->method('fetchColumn')->willReturn("6");
+
+        $resultado = $this->message->countAllUnread(7);
+
+        $this->assertSame("6", $resultado);
+    }
+
+    /* ============================================================
+       enviarMensajeSistema()
+       ============================================================ */
+
+    public function testEnviarMensajeSistemaInsertaCorrectamente()
+    {
+        $this->pdo->method('prepare')->willReturn($this->stmt);
+
+        $this->stmt->expects($this->once())
+            ->method('execute')
+            ->with([
+                ":chat"      => 8,
+                ":contenido" => "[SISTEMA] Mensaje automático"
+            ])
+            ->willReturn(true);
+
+        $resultado = $this->message->enviarMensajeSistema(8, "Mensaje automático");
+
+        $this->assertTrue($resultado);
+    }
+
+    public function testEnviarMensajeSistemaDevuelveFalseSiFalla()
+    {
+        $this->pdo->method('prepare')->willReturn($this->stmt);
+
+        $this->stmt->method('execute')->willReturn(false);
+
+        $resultado = $this->message->enviarMensajeSistema(8, "Error");
 
         $this->assertFalse($resultado);
     }

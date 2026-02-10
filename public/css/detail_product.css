@@ -127,6 +127,12 @@
     line-height: 1.7;
 }
 
+body.dark-mode .description {
+    color: black !important;
+}
+
+
+
 /* PRODUCTOS SUGERIDOS */
 .suggested-products {
     margin-top: 40px;
