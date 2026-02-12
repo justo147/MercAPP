@@ -4,7 +4,8 @@
 
     <!-- Logo y nombre de la aplicación -->
     <a class="navbar-brand fw-bold " href="home.php">
-      <img src="../img/logo_sinfondo.png" alt="Logo de MercApp de la barra de navegacion" height="30" class="d-inline-block align-middle">
+      <img src="../img/logo_sinfondo.png" alt="Logo de MercApp de la barra de navegacion" height="30"
+        class="d-inline-block align-middle">
       MercApp
     </a>
 
@@ -21,15 +22,8 @@
       <?php if (!empty($showSearch) && $showSearch === true): ?>
         <div class="ms-auto" style="max-width: 500px; width: 100%;">
           <form class="d-flex" role="search" method="get" action="home.php">
-            <input 
-  class="form-control me-2" 
-  type="search" 
-  name="q" 
-  id="navbar-search"
-  placeholder="Buscar productos..." 
-  aria-label="Buscar"
-  value="<?php echo htmlspecialchars($_GET['q'] ?? '') ?>"
->
+            <input class="form-control me-2" type="search" name="q" id="navbar-search" placeholder="Buscar productos..."
+              aria-label="Buscar" value="<?php echo htmlspecialchars($_GET['q'] ?? '') ?>">
 
             <button class="btn btn-light" type="submit" aria-label="Buscar productos">
               <i class="bi bi-search"></i>
@@ -64,6 +58,16 @@
                 <i class="bi bi-person"></i> Mi perfil
               </a>
             </li>
+            <!-- Ver mensajes -->
+            <li>
+              <a class="dropdown-item d-flex align-items-center"
+                href="chat_list.php?id=<?php echo htmlspecialchars($_SESSION['user_id']) ?>">
+                <i class="bi bi-envelope me-2"></i>Mensajes
+                <span id="badge-mensajes" class="badge bg-danger ms-2">
+                </span>
+              </a>
+            </li>
+
             <li>
               <a class="dropdown-item" href="upload_product.php">
                 <i class="bi bi-upload"></i> Subir producto
@@ -76,10 +80,10 @@
                 <i class="bi bi-gear"></i> Ajustes de Cuenta
               </a>
             </li>
-             <!-- Documentación -->
-             <a class="dropdown-item" href="../../public/views/docs.php">
-                <i class="bi bi-book"></i> Documentación
-              </a>
+            <!-- Documentación -->
+            <a class="dropdown-item" href="../../public/views/docs.php">
+              <i class="bi bi-book"></i> Documentación
+            </a>
             </li>
             <li>
               <hr class="dropdown-divider">

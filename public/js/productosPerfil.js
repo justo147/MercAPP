@@ -283,22 +283,23 @@ document.addEventListener("DOMContentLoaded", () => {
     fetch("/MercApp/api/chat_unread_count.php")
       .then(res => res.text())
       .then(num => {
-        const badge = document.getElementById("badge-mensajes");
-        if (!badge) return;
+        const badges = document.querySelectorAll("#badge-mensajes");
+        const count = parseInt(num) || 0; // Convertimos num una sola vez fuera del bucle
 
-        num = parseInt(num);
-
-        if (num > 0) {
-          badge.textContent = num;
-          badge.style.display = "inline-block";
-        } else {
-          badge.style.display = "none";
-        }
-        badge.style.opacity = num > 0 ? "1" : "0";
-
-      })
+        badges.forEach(badge => {
+          if (count > 0) {
+            badge.textContent = count;
+            badge.style.display = "inline-block";
+            badge.style.opacity = "1";
+          } else {
+            badge.style.display = "none";
+            badge.style.opacity = "0";
+          }
+        }); // Cierre correcto del forEach
+      }) // Cierre correcto del then
       .catch(err => console.error("Error actualizando badge:", err));
-  }
+}
+  
   //no mostrar el badge en otro perfil
   if (!ES_PROPIETARIO) return;
 

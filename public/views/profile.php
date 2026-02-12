@@ -170,12 +170,12 @@ $esPropietario = ($perfilId === $usuarioLogueado);
       </div>
     </div>
 
-   <div class="container my-4">
-    <h2 class="mb-3">Mis productos</h2>
-    <label for="buscador-productos" class="form-label">Buscar en mis productos:</label>
-    <input type="text" id="buscador-productos" class="form-control mb-3" placeholder="Ej: Camiseta de algodón...">
-    <div id="productos-usuario" class="row g-3"></div>
-</div>
+    <div class="container my-4">
+      <h2 class="mb-3">Mis productos</h2>
+      <label for="buscador-productos" class="form-label">Buscar en mis productos:</label>
+      <input type="text" id="buscador-productos" class="form-control mb-3" placeholder="Ej: Camiseta de algodón...">
+      <div id="productos-usuario" class="row g-3"></div>
+    </div>
 
 
     <div class="d-flex justify-content-center mt-4" id="paginacion-productos"></div>
