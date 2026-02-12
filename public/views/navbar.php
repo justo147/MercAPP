@@ -2,108 +2,81 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4 shadow-sm" aria-label="Navegación principal">
   <div class="container-fluid">
 
-    <!-- Logo y nombre de la aplicación -->
-    <a class="navbar-brand fw-bold " href="home.php">
-      <img src="../img/logo_sinfondo.png" alt="Logo de MercApp de la barra de navegacion" height="30"
-        class="d-inline-block align-middle">
+    <!-- Logo -->
+    <a class="navbar-brand fw-bold" href="home.php">
+      <img src="../img/logo_sinfondo.png" height="30" class="d-inline-block align-middle">
       MercApp
     </a>
 
-    <!-- Botón de colapso para móviles -->
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
-      aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+    <!-- Botón hamburguesa -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <!-- Contenido colapsable -->
     <div class="collapse navbar-collapse" id="navbarContent">
 
-      <!-- Buscador, solo si $showSearch está habilitado -->
-      <?php if (!empty($showSearch) && $showSearch === true): ?>
-        <div class="ms-auto" style="max-width: 500px; width: 100%;">
-          <form class="d-flex" role="search" method="get" action="home.php">
-            <input class="form-control me-2" type="search" name="q" id="navbar-search" placeholder="Buscar productos..."
-              aria-label="Buscar" value="<?php echo htmlspecialchars($_GET['q'] ?? '') ?>">
+      <!-- CONTENEDOR FLEXIBLE -->
+      <div class="w-100 d-flex flex-column flex-lg-row align-items-lg-center">
 
-            <button class="btn btn-light" type="submit" aria-label="Buscar productos">
-              <i class="bi bi-search"></i>
+        <!-- 1) PERFIL + TEMA (arriba en móvil, derecha en escritorio) -->
+        <div class="d-flex align-items-center justify-content-end order-1 order-lg-2 ms-lg-auto mb-3 mb-lg-0">
+
+          <!-- Dropdown usuario -->
+          <div class="dropdown me-2">
+            <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center" id="userMenu"
+              data-bs-toggle="dropdown">
+
+              <?php if (!empty($_SESSION["profile_photo"])): ?>
+                <img src="/MercApp/<?php echo htmlspecialchars($_SESSION["profile_photo"]) ?>" class="rounded-circle me-2"
+                  width="24" height="24">
+              <?php else: ?>
+                <i class="bi bi-person me-2 fs-5"></i>
+              <?php endif; ?>
+
+              Perfil
             </button>
-          </form>
-        </div>
-      <?php endif; ?>
 
-      <!-- Menú de usuario y toggle de tema -->
-      <div class="d-flex ms-auto align-items-center">
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="profile.php?id=<?php echo $_SESSION['user_id'] ?>"><i
+                    class="bi bi-person"></i> Mi perfil</a></li>
+              <li><a class="dropdown-item d-flex align-items-center"
+                  href="chat_list.php?id=<?php echo $_SESSION['user_id'] ?>"><i class="bi bi-envelope me-2"></i>Mensajes
+                  <span id="badge-mensajes" class="badge bg-danger ms-2"></span></a></li>
+              <li><a class="dropdown-item" href="upload_product.php"><i class="bi bi-upload"></i> Subir producto</a>
+              </li>
+              <li><a class="dropdown-item" href="../../public/views/help.php"><i class="bi bi-question-circle"></i>
+                  Ayuda</a></li>
+              <li><a class="dropdown-item" href="detail_account.php"><i class="bi bi-gear"></i> Ajustes de Cuenta</a>
+              </li>
+              <li><a class="dropdown-item" href="../../public/views/docs.php"><i class="bi bi-book"></i>
+                  Documentación</a></li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li><a class="dropdown-item text-danger" href="../../controllers/logout.php"><i
+                    class="bi bi-box-arrow-right"></i> Cerrar sesión</a></li>
+            </ul>
+          </div>
 
-        <!-- Dropdown de usuario -->
-        <div class="dropdown me-2">
-          <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center" type="button" id="userMenu"
-            data-bs-toggle="dropdown" aria-expanded="false">
-
-            <!-- Foto de perfil o icono por defecto -->
-            <?php if (!empty($_SESSION["profile_photo"])): ?>
-              <img src="/MercApp/<?php echo htmlspecialchars($_SESSION["profile_photo"]) ?>" alt="Foto de perfil"
-                class="rounded-circle me-2" width="24" height="24">
-            <?php else: ?>
-              <i class="bi bi-person me-2 fs-5"></i>
-            <?php endif; ?>
-
-            Perfil
-          </button>
-
-          <!-- Opciones del dropdown -->
-          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-            <li>
-              <a class="dropdown-item" href="profile.php?id=<?php echo htmlspecialchars($_SESSION['user_id']) ?>">
-                <i class="bi bi-person"></i> Mi perfil
-              </a>
-            </li>
-            <!-- Ver mensajes -->
-            <li>
-              <a class="dropdown-item d-flex align-items-center"
-                href="chat_list.php?id=<?php echo htmlspecialchars($_SESSION['user_id']) ?>">
-                <i class="bi bi-envelope me-2"></i>Mensajes
-                <span id="badge-mensajes" class="badge bg-danger ms-2">
-                </span>
-              </a>
-            </li>
-
-            <li>
-              <a class="dropdown-item" href="upload_product.php">
-                <i class="bi bi-upload"></i> Subir producto
-              </a>
-            </li>
-            <li> <a class="dropdown-item" href="../../public/views/help.php"> <i class="bi bi-question-circle"></i>
-                Ayuda </a> </li>
-            <li>
-              <a class="dropdown-item" href="detail_account.php">
-                <i class="bi bi-gear"></i> Ajustes de Cuenta
-              </a>
-            </li>
-            <!-- Documentación -->
-            <a class="dropdown-item" href="../../public/views/docs.php">
-              <i class="bi bi-book"></i> Documentación
-            </a>
-            </li>
-            <li>
-              <hr class="dropdown-divider">
-            </li>
-            <li>
-              <!-- Cerrar sesión -->
-              <a class="dropdown-item text-danger" href="../../controllers/logout.php">
-                <i class="bi bi-box-arrow-right"></i> Cerrar sesión
-              </a>
-            </li>
-            <li>
-          </ul>
+          <!-- Botón tema -->
+          <button id="themeToggle" class="btn btn-outline-light rounded-circle">🌙</button>
         </div>
 
-        <!-- Botón de toggle de tema (claro/oscuro) -->
-        <button id="themeToggle" class="btn btn-outline-light rounded-circle" aria-label="Cambiar tema">🌙</button>
+        <!-- 2) BUSCADOR (abajo en móvil, centrado en escritorio) -->
+        <?php if (!empty($showSearch) && $showSearch === true): ?>
+          <div class="order-2 order-lg-1 mx-lg-auto" style="max-width: 500px; width: 100%;">
+            <form class="d-flex" method="get" action="home.php">
+              <input class="form-control me-2" type="search" name="q" placeholder="Buscar productos..."
+                value="<?php echo htmlspecialchars($_GET['q'] ?? '') ?>">
+              <button class="btn btn-light" type="submit"><i class="bi bi-search"></i></button>
+            </form>
+          </div>
+        <?php endif; ?>
+
       </div>
     </div>
   </div>
 </nav>
 
-<!-- Script para manejar cambio de tema -->
 <script src="../js/theme.js"></script>
