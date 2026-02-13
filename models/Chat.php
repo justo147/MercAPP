@@ -126,18 +126,26 @@ class Chat
      * @param int $productoId ID del producto.
      * @param int $compradorId ID del comprador.
      * @param int $vendedorId ID del vendedor.
-     * @return int|string ID del chat existente o recién creado.
+     * @return array{id:int, nuevo:bool} ID del chat existente o recién creado.
      */
-    public function getOrCreate(int $productoId, int $compradorId, int $vendedorId)
-    {
-        $chatId = $this->getExistingChat($productoId, $compradorId, $vendedorId);
+   public function getOrCreate(int $productoId, int $compradorId, int $vendedorId)
+{
+    $chatId = $this->getExistingChat($productoId, $compradorId, $vendedorId);
 
-        if ($chatId) {
-            return $chatId;
-        }
-
-        return $this->create($productoId, $compradorId, $vendedorId);
+    if ($chatId) {
+        return [
+            "id" => $chatId,
+            "nuevo" => false
+        ];
     }
+
+    $nuevoId = $this->create($productoId, $compradorId, $vendedorId);
+
+    return [
+        "id" => $nuevoId,
+        "nuevo" => true
+    ];
+}
 
     /* -----------------------------------------
        Verificar si un usuario pertenece al chat
@@ -208,7 +216,7 @@ public function getChatsByUser(int $userId)
                 SELECT COUNT(*) 
                 FROM Mensajes 
                 WHERE chat_id = c.id 
-                AND usuario_id != :uid 
+                AND (usuario_id != :uid OR usuario_id IS NULL)
                 AND leido = 0
             ) AS no_leidos
 
@@ -224,5 +232,18 @@ public function getChatsByUser(int $userId)
 
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
+
+
+public function setTransaction(int $chatId, int $transactionId)
+{
+    $sql = "UPDATE Chat SET transaccion_id = :tid WHERE id = :chatId";
+    $stmt = $this->conn->prepare($sql);
+    return $stmt->execute([
+        ':tid' => $transactionId,
+        ':chatId' => $chatId
+    ]);
+}
+
 
 }

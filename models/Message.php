@@ -80,77 +80,97 @@ class Message
     }
 
     public function markAsRead(int $chatId, int $userId)
-    {
-        $sql = "UPDATE Mensajes
+{
+    $sql = "UPDATE Mensajes
             SET leido = 1
             WHERE chat_id = :chat
-            AND usuario_id != :uid
+            AND usuario_id IS NOT NULL   -- NO marcar mensajes del sistema
+            AND usuario_id != :uid       -- solo mensajes del otro usuario
             AND leido = 0";
 
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute([
-            ":chat" => $chatId,
-            ":uid" => $userId
-        ]);
-    }
-
-    public function countUnread(int $chatId, int $userId)
-    {
-        $sql = "SELECT COUNT(*) FROM Mensajes
-            WHERE chat_id = :chat
-            AND usuario_id != :uid
-            AND leido = 0";
-
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute([
-            ":chat" => $chatId,
-            ":uid" => $userId
-        ]);
-
-        return $stmt->fetchColumn();
-    }
-
-    /**
- * Cuenta todos los mensajes sin leer del usuario en todos sus chats.
- *
- * @param int $userId
- * @return int
- */
-public function countAllUnread(int $userId)
-{
-    $sql = "SELECT COUNT(*) 
-            FROM Mensajes m
-            JOIN Chat c ON m.chat_id = c.id
-            WHERE m.usuario_id != :uid
-            AND m.leido = 0
-            AND (c.usuario_comprador = :uid OR c.usuario_vendedor = :uid)";
-
     $stmt = $this->conn->prepare($sql);
-    $stmt->execute([":uid" => $userId]);
-
-    return $stmt->fetchColumn();
-}
-
-/**
- * Envía un mensaje automático del sistema al chat.
- *
- * @param int $chatId
- * @param string $texto
- * @return bool
- */
-public function enviarMensajeSistema(int $chatId, string $texto): bool
-{
-    $sql = "INSERT INTO Mensajes (chat_id, usuario_id, contenido, leido)
-            VALUES (:chat, NULL, :contenido, 0)";
-
-    $stmt = $this->conn->prepare($sql);
-
-    return $stmt->execute([
-        ':chat' => $chatId,
-        ':contenido' => '[SISTEMA] ' . $texto
+    $stmt->execute([
+        ":chat" => $chatId,
+        ":uid" => $userId
     ]);
 }
 
 
+
+
+
+    public function countUnread(int $chatId, int $userId)
+{
+    $sql = "SELECT COUNT(*) 
+            FROM Mensajes
+            WHERE chat_id = :chat
+            AND (usuario_id != :uid OR usuario_id IS NULL)
+            AND leido = 0";
+
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute([
+        ":chat" => $chatId,
+        ":uid" => $userId
+    ]);
+
+    return $stmt->fetchColumn();
+}
+
+
+    /**
+     * Cuenta todos los mensajes sin leer del usuario en todos sus chats.
+     *
+     * @param int $userId
+     * @return int
+     */
+    public function countAllUnread(int $userId)
+    {
+        $sql = "SELECT COUNT(*) 
+            FROM Mensajes m
+            JOIN Chat c ON m.chat_id = c.id
+            WHERE (m.usuario_id != :uid OR m.usuario_id IS NULL)
+            AND m.leido = 0
+            AND (c.usuario_comprador = :uid OR c.usuario_vendedor = :uid)";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([":uid" => $userId]);
+
+        return $stmt->fetchColumn();
+    }
+
+
+    /**
+     * Envía un mensaje automático del sistema al chat.
+     *
+     * @param int $chatId
+     * @param string $texto
+     * @return bool
+     */
+    public function enviarMensajeSistema(int $chatId, string $texto): bool
+    {
+        $sql = "INSERT INTO Mensajes (chat_id, usuario_id, contenido, leido)
+            VALUES (:chat, NULL, :contenido, 0)";
+
+        $stmt = $this->conn->prepare($sql);
+
+        return $stmt->execute([
+            ':chat' => $chatId,
+            ':contenido' => '[SISTEMA] ' . $texto
+        ]);
+    }
+
+    public function markSystemAsRead(int $chatId)
+{
+    $sql = "UPDATE Mensajes
+            SET leido = 1
+            WHERE chat_id = :chat
+            AND usuario_id IS NULL
+            AND leido = 0";
+
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute([
+        ":chat" => $chatId
+    ]);
+}
 
 }

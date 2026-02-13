@@ -227,11 +227,14 @@ CREATE TABLE Chat (
   usuario_vendedor INT NOT NULL,
   fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
   estado ENUM('activo','cerrado') DEFAULT 'activo',
+  transaccion_id INT NULL,
   FOREIGN KEY (producto_id) REFERENCES Productos(id)
     ON DELETE SET NULL ON UPDATE CASCADE,
   FOREIGN KEY (usuario_comprador) REFERENCES Usuario(id)
     ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY (usuario_vendedor) REFERENCES Usuario(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (transaccion_id) REFERENCES Transacciones(id)
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 

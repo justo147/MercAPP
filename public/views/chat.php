@@ -35,15 +35,23 @@ if (!$chatModel->userBelongsToChat($chatId, $usuarioActual)) {
 // Info del chat
 $chat = $chatModel->getById($chatId);
 
-// Obtener última transacción del producto
-$transaccion = $transactionModel->getLastTransactionByProduct($chat["producto_id"]);
+$transaccion = null;
+
+if (!empty($chat["transaccion_id"])) {
+    $transaccion = $transactionModel->getById($chat["transaccion_id"]);
+}
+
 
 // Roles
 $esVendedor = ($usuarioActual == $chat["usuario_vendedor"]);
 $esComprador = ($usuarioActual == $chat["usuario_comprador"]);
 
-// Marcar mensajes como leídos
-$mensajeModel->markAsRead($chatId, $usuarioActual);
+// Solo marcar mensajes como leídos si es una petición GET (el usuario abre el chat)
+if ($_SERVER["REQUEST_METHOD"] === "GET") {
+    $mensajeModel->markAsRead($chatId, $usuarioActual);
+    $mensajeModel->markSystemAsRead($chatId);
+}
+
 
 // Enviar mensaje normal
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["mensaje"])) {

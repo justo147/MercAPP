@@ -49,13 +49,12 @@ $productoId = intval($chat["producto_id"]);
 $compradorId = intval($chat["usuario_comprador"]);
 $vendedorId = $usuarioActual;
 
-// Verificar si ya existe una transacción activa
-$transaccionActiva = $transactionModel->getActiveTransactionByProduct($productoId);
-
-if ($transaccionActiva) {
+// Si el chat ya tiene una transacción, no crear otra
+if (!empty($chat["transaccion_id"])) {
     header("Location: /MercApp/public/views/chat.php?id=" . $chatId);
     exit;
 }
+
 
 // Crear nueva transacción
 $transactionId = $transactionModel->createFromChat(
@@ -63,6 +62,9 @@ $transactionId = $transactionModel->createFromChat(
     $compradorId,
     $vendedorId
 );
+
+// Vincular transacción al chat
+$chatModel->setTransaction($chatId, $transactionId);
 
 // Cambiar estado de publicación a 'pausado'
 $productoModel->reservarProducto($productoId);

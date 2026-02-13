@@ -38,7 +38,19 @@ if ($vendedorId === $usuarioActual) {
 }
 
 // Crear o reutilizar chat
-$chatId = $chatModel->getOrCreate($productoId, $usuarioActual, $vendedorId);
+$resultado = $chatModel->getOrCreate($productoId, $usuarioActual, $vendedorId);
+$chatId = $resultado["id"];
+
+if ($resultado["nuevo"]) {
+    require_once __DIR__ . '/../models/Message.php';
+    $mensajeModel = new Message($conn);
+
+    // Mensaje para el vendedor
+    $mensajeModel->enviarMensajeSistema(
+        $chatId,
+        "El comprador ha iniciado un chat contigo."
+    );
+}
 
 // Redirigir al chat
 header("Location: ../public/views/chat.php?id=" . $chatId);
