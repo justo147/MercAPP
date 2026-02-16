@@ -80,3 +80,4 @@
 </nav>
 
 <script src="../js/theme.js"></script>
+<script src="/MercApp/public/js/navbar.js"></script>
