@@ -1,28 +1,21 @@
-<!-- Navbar principal -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4 shadow-sm" aria-label="Navegación principal">
   <div class="container-fluid">
 
-    <!-- Logo -->
     <a class="navbar-brand fw-bold" href="home.php">
       <img src="../img/logo_sinfondo.png" height="30" class="d-inline-block align-middle">
       MercApp
     </a>
 
-    <!-- Botón hamburguesa -->
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <!-- Contenido colapsable -->
     <div class="collapse navbar-collapse" id="navbarContent">
 
-      <!-- CONTENEDOR FLEXIBLE -->
       <div class="w-100 d-flex flex-column flex-lg-row align-items-lg-center">
 
-        <!-- 1) PERFIL + TEMA (arriba en móvil, derecha en escritorio) -->
         <div class="d-flex align-items-center justify-content-end order-1 order-lg-2 ms-lg-auto mb-3 mb-lg-0">
 
-          <!-- Dropdown usuario -->
           <div class="dropdown me-2">
             <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center" id="userMenu"
               data-bs-toggle="dropdown">
@@ -38,6 +31,15 @@
             </button>
 
             <ul class="dropdown-menu dropdown-menu-end">
+              
+              <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                <li>
+                  <a class="dropdown-item fw-bold text-primary bg-light" href="admin_dashboard.php">
+                    <i class="bi bi-shield-lock"></i> Panel de Admin
+                  </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+              <?php endif; ?>
               <li><a class="dropdown-item" href="profile.php?id=<?php echo $_SESSION['user_id'] ?>"><i
                     class="bi bi-person"></i> Mi perfil</a></li>
               <li><a class="dropdown-item d-flex align-items-center"
@@ -59,11 +61,9 @@
             </ul>
           </div>
 
-          <!-- Botón tema -->
           <button id="themeToggle" class="btn btn-outline-light rounded-circle">🌙</button>
         </div>
 
-        <!-- 2) BUSCADOR (abajo en móvil, centrado en escritorio) -->
         <?php if (!empty($showSearch) && $showSearch === true): ?>
           <div class="order-2 order-lg-1 mx-lg-auto" style="max-width: 500px; width: 100%;">
             <form class="d-flex" method="get" action="home.php">

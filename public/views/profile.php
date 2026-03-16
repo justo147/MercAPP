@@ -5,6 +5,7 @@
  * Redirige a login si no hay sesión activa
  */
 session_start();
+require_once __DIR__ . '/../../controllers/check_auth.php';
 //si no esta iniciada la session
 if (!isset($_SESSION["user_id"])) {
   header("location:auth/login.php");

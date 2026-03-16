@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../controllers/check_auth.php';
 include __DIR__ . '/../../controllers/chat_list.php';
 ?>
 

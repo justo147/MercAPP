@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once __DIR__ . '/../../controllers/check_auth.php';
 if (!isset($_SESSION["user_id"])) {
   header("Location: ../views/auth/login.php");
   exit;

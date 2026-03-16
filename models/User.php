@@ -131,7 +131,8 @@ class User
     public function verifyCredentials($email, $password)
     {
         $user = $this->getByEmail($email);
-        if (!$user) return false;
+        if (!$user)
+            return false;
 
         if (!password_verify($password, $user['contraseña_hash'])) {
             return false;
@@ -281,6 +282,67 @@ class User
         return $stmt->execute();
     }
 
+    /**
+     * Obtiene una lista paginada de todos los usuarios (para panel admin).
+     * Opcionalmente filtra por búsqueda (nombre o email).
+     *
+     * @param int $limit Número de resultados por página.
+     * @param int $offset Desplazamiento.
+     * @param string $search Término de búsqueda opcional.
+     * @return array Lista de usuarios.
+     */
+    public function getAllUsersPaginated($limit = 20, $offset = 0, $search = '')
+    {
+        $sql = "SELECT id, nombre, apellidos, email, telefono, fecha_registro, estado, rol 
+                FROM usuario 
+                WHERE 1=1";
+
+        if (!empty($search)) {
+            $sql .= " AND (nombre LIKE :search OR email LIKE :search OR apellidos LIKE :search)";
+        }
+
+        $sql .= " ORDER BY fecha_registro DESC LIMIT :limit OFFSET :offset";
+
+        $stmt = $this->db->prepare($sql);
+
+        if (!empty($search)) {
+            $searchTerm = "%$search%";
+            $stmt->bindParam(':search', $searchTerm, PDO::PARAM_STR);
+        }
+
+        $stmt->bindValue(':limit', (int) $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
+
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Cuenta el total de usuarios (para la paginación del panel admin).
+     *
+     * @param string $search Término de búsqueda opcional.
+     * @return int Total de usuarios.
+     */
+    public function countAllUsers($search = '')
+    {
+        $sql = "SELECT COUNT(*) FROM usuario WHERE 1=1";
+
+        if (!empty($search)) {
+            $sql .= " AND (nombre LIKE :search OR email LIKE :search OR apellidos LIKE :search)";
+        }
+
+        $stmt = $this->db->prepare($sql);
+
+        if (!empty($search)) {
+            $searchTerm = "%$search%";
+            $stmt->bindParam(':search', $searchTerm, PDO::PARAM_STR);
+        }
+
+        $stmt->execute();
+        return (int) $stmt->fetchColumn();
+    }
+
+
     /* ============================================================
        UTILIDADES
        ============================================================ */
@@ -336,7 +398,7 @@ class User
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$userId]);
 
-        return (int)$stmt->fetchColumn();
+        return (int) $stmt->fetchColumn();
     }
 
     /**
@@ -353,7 +415,7 @@ class User
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$userId]);
 
-        return (int)$stmt->fetchColumn();
+        return (int) $stmt->fetchColumn();
     }
 
     /**
@@ -383,12 +445,12 @@ class User
     public function obtenerEstadisticas($userId)
     {
         return [
-            "productos"          => $this->contarProductos($userId),
-            "activos"            => $this->contarActivos($userId),
-            "vendidos"           => $this->contarVendidos($userId),
-            "ventas"             => $this->contarVentas($userId),
-            "valoracion"         => $this->obtenerValoracion($userId),
-            "fecha_registro"     => $this->obtenerFechaRegistro($userId),
+            "productos" => $this->contarProductos($userId),
+            "activos" => $this->contarActivos($userId),
+            "vendidos" => $this->contarVendidos($userId),
+            "ventas" => $this->contarVentas($userId),
+            "valoracion" => $this->obtenerValoracion($userId),
+            "fecha_registro" => $this->obtenerFechaRegistro($userId),
             "ultima_publicacion" => $this->obtenerUltimaPublicacion($userId)
         ];
     }
@@ -407,7 +469,7 @@ class User
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$userId]);
 
-        return (int)$stmt->fetchColumn();
+        return (int) $stmt->fetchColumn();
     }
 
     /**
@@ -424,7 +486,7 @@ class User
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$userId]);
 
-        return (int)$stmt->fetchColumn();
+        return (int) $stmt->fetchColumn();
     }
 
     /**

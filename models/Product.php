@@ -36,6 +36,7 @@ class Product
 
     /**
      * Obtiene productos paginados para la página principal.
+     * * FILTRO DE SEGURIDAD: Solo muestra productos de usuarios con estado 'activo'.
      *
      * Incluye:
      * - nombre del usuario
@@ -44,21 +45,27 @@ class Product
      *
      * @param int $limit Número de productos a mostrar.
      * @param int $offset Desplazamiento para paginación.
+     * @param int|null $userId ID del usuario actual para excluir sus propios productos.
      * @return array Lista de productos con imágenes.
      */
     public function getPaginated($limit, $offset, $userId = null)
     {
+        // 1. Base de la consulta con JOIN a Usuario para verificar su estado
         $sql = "SELECT 
                     p.*, 
                     u.nombre AS usuario_nombre,
                     c.nombre AS categoria_nombre
                 FROM Productos p
                 JOIN Usuario u ON p.usuario_id = u.id
-                JOIN Categorias c ON p.categoria_id = c.id";
+                JOIN Categorias c ON p.categoria_id = c.id
+                WHERE u.estado = 'activo'"; // Solo vendedores activos
 
+        // 2. Si hay un usuario logueado, excluimos sus productos del Home
         if ($userId !== null) {
-            $sql .= " WHERE p.usuario_id != :uid";
+            $sql .= " AND p.usuario_id != :uid";
         }
+
+        // 3. Orden y paginación
         $sql .= " ORDER BY p.fecha_publicacion DESC LIMIT :limit OFFSET :offset";
 
         $stmt = $this->conn->prepare($sql);
@@ -73,6 +80,7 @@ class Product
 
         $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+        // Adjuntar las imágenes antes de devolver
         return $this->attachImages($productos);
     }
 
@@ -105,15 +113,11 @@ class Product
     ------------------------------------------ */
 
     /**
-     * Obtiene un producto por su ID, incluyendo:
-     * - categoría
-     * - estado del producto
-     * - estado de publicación
-     * - datos del usuario
-     * - imágenes asociadas
+     * Obtiene un producto por su ID, incluyendo datos del vendedor y su estado.
+     * FILTRO DE SEGURIDAD: Solo devuelve el producto si el vendedor está 'activo'.
      *
      * @param int $id ID del producto.
-     * @return array|null Datos del producto o null si no existe.
+     * @return array|null Datos del producto o null si no existe o el vendedor está bloqueado.
      */
     public function getById($id)
     {
@@ -123,7 +127,8 @@ class Product
                     ep.nombre AS estado_producto,
                     epu.nombre AS estado_publicacion,
                     u.nombre AS usuario_nombre,
-                    u.email AS usuario_email
+                    u.email AS usuario_email,
+                    u.estado AS usuario_estado
                 FROM Productos p
                 JOIN Categorias c ON p.categoria_id = c.id
                 JOIN EstadoProducto ep ON p.estado_producto_id = ep.id
@@ -137,9 +142,14 @@ class Product
 
         $producto = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($producto) {
-            $producto["imagenes"] = $this->getImages($producto["id"]);
+        // --- BLOQUE DE SEGURIDAD ---
+        // Si no se encuentra el producto O el estado del vendedor no es 'activo', devolvemos null
+        if (!$producto || $producto['usuario_estado'] !== 'activo') {
+            return null;
         }
+
+        // Si pasa el filtro, adjuntamos las imágenes
+        $producto["imagenes"] = $this->getImages($producto["id"]);
 
         return $producto;
     }
@@ -402,14 +412,8 @@ class Product
 
     /**
      * Realiza una búsqueda avanzada con múltiples filtros:
-     * - texto
-     * - categoría
-     * - estado del producto
-     * - tipo de transacción
-     * - rango de precio
-     * - ubicación
-     * - orden
-     * - paginación
+     * - texto, categoría, estado, transacción, precio, ubicación, orden, paginación
+     * - FILTRO DE SEGURIDAD: Solo usuarios activos.
      *
      * @param array $filters Filtros aplicados.
      * @return array Lista de productos filtrados.
@@ -427,7 +431,7 @@ class Product
                 JOIN EstadoProducto ep ON p.estado_producto_id = ep.id
                 JOIN EstadoPublicacion epu ON p.estado_publicacion_id = epu.id
                 JOIN Usuario u ON p.usuario_id = u.id
-                WHERE 1=1";
+                WHERE u.estado = 'activo'"; // <--- CAMBIO AQUÍ: Reemplazamos 1=1 por el filtro de estado
 
         $params = [];
 
@@ -608,103 +612,90 @@ class Product
             ":id" => $imageId
         ]);
 
-    }public function getRandomProducts(int $limit = 10, int $excludeId = 0): array
-{
-    // -------------------------------------------------------------
-    // 1. Construcción de la consulta base
-    // -------------------------------------------------------------
-    // Selecciona productos que estén publicados (estado_publicacion_id = 1)
-    // Esto evita mostrar productos pausados o vendidos.
-    $sql = "SELECT *
-            FROM Productos
-            WHERE estado_publicacion_id = 1";
-
-    // -------------------------------------------------------------
-    // 2. Exclusión opcional del producto actual
-    // -------------------------------------------------------------
-    // Si se pasa un ID para excluir, se añade a la consulta.
-    // Esto evita que el producto que se está viendo aparezca en sugeridos.
-    if ($excludeId > 0) {
-        $sql .= " AND id != :excludeId";
     }
 
-    // -------------------------------------------------------------
-    // 3. Orden aleatorio y límite de resultados
-    // -------------------------------------------------------------
-    // ORDER BY RAND() genera productos aleatorios.
-    // LIMIT controla cuántos productos se devuelven.
-    $sql .= " ORDER BY RAND() LIMIT :lim";
+    public function getRandomProducts(int $limit = 10, int $excludeId = 0): array
+    {
+        // -------------------------------------------------------------
+        // 1. Construcción de la consulta base con JOIN de seguridad
+        // -------------------------------------------------------------
+        // Seleccionamos p.* para obtener los datos del producto
+        // JOIN con Usuario (u) para verificar que el vendedor no esté baneado/eliminado
+        $sql = "SELECT p.*
+            FROM Productos p
+            JOIN Usuario u ON p.usuario_id = u.id
+            WHERE p.estado_publicacion_id = 1 
+            AND u.estado = 'activo'"; // <--- FILTRO DE SEGURIDAD
 
-    // Se prepara la consulta
-    $stmt = $this->conn->prepare($sql);
+        // -------------------------------------------------------------
+        // 2. Exclusión opcional del producto actual
+        // -------------------------------------------------------------
+        if ($excludeId > 0) {
+            $sql .= " AND p.id != :excludeId";
+        }
 
-    // -------------------------------------------------------------
-    // 4. Enlace de parámetros seguros
-    // -------------------------------------------------------------
-    // Se enlaza el ID a excluir si corresponde
-    if ($excludeId > 0) {
-        $stmt->bindValue(":excludeId", $excludeId, PDO::PARAM_INT);
+        // -------------------------------------------------------------
+        // 3. Orden aleatorio y límite de resultados
+        // -------------------------------------------------------------
+        $sql .= " ORDER BY RAND() LIMIT :lim";
+
+        $stmt = $this->conn->prepare($sql);
+
+        // -------------------------------------------------------------
+        // 4. Enlace de parámetros seguros
+        // -------------------------------------------------------------
+        if ($excludeId > 0) {
+            $stmt->bindValue(":excludeId", $excludeId, PDO::PARAM_INT);
+        }
+
+        $stmt->bindValue(":lim", $limit, PDO::PARAM_INT);
+
+        // -------------------------------------------------------------
+        // 5. Ejecución de la consulta
+        // -------------------------------------------------------------
+        $stmt->execute();
+
+        // -------------------------------------------------------------
+        // 6. Obtención de los productos
+        // -------------------------------------------------------------
+        $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // -------------------------------------------------------------
+        // 7. Adjuntar imágenes
+        // -------------------------------------------------------------
+        return $this->attachImages($productos);
     }
-
-    // Se enlaza el límite de productos a devolver
-    $stmt->bindValue(":lim", $limit, PDO::PARAM_INT);
-
-    // -------------------------------------------------------------
-    // 5. Ejecución de la consulta
-    // -------------------------------------------------------------
-    $stmt->execute();
-
-    // -------------------------------------------------------------
-    // 6. Obtención de los productos como array asociativo
-    // -------------------------------------------------------------
-    $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // -------------------------------------------------------------
-    // 7. Adjuntar imágenes a cada producto
-    // -------------------------------------------------------------
-    // attachImages() es un método del modelo que añade las imágenes
-    // correspondientes a cada producto antes de devolverlos.
-    return $this->attachImages($productos);
-}
-
-
-
-
-
-
-    
-
 
     /**
      * Cambia el estado de publicación de un producto.
      */
-   /**
- * Cambia el estado de publicación del producto.
- */
-public function cambiarEstadoPublicacion(int $productoId, string $estadoNombre): bool
-{
-    // Obtener ID del estado por nombre
-    $sql = "UPDATE Productos 
+    /**
+     * Cambia el estado de publicación del producto.
+     */
+    public function cambiarEstadoPublicacion(int $productoId, string $estadoNombre): bool
+    {
+        // Obtener ID del estado por nombre
+        $sql = "UPDATE Productos 
             SET estado_publicacion_id = (
                 SELECT id FROM EstadoPublicacion WHERE nombre = :estado
             )
             WHERE id = :id";
 
-    $stmt = $this->conn->prepare($sql);
+        $stmt = $this->conn->prepare($sql);
 
-    return $stmt->execute([
-        ':estado' => $estadoNombre,
-        ':id'     => $productoId
-    ]);
-}
+        return $stmt->execute([
+            ':estado' => $estadoNombre,
+            ':id' => $productoId
+        ]);
+    }
 
-/**
- * Poner producto en estado 'pausado' (reservado).
- */
-public function reservarProducto(int $productoId): bool
-{
-    return $this->cambiarEstadoPublicacion($productoId, 'pausado');
-}
+    /**
+     * Poner producto en estado 'pausado' (reservado).
+     */
+    public function reservarProducto(int $productoId): bool
+    {
+        return $this->cambiarEstadoPublicacion($productoId, 'pausado');
+    }
 
 
     /**

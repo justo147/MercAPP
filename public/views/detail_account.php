@@ -1,5 +1,6 @@
 <?php
 // Incluye el handler que procesa la lógica de detalle de cuenta (actualización de datos, foto, etc.)
+require_once __DIR__ . '/../../controllers/check_auth.php';
 require_once __DIR__ . '/../../controllers/handlers/detail_account_handlers.php';
 ?>
 <!DOCTYPE html>
