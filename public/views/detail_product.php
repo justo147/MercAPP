@@ -66,19 +66,19 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
                     <!-- Imagen principal -->
                     <?php if (!empty($producto['imagenes'])): ?>
                         <img src="/MercApp/<?= htmlspecialchars($producto['imagenes'][0]['url']) ?>"
-                             class="img-fluid rounded mb-3" alt="Imagen del producto">
+                            class="img-fluid rounded mb-3" alt="Imagen del producto">
                     <?php else: ?>
                         <img src="/uploads/products/default.jpg"
-                             class="img-fluid rounded mb-3" alt="Imagen por defecto">
+                            class="img-fluid rounded mb-3" alt="Imagen por defecto">
                     <?php endif; ?>
 
                     <!-- Miniaturas -->
                     <div class="d-flex flex-wrap gap-2">
                         <?php foreach ($producto['imagenes'] as $img): ?>
                             <img src="/<?= htmlspecialchars($img['url']) ?>"
-                                 class="img-thumbnail"
-                                 style="width: 80px; height: 80px; object-fit: cover;"
-                                 alt="Miniatura">
+                                class="img-thumbnail"
+                                style="width: 80px; height: 80px; object-fit: cover;"
+                                alt="Miniatura">
                         <?php endforeach; ?>
                     </div>
 
@@ -113,13 +113,14 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
                         <?php endif; ?>
                     </div>
 
-                    <!-- Botón de favoritos -->
+                    <!-- Botón de favoritos (Bootstrap Icons) -->
                     <button id="favBtn"
-                            class="btn btn-outline-danger mb-3"
-                            style="font-size: 1.7rem;"
-                            onclick="toggleFavorito(<?= $producto['id'] ?>)">
-                        🤍
+                        class="btn btn-outline-danger mb-3 d-flex align-items-center justify-content-center"
+                        style="width: 55px; height: 55px; border-radius: 50%; font-size: 1.6rem;"
+                        onclick="toggleFavorito(<?= $producto['id'] ?>)">
+                        <i class="bi bi-heart"></i>
                     </button>
+
 
                     <!-- Botón comprar -->
                     <form method="post" action="cart.php" class="mb-3">
@@ -131,7 +132,7 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
 
                     <!-- Contactar con el vendedor -->
                     <a href="/MercApp/controllers/chat_start.php?producto_id=<?= $producto["id"] ?>"
-                       class="btn btn-primary w-100 mb-3 d-flex align-items-center justify-content-center gap-2">
+                        class="btn btn-primary w-100 mb-3 d-flex align-items-center justify-content-center gap-2">
                         <i class="bi bi-chat-dots"></i>
                         Contactar con el vendedor
                     </a>
@@ -178,9 +179,9 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
                                 <div class="d-flex justify-content-center">
                                     <a href="detail_product.php?id=<?= $s['id'] ?>" class="text-center">
                                         <img src="/<?= htmlspecialchars($img) ?>"
-                                             class="d-block"
-                                             style="width: 200px; height: 200px; object-fit: cover;"
-                                             alt="Producto sugerido">
+                                            class="d-block"
+                                            style="width: 200px; height: 200px; object-fit: cover;"
+                                            alt="Producto sugerido">
 
                                         <p class="mt-2 fw-bold"><?= htmlspecialchars($s['titulo']) ?></p>
                                         <p class="text-success"><?= number_format($s['precio'], 2) ?> €</p>
@@ -211,38 +212,44 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
 
     <?php include __DIR__ . '/footer.php'; ?>
 
-    <!-- Script: gestión de favoritos -->
-    <script>
+   <!-- Script: gestión de favoritos con Bootstrap Icons -->
+<script>
     /**
      * Alterna entre añadir y eliminar un producto de favoritos.
      */
     function toggleFavorito(productoId) {
 
         fetch(`/MercApp/controllers/handlers/is_favorite_handle.php?producto_id=${productoId}`)
-        .then(r => r.text())
-        .then(esFav => {
+            .then(r => r.text())
+            .then(esFav => {
 
-            if (esFav == "1") {
-                // Eliminar de favoritos
-                fetch("/MercApp/controllers/handlers/remove_favorite_handle.php", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                    body: `producto_id=${productoId}`
-                }).then(() => {
-                    document.getElementById("favBtn").innerHTML = "🤍";
-                });
+                if (esFav == "1") {
+                    // Eliminar de favoritos
+                    fetch("/MercApp/controllers/handlers/remove_favorite_handle.php", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },
+                        body: `producto_id=${productoId}`
+                    }).then(() => {
+                        document.getElementById("favBtn").innerHTML =
+                            '<i class="bi bi-heart"></i>';
+                    });
 
-            } else {
-                // Añadir a favoritos
-                fetch("/MercApp/controllers/handlers/add_favorite_handle.php", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                    body: `producto_id=${productoId}`
-                }).then(() => {
-                    document.getElementById("favBtn").innerHTML = "❤️";
-                });
-            }
-        });
+                } else {
+                    // Añadir a favoritos
+                    fetch("/MercApp/controllers/handlers/add_favorite_handle.php", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },
+                        body: `producto_id=${productoId}`
+                    }).then(() => {
+                        document.getElementById("favBtn").innerHTML =
+                            '<i class="bi bi-heart-fill"></i>';
+                    });
+                }
+            });
     }
 
     /**
@@ -253,12 +260,17 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
         const productoId = <?= $producto['id'] ?>;
 
         fetch(`/MercApp/controllers/handlers/is_favorite_handle.php?producto_id=${productoId}`)
-        .then(r => r.text())
-        .then(esFav => {
-            document.getElementById("favBtn").innerHTML = esFav == "1" ? "❤️" : "🤍";
-        });
+            .then(r => r.text())
+            .then(esFav => {
+                document.getElementById("favBtn").innerHTML =
+                    esFav == "1"
+                        ? '<i class="bi bi-heart-fill"></i>'
+                        : '<i class="bi bi-heart"></i>';
+            });
     });
-    </script>
+</script>
+
 
 </body>
+
 </html>
