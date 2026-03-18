@@ -45,6 +45,7 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
     <script src="../js/detailProduct.js" defer></script>
+    <script src="../js/favorite.js" defer> </script>
 </head>
 
 <body>
@@ -212,64 +213,14 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
 
     <?php include __DIR__ . '/footer.php'; ?>
 
-   <!-- Script: gestión de favoritos con Bootstrap Icons -->
-<script>
-    /**
-     * Alterna entre añadir y eliminar un producto de favoritos.
-     */
-    function toggleFavorito(productoId) {
 
-        fetch(`/MercApp/controllers/handlers/is_favorite_handle.php?producto_id=${productoId}`)
-            .then(r => r.text())
-            .then(esFav => {
+    <!-- Pasamos el ID del producto desde PHP al archivo JS externo -->
+    <script>
+        window.productoIdGlobal = <?= $producto['id'] ?>;
+    </script>
 
-                if (esFav == "1") {
-                    // Eliminar de favoritos
-                    fetch("/MercApp/controllers/handlers/remove_favorite_handle.php", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/x-www-form-urlencoded"
-                        },
-                        body: `producto_id=${productoId}`
-                    }).then(() => {
-                        document.getElementById("favBtn").innerHTML =
-                            '<i class="bi bi-heart"></i>';
-                    });
-
-                } else {
-                    // Añadir a favoritos
-                    fetch("/MercApp/controllers/handlers/add_favorite_handle.php", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/x-www-form-urlencoded"
-                        },
-                        body: `producto_id=${productoId}`
-                    }).then(() => {
-                        document.getElementById("favBtn").innerHTML =
-                            '<i class="bi bi-heart-fill"></i>';
-                    });
-                }
-            });
-    }
-
-    /**
-     * Al cargar la página, se consulta si el producto ya está en favoritos
-     * para mostrar el icono correcto.
-     */
-    document.addEventListener("DOMContentLoaded", () => {
-        const productoId = <?= $producto['id'] ?>;
-
-        fetch(`/MercApp/controllers/handlers/is_favorite_handle.php?producto_id=${productoId}`)
-            .then(r => r.text())
-            .then(esFav => {
-                document.getElementById("favBtn").innerHTML =
-                    esFav == "1"
-                        ? '<i class="bi bi-heart-fill"></i>'
-                        : '<i class="bi bi-heart"></i>';
-            });
-    });
-</script>
-
+    <!-- Cargamos el archivo externo que gestiona los favoritos -->
+    <script src="/MercApp/public/js/favoritos.js"></script>
 
 </body>
 
