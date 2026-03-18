@@ -16,6 +16,12 @@
 
         <div class="d-flex align-items-center justify-content-end order-1 order-lg-2 ms-lg-auto mb-3 mb-lg-0">
 
+          <!-- Nuevo botón de seguidores -->
+          <a href="followers_products.php?id=<?php echo $_SESSION['user_id'] ?>"
+            class="btn btn-outline-light me-2 d-flex align-items-center">
+            <i class="bi bi-people-fill me-1"></i> Seguidores
+          </a>
+
           <div class="dropdown me-2">
             <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center" id="userMenu"
               data-bs-toggle="dropdown">
@@ -31,14 +37,16 @@
             </button>
 
             <ul class="dropdown-menu dropdown-menu-end">
-              
+
               <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
                 <li>
                   <a class="dropdown-item fw-bold text-primary bg-light" href="admin_dashboard.php">
                     <i class="bi bi-shield-lock"></i> Panel de Admin
                   </a>
                 </li>
-                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <hr class="dropdown-divider">
+                </li>
               <?php endif; ?>
               <li><a class="dropdown-item" href="profile.php?id=<?php echo $_SESSION['user_id'] ?>"><i
                     class="bi bi-person"></i> Mi perfil</a></li>

@@ -523,4 +523,67 @@ class User
 
         return $stmt->fetchColumn();
     }
+
+
+    public function seguirUsuario($seguidorId, $seguidoId)
+{
+    $sql = "INSERT INTO Seguidores (seguidor_id, seguido_id)
+            VALUES (?, ?)";
+
+    $stmt = $this->db->prepare($sql);
+
+    try {
+        return $stmt->execute([$seguidorId, $seguidoId]);
+    } catch (PDOException $e) {
+        // Si intenta seguir dos veces o se viola el CHECK, capturamos el error
+        return false;
+    }
+}
+
+
+public function dejarDeSeguir($seguidorId, $seguidoId)
+{
+    $sql = "DELETE FROM Seguidores
+            WHERE seguidor_id = ? AND seguido_id = ?";
+
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute([$seguidorId, $seguidoId]);
+
+    return $stmt->rowCount() > 0;
+}
+public function obtenerSeguidores($usuarioId)
+{
+    $sql = "SELECT u.id, u.nombre, u.apellidos, u.foto_perfil, s.fecha_seguimiento
+            FROM Seguidores s
+            JOIN Usuario u ON u.id = s.seguidor_id
+            WHERE s.seguido_id = ?
+            ORDER BY s.fecha_seguimiento DESC";
+
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute([$usuarioId]);
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+public function obtenerSeguidos($usuarioId)
+{
+    $sql = "SELECT u.id, u.nombre, u.apellidos, u.foto_perfil, s.fecha_seguimiento
+            FROM Seguidores s
+            JOIN Usuario u ON u.id = s.seguido_id
+            WHERE s.seguidor_id = ?
+            ORDER BY s.fecha_seguimiento DESC";
+
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute([$usuarioId]);
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+public function sigueA($seguidorId, $seguidoId)
+{
+    $sql = "SELECT 1 FROM Seguidores WHERE seguidor_id = ? AND seguido_id = ?";
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute([$seguidorId, $seguidoId]);
+    return $stmt->fetchColumn() ? true : false;
+}
+
 }

@@ -714,4 +714,75 @@ class Product
         return $this->cambiarEstadoPublicacion($productoId, 'activo');
     }
 
+    public function getProductsFromFollowing($userId, $limit, $offset, $q)
+{
+    $sql = "SELECT 
+                p.id, p.titulo, p.descripcion, p.precio, p.fecha_publicacion,
+                p.usuario_id, u.nombre, u.apellidos,
+                (
+                    SELECT CONCAT(
+                        '[', 
+                        GROUP_CONCAT(
+                            CONCAT('{\"url\":\"', ip.url, '\"}')
+                        ),
+                        ']'
+                    )
+                    FROM Imagenes_prod ip
+                    WHERE ip.id_producto = p.id
+                ) AS imagenes
+            FROM Productos p
+            JOIN usuario u ON u.id = p.usuario_id
+            JOIN Seguidores s ON s.seguido_id = p.usuario_id
+            WHERE s.seguidor_id = ?
+              AND p.estado_publicacion_id = 1
+              AND (p.titulo LIKE ? OR p.descripcion LIKE ?)
+            ORDER BY p.fecha_publicacion DESC
+            LIMIT ? OFFSET ?";
+
+    $stmt = $this->conn->prepare($sql);
+
+    $search = "%$q%";
+
+    // Forzar tipos enteros
+    $limit = (int)$limit;
+    $offset = (int)$offset;
+
+    $stmt->bindValue(1, $userId, PDO::PARAM_INT);
+    $stmt->bindValue(2, $search, PDO::PARAM_STR);
+    $stmt->bindValue(3, $search, PDO::PARAM_STR);
+    $stmt->bindValue(4, $limit, PDO::PARAM_INT);
+    $stmt->bindValue(5, $offset, PDO::PARAM_INT);
+
+    $stmt->execute();
+
+    $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Convertir el JSON de imágenes a array real
+    foreach ($productos as &$p) {
+        $p['imagenes'] = json_decode($p['imagenes'], true) ?? [];
+    }
+
+    return $productos;
+}
+
+
+
+
+
+public function countProductsFromFollowing($userId, $q)
+{
+    $sql = "SELECT COUNT(*)
+            FROM Productos p
+            JOIN Seguidores s ON s.seguido_id = p.usuario_id
+            WHERE s.seguidor_id = ?
+              AND (p.titulo LIKE ? OR p.descripcion LIKE ?)";
+
+    $stmt = $this->conn->prepare($sql);
+    $search = "%$q%";
+    $stmt->execute([$userId, $search, $search]);
+
+    return $stmt->fetchColumn();
+}
+
+
 }

@@ -157,11 +157,22 @@ $esPropietario = ($perfilId === $usuarioLogueado);
                   </a>
 
                   <?php
-                  // Mostrar botón Follow si no es el propio perfil
-                  if (!$esPropietario) {
-                    echo "<button class='flex-grow-1 btn btn-primary'>Follow</button>";
-                  }
-                  ?>
+                  require_once __DIR__ . '/../../models/User.php';
+                  $db = new Database();
+                  $conn = $db->getConnection();
+                  $usuarioPDO = new User($conn);
+                  $yaSigue = $usuarioPDO->sigueA($usuarioLogueado, $perfilId);
+
+                  if (!$esPropietario): ?>
+                    <button id="btn-follow" class="flex-grow-1 btn <?= $yaSigue ? 'btn-secondary' : 'btn-primary' ?>"
+                      data-seguidor="<?= $usuarioLogueado ?>" data-seguido="<?= $perfilId ?>"
+                      data-sigue="<?= $yaSigue ? '1' : '0' ?>">
+                      <?= $yaSigue ? 'Siguiendo' : 'Seguir' ?>
+                    </button>
+                  <?php endif; ?>
+
+
+
                 </div>
 
               </div>
@@ -229,28 +240,102 @@ $esPropietario = ($perfilId === $usuarioLogueado);
       </div>
     </div>
   </div>
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
+ <script>
+document.addEventListener("DOMContentLoaded", () => {
 
-      const modal = document.getElementById("modalEliminarProducto");
-      const btnConfirmar = document.getElementById("btnConfirmarEliminar");
-      const params = new URLSearchParams(window.location.search);
+    /* ============================================================
+       MODAL ELIMINAR PRODUCTO
+    ============================================================ */
+    const modal = document.getElementById("modalEliminarProducto");
+    const btnConfirmar = document.getElementById("btnConfirmarEliminar");
+    const params = new URLSearchParams(window.location.search);
 
-      modal.addEventListener("show.bs.modal", event => {
-        const button = event.relatedTarget;
-        const productId = button.getAttribute("data-product-id");
+    if (modal) {
+        modal.addEventListener("show.bs.modal", event => {
+            const button = event.relatedTarget;
+            const productId = button.getAttribute("data-product-id");
+            btnConfirmar.href = `/MercApp/controllers/handlers/delete_product_handler.php?id=${productId}`;
+        });
+    }
 
-        // Establecer la URL del botón de confirmación
-        btnConfirmar.href = `/MercApp/controllers/handlers/delete_product_handler.php?id=${productId}`;
-      });
-
-      if (params.has("deleted")) {
+    if (params.has("deleted")) {
         const toast = new bootstrap.Toast(document.getElementById("toastEliminado"));
         toast.show();
-      }
+    }
 
+    /* ============================================================
+       SISTEMA SEGUIR / SIGUIENDO / DEJAR DE SEGUIR
+    ============================================================ */
+    const btnFollow = document.getElementById("btn-follow");
+    if (!btnFollow) return;
+
+    let sigue = btnFollow.dataset.sigue === "1";
+
+    actualizarBoton();
+
+    // Hover: cambiar a "Dejar de seguir"
+    btnFollow.addEventListener("mouseenter", () => {
+        if (sigue) btnFollow.textContent = "Dejar de seguir";
     });
-  </script>
+
+    // Salir del hover: volver a "Siguiendo"
+    btnFollow.addEventListener("mouseleave", () => {
+        if (sigue) btnFollow.textContent = "Siguiendo";
+    });
+
+    // Click: seguir o dejar de seguir
+    btnFollow.addEventListener("click", () => {
+
+        const seguidor = btnFollow.dataset.seguidor;
+        const seguido  = btnFollow.dataset.seguido;
+
+        const url = sigue
+            ? "/MercApp/controllers/unfollow.php"
+            : "/MercApp/controllers/follow.php";
+
+        fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: `seguidor=${seguidor}&seguido=${seguido}`
+        })
+        .then(res => res.json())
+        .then(data => {
+
+            if (!data.success) {
+                console.error("Error:", data);
+                alert("Error al actualizar seguimiento");
+                return;
+            }
+
+            sigue = !sigue;
+            btnFollow.dataset.sigue = sigue ? "1" : "0";
+
+            actualizarBoton();
+        })
+        .catch(err => {
+            console.error("Fetch error:", err);
+        });
+    });
+
+    /* ============================================================
+       FUNCIÓN PARA ACTUALIZAR EL BOTÓN
+    ============================================================ */
+    function actualizarBoton() {
+        if (sigue) {
+            btnFollow.classList.remove("btn-primary");
+            btnFollow.classList.add("btn-secondary");
+            btnFollow.textContent = "Siguiendo";
+        } else {
+            btnFollow.classList.remove("btn-secondary");
+            btnFollow.classList.add("btn-primary");
+            btnFollow.textContent = "Seguir";
+        }
+    }
+
+});
+</script>
+
+
 
 </body>
 
