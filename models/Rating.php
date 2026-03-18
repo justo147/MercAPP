@@ -169,6 +169,32 @@ class Rating
     }
 
     /* ============================================================
+       COMPROBACIONES
+    ============================================================ */
+
+    /**
+     * Comprueba si un usuario ya ha valorado una transacción concreta.
+     *
+     * @param int $transaccionId
+     * @param int $usuarioValorador
+     * @return bool
+     */
+    public function hasRated($transaccionId, $usuarioValorador)
+    {
+        $sql = "SELECT COUNT(*) FROM valoraciones
+                WHERE transaccion_id = :transaccion_id
+                  AND usuario_valorador = :usuario_valorador";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([
+            ':transaccion_id'    => $transaccionId,
+            ':usuario_valorador' => $usuarioValorador
+        ]);
+
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
+    /* ============================================================
        ELIMINAR
     ============================================================ */
 
