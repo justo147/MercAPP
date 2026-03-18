@@ -284,6 +284,23 @@ CREATE TABLE Reportes (
     ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
+
+CREATE TABLE Seguidores (
+  seguidor_id INT NOT NULL,
+  seguido_id INT NOT NULL,
+  fecha_seguimiento DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+  PRIMARY KEY (seguidor_id, seguido_id),
+
+  FOREIGN KEY (seguidor_id) REFERENCES Usuario(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+
+  FOREIGN KEY (seguido_id) REFERENCES Usuario(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+
+  CONSTRAINT chk_no_auto_follow CHECK (seguidor_id <> seguido_id)
+) ENGINE=InnoDB;
+
 -- -----------------------------
 -- Buenas prácticas adicionales
 -- -----------------------------
