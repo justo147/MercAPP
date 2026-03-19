@@ -16,11 +16,18 @@
 
         <div class="d-flex align-items-center justify-content-end order-1 order-lg-2 ms-lg-auto mb-3 mb-lg-0">
 
-          <!-- Nuevo botón de seguidores -->
+          <!-- Botón de seguidores -->
           <a href="followers_products.php?id=<?php echo $_SESSION['user_id'] ?>"
             class="btn btn-outline-light me-2 d-flex align-items-center">
             <i class="bi bi-people-fill me-1"></i> Seguidores
           </a>
+
+          <!-- Botón de favoritos -->
+          <a href="my_favorites.php"
+            class="btn btn-outline-light me-2 d-flex align-items-center">
+            <i class="bi bi-heart me-1"></i> Favoritos
+          </a>
+
 
           <div class="dropdown me-2">
             <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center" id="userMenu"
@@ -48,24 +55,41 @@
                   <hr class="dropdown-divider">
                 </li>
               <?php endif; ?>
-              <li><a class="dropdown-item" href="profile.php?id=<?php echo $_SESSION['user_id'] ?>"><i
-                    class="bi bi-person"></i> Mi perfil</a></li>
+
+              <li><a class="dropdown-item" href="profile.php?id=<?php echo $_SESSION['user_id'] ?>">
+                  <i class="bi bi-person"></i> Mi perfil
+                </a></li>
+
               <li><a class="dropdown-item d-flex align-items-center"
-                  href="chat_list.php?id=<?php echo $_SESSION['user_id'] ?>"><i class="bi bi-envelope me-2"></i>Mensajes
-                  <span id="badge-mensajes" class="badge bg-danger ms-2"></span></a></li>
-              <li><a class="dropdown-item" href="upload_product.php"><i class="bi bi-upload"></i> Subir producto</a>
-              </li>
-              <li><a class="dropdown-item" href="../../public/views/help.php"><i class="bi bi-question-circle"></i>
-                  Ayuda</a></li>
-              <li><a class="dropdown-item" href="detail_account.php"><i class="bi bi-gear"></i> Ajustes de Cuenta</a>
-              </li>
-              <li><a class="dropdown-item" href="../../public/views/docs.php"><i class="bi bi-book"></i>
-                  Documentación</a></li>
+                  href="chat_list.php?id=<?php echo $_SESSION['user_id'] ?>">
+                  <i class="bi bi-envelope me-2"></i>Mensajes
+                  <span id="badge-mensajes" class="badge bg-danger ms-2"></span>
+                </a></li>
+
+              <li><a class="dropdown-item" href="upload_product.php">
+                  <i class="bi bi-upload"></i> Subir producto
+                </a></li>
+
+              <li><a class="dropdown-item" href="../../public/views/help.php">
+                  <i class="bi bi-question-circle"></i> Ayuda
+                </a></li>
+
+              <li><a class="dropdown-item" href="detail_account.php">
+                  <i class="bi bi-gear"></i> Ajustes de Cuenta
+                </a></li>
+
+              <li><a class="dropdown-item" href="../../public/views/docs.php">
+                  <i class="bi bi-book"></i> Documentación
+                </a></li>
+
               <li>
                 <hr class="dropdown-divider">
               </li>
-              <li><a class="dropdown-item text-danger" href="../../controllers/logout.php"><i
-                    class="bi bi-box-arrow-right"></i> Cerrar sesión</a></li>
+
+              <li><a class="dropdown-item text-danger" href="../../controllers/logout.php">
+                  <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+                </a></li>
+
             </ul>
           </div>
 
