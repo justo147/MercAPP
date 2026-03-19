@@ -18,6 +18,7 @@ require_once __DIR__ . '/../../models/Chat.php';
 require_once __DIR__ . '/../../models/Message.php';
 require_once __DIR__ . '/../../models/Transaction.php';
 require_once __DIR__ . '/../../models/Product.php';
+require_once __DIR__ . '/../../models/Rating.php';
 
 $db = new Database();
 $conn = $db->getConnection();
@@ -26,6 +27,7 @@ $chatModel = new Chat($conn);
 $mensajeModel = new Message($conn);
 $transactionModel = new Transaction($conn);
 $productoModel = new Product($conn);
+$ratingModel   = new Rating($conn);
 
 // Seguridad
 if (!$chatModel->userBelongsToChat($chatId, $usuarioActual)) {
@@ -39,6 +41,17 @@ $transaccion = null;
 
 if (!empty($chat["transaccion_id"])) {
     $transaccion = $transactionModel->getById($chat["transaccion_id"]);
+}
+
+// ¿Debe abrirse el modal de valoración?
+// Condición: transacción entregada + el usuario aún no ha valorado
+$mostrarModalValoracion = false;
+if (
+    $transaccion &&
+    $transaccion['estado'] === 'entregado' &&
+    !$ratingModel->hasRated($transaccion['id'], $usuarioActual)
+) {
+    $mostrarModalValoracion = true;
 }
 
 
@@ -62,6 +75,48 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["mensaje"])) {
     }
 
     header("Location: chat.php?id=" . $chatId);
+    exit;
+}
+
+// Enviar valoración
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["valoracion"])) {
+    $transaccionId = intval($_POST["transaccion_id"] ?? 0);
+    $fiabilidad    = intval($_POST["fiabilidad"]     ?? 0);
+    $comunicacion  = intval($_POST["comunicacion"]   ?? 0);
+    $puntualidad   = intval($_POST["puntualidad"]    ?? 0);
+    $comentario    = trim($_POST["comentario"]       ?? '');
+
+    $transaccionVal = $transactionModel->getById($transaccionId);
+
+    if (
+        $transaccionVal &&
+        $transaccionVal['estado'] === 'entregado' &&
+        !$ratingModel->hasRated($transaccionId, $usuarioActual) &&
+        $fiabilidad  >= 1 && $fiabilidad  <= 5 &&
+        $comunicacion >= 1 && $comunicacion <= 5 &&
+        $puntualidad >= 1 && $puntualidad  <= 5
+    ) {
+        $esCompradorVal  = ($usuarioActual == $transaccionVal['comprador_id']);
+        $usuarioValorado = $esCompradorVal
+            ? $transaccionVal['vendedor_id']
+            : $transaccionVal['comprador_id'];
+        $puntuacion = round(($fiabilidad + $comunicacion + $puntualidad) / 3);
+
+        $ok = $ratingModel->create(
+            $transaccionId,
+            $usuarioActual,
+            $usuarioValorado,
+            $puntuacion,
+            $comentario ?: null,
+            $fiabilidad,
+            $comunicacion,
+            $puntualidad
+        );
+
+        echo json_encode(['ok' => $ok]);
+    } else {
+        echo json_encode(['ok' => false, 'error' => 'No se pudo guardar la valoración']);
+    }
     exit;
 }
 
@@ -347,6 +402,115 @@ $mensajes = $mensajeModel->getByChat($chatId);
     <footer>
         <?php include __DIR__ . '/footer.php'; ?>
     </footer>
+
+    <!-- =====================================================
+         MODAL DE VALORACIÓN
+         Se abre automáticamente cuando la transacción está
+         entregada y el usuario aún no ha valorado.
+    ====================================================== -->
+    <?php if ($mostrarModalValoracion && $transaccion): ?>
+    <div class="modal fade" id="modalValoracion" tabindex="-1"
+         aria-labelledby="modalValoracionLabel" aria-modal="true" role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalValoracionLabel">
+                        <i class="bi bi-star-fill text-warning me-2"></i>
+                        Valora tu experiencia
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Cerrar"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p class="text-muted small mb-4">
+                        Tu opinión ayuda a construir una comunidad de confianza.
+                        Puntúa del 1 (peor) al 5 (mejor) cada criterio.
+                    </p>
+
+                    <!-- Fiabilidad -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-shield-check me-1"></i> Fiabilidad
+                        </label>
+                        <div class="star-group d-flex gap-2 fs-3" data-field="fiabilidad">
+                            <?php for ($i = 1; $i <= 5; $i++): ?>
+                                <i class="bi bi-star star-btn" data-value="<?= $i ?>"
+                                   style="cursor:pointer; color: #ccc;"></i>
+                            <?php endfor; ?>
+                        </div>
+                        <input type="hidden" name="fiabilidad" id="inp-fiabilidad" value="0">
+                    </div>
+
+                    <!-- Comunicación -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-chat-dots me-1"></i> Comunicación
+                        </label>
+                        <div class="star-group d-flex gap-2 fs-3" data-field="comunicacion">
+                            <?php for ($i = 1; $i <= 5; $i++): ?>
+                                <i class="bi bi-star star-btn" data-value="<?= $i ?>"
+                                   style="cursor:pointer; color: #ccc;"></i>
+                            <?php endfor; ?>
+                        </div>
+                        <input type="hidden" name="comunicacion" id="inp-comunicacion" value="0">
+                    </div>
+
+                    <!-- Puntualidad -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-clock me-1"></i> Puntualidad
+                        </label>
+                        <div class="star-group d-flex gap-2 fs-3" data-field="puntualidad">
+                            <?php for ($i = 1; $i <= 5; $i++): ?>
+                                <i class="bi bi-star star-btn" data-value="<?= $i ?>"
+                                   style="cursor:pointer; color: #ccc;"></i>
+                            <?php endfor; ?>
+                        </div>
+                        <input type="hidden" name="puntualidad" id="inp-puntualidad" value="0">
+                    </div>
+
+                    <!-- Comentario -->
+                    <div class="mb-3">
+                        <label for="comentario-val" class="form-label fw-semibold">
+                            <i class="bi bi-pencil me-1"></i> Comentario <span class="text-muted fw-normal">(opcional)</span>
+                        </label>
+                        <textarea id="comentario-val" class="form-control" rows="3"
+                                  maxlength="500"
+                                  placeholder="Cuéntanos cómo fue la experiencia..."></textarea>
+                    </div>
+
+                    <!-- Resumen media -->
+                    <div id="resumen-media" class="alert alert-light text-center d-none">
+                        Puntuación media: <strong id="media-val">—</strong>
+                        <span class="text-warning" id="media-stars"></span>
+                    </div>
+
+                    <!-- Mensajes de feedback -->
+                    <div id="rating-feedback" class="d-none"></div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">Ahora no</button>
+                    <button type="button" id="btn-enviar-valoracion"
+                            class="btn btn-primary" disabled>
+                        <i class="bi bi-send me-1"></i> Enviar valoración
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script
+        src="../js/rating.js"
+        data-transaccion-id="<?= (int) $transaccion['id'] ?>"
+        data-chat-id="<?= (int) $chatId ?>"
+        defer
+    ></script>
+    <?php endif; ?>
 
 </body>
 
