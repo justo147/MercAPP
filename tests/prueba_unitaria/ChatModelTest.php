@@ -2,7 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 
-require_once __DIR__ . '/../models/Chat.php';
+require_once __DIR__ . '/../../models/Chat.php';
 
 /**
  * Clases fake para permitir mocks de PDO y PDOStatement.

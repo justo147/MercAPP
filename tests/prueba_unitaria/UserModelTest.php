@@ -2,7 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 
-require_once __DIR__ . '/../models/User.php';
+require_once __DIR__ . '/../../models/User.php';
 
 /**
  * Class UserModelTest

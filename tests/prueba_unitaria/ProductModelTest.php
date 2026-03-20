@@ -2,7 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 
-require_once __DIR__ . '/../models/Product.php';
+require_once __DIR__ . '/../../models/Product.php';
 
 /**
  * Clases fake para este archivo de test.
@@ -117,26 +117,29 @@ class ProductModelTest extends TestCase
      * Verifica que se obtiene un producto por ID y que incluye imágenes.
      */
     public function testGetById()
-    {
-        $fakeProduct = [
-            "id" => 1,
-            "titulo" => "Producto X"
-        ];
+{
+    $fakeProduct = [
+        "id" => 1,
+        "titulo" => "Producto X"
+    ];
 
-        $this->pdo->method('prepare')->willReturn($this->stmt);
-        $this->stmt->method('fetch')->willReturn($fakeProduct);
+    $mock = $this->getMockBuilder(Product::class)
+        ->setConstructorArgs([$this->pdo])
+        ->onlyMethods(['getImages'])
+        ->getMock();
 
-        $mock = $this->getMockBuilder(Product::class)
-            ->setConstructorArgs([$this->pdo])
-            ->onlyMethods(['getImages'])
-            ->getMock();
+    // ✅ El prepare debe estar en $this->pdo, que es el que usa $mock
+    $this->pdo->method('prepare')->willReturn($this->stmt);
+    $this->stmt->method('fetch')->willReturn($fakeProduct);
 
-        $mock->method('getImages')->willReturn([]);
+    $mock->method('getImages')->willReturn([]);
 
-        $resultado = $mock->getById(1);
+    $resultado = $mock->getById(1);
 
-        $this->assertArrayHasKey("imagenes", $resultado);
-    }
+    $this->assertNotNull($resultado);                    // ✅ No es null
+    $this->assertArrayHasKey("imagenes", $resultado);   // ✅ Tiene imágenes
+    $this->assertArrayHasKey("id", $resultado);         // ✅ Tiene id
+}
 
     /* ============================================================
        getByUserPaginated()

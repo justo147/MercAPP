@@ -2,7 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 
-require_once __DIR__ . '/../models/Transaction.php';
+require_once __DIR__ . '/../../models/Transaction.php';
 
 /**
  * Clases fake para permitir mocks de PDO y PDOStatement
