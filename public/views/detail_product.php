@@ -179,7 +179,7 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
                                 width="80" height="80" style="object-fit: cover;">
                         <?php else: ?>
                             <i class="bi bi-person-circle text-secondary" style="font-size: 80px;"></i>
-                        <?php endif; ?>
+                        <?php endif; ?> 
                     </a>
 
                     <!-- Info -->
