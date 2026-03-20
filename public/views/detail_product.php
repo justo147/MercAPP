@@ -23,6 +23,21 @@ if (!$producto) {
     echo "Producto no encontrado.";
     exit;
 }
+$vendedorId = $producto['usuario_id'] ?? null;
+if ($vendedorId) {
+    require_once __DIR__ . '/../../models/User.php';
+
+    $userModel = new User($conn);
+    $vendedor = $userModel->getById($vendedorId);
+
+    // Ver si el usuario logueado sigue al vendedor
+    $usuarioLogueado = $_SESSION['user_id'] ?? null;
+    $yaSigue = false;
+
+    if ($usuarioLogueado && $usuarioLogueado != $vendedorId) {
+        $yaSigue = $userModel->sigueA($usuarioLogueado, $vendedorId);
+    }
+}
 
 // Productos sugeridos (excluyendo el actual)
 $productosSugeridos = $productModel->getRandomProducts(20, $productId);
@@ -69,17 +84,14 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
                         <img src="/MercApp/<?= htmlspecialchars($producto['imagenes'][0]['url']) ?>"
                             class="img-fluid rounded mb-3" alt="Imagen del producto">
                     <?php else: ?>
-                        <img src="/uploads/products/default.jpg"
-                            class="img-fluid rounded mb-3" alt="Imagen por defecto">
+                        <img src="/uploads/products/default.jpg" class="img-fluid rounded mb-3" alt="Imagen por defecto">
                     <?php endif; ?>
 
                     <!-- Miniaturas -->
                     <div class="d-flex flex-wrap gap-2">
                         <?php foreach ($producto['imagenes'] as $img): ?>
-                            <img src="/<?= htmlspecialchars($img['url']) ?>"
-                                class="img-thumbnail"
-                                style="width: 80px; height: 80px; object-fit: cover;"
-                                alt="Miniatura">
+                            <img src="/<?= htmlspecialchars($img['url']) ?>" class="img-thumbnail"
+                                style="width: 80px; height: 80px; object-fit: cover;" alt="Miniatura">
                         <?php endforeach; ?>
                     </div>
 
@@ -123,14 +135,6 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
                     </button>
 
 
-                    <!-- Botón comprar -->
-                    <form method="post" action="cart.php" class="mb-3">
-                        <input type="hidden" name="product_id" value="<?= $producto['id'] ?>">
-                        <button type="submit" class="btn btn-success w-100 py-2">
-                            Comprar
-                        </button>
-                    </form>
-
                     <!-- Contactar con el vendedor -->
                     <a href="/MercApp/controllers/chat_start.php?producto_id=<?= $producto["id"] ?>"
                         class="btn btn-primary w-100 mb-3 d-flex align-items-center justify-content-center gap-2">
@@ -160,6 +164,55 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
             <p><?= nl2br(htmlspecialchars($producto['descripcion'])) ?></p>
         </div>
 
+        <!-- Perfil del vendedor -->
+        <?php if (!empty($vendedor)): ?>
+            <div class="card mt-4 p-4">
+
+                <h4 class="mb-3">Perfil del vendedor</h4>
+
+                <div class="d-flex align-items-center">
+
+                    <!-- Foto -->
+                    <a href="/MercApp/public/views/profile.php?id=<?= $vendedorId ?>" class="me-3">
+                        <?php if (!empty($vendedor['foto_perfil'])): ?>
+                            <img src="/MercApp/<?= htmlspecialchars($vendedor['foto_perfil']) ?>" class="rounded-circle"
+                                width="80" height="80" style="object-fit: cover;">
+                        <?php else: ?>
+                            <i class="bi bi-person-circle text-secondary" style="font-size: 80px;"></i>
+                        <?php endif; ?>
+                    </a>
+
+                    <!-- Info -->
+                    <div class="flex-grow-1">
+                        <h5 class="mb-1">
+                            <a href="/MercApp/public/views/profile.php?id=<?= $vendedorId ?>">
+                                <?= htmlspecialchars($vendedor['nombre'] . " " . $vendedor['apellidos']) ?>
+                            </a>
+                        </h5>
+
+                        <p class="text-muted mb-1">
+                            Miembro desde:
+                            <?php
+                            $fecha = new DateTime($vendedor['fecha_registro']);
+                            echo $fecha->format('m/Y');
+                            ?>
+                        </p>
+                    </div>
+
+                    <!-- Botón seguir -->
+                    <?php if ($usuarioLogueado && $usuarioLogueado != $vendedorId): ?>
+                        <button id="btn-follow" class="btn <?= $yaSigue ? 'btn-secondary' : 'btn-primary' ?>"
+                            data-seguidor="<?= $usuarioLogueado ?>" data-seguido="<?= $vendedorId ?>"
+                            data-sigue="<?= $yaSigue ? '1' : '0' ?>">
+                            <?= $yaSigue ? 'Siguiendo' : 'Seguir' ?>
+                        </button>
+                    <?php endif; ?>
+
+                </div>
+
+            </div>
+        <?php endif; ?>
+
         <!-- Productos sugeridos -->
         <section class="mt-5">
             <h2 class="mb-3">Productos sugeridos</h2>
@@ -179,10 +232,8 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
                             <div class="carousel-item <?= $index === 0 ? 'active' : '' ?>">
                                 <div class="d-flex justify-content-center">
                                     <a href="detail_product.php?id=<?= $s['id'] ?>" class="text-center">
-                                        <img src="/<?= htmlspecialchars($img) ?>"
-                                            class="d-block"
-                                            style="width: 200px; height: 200px; object-fit: cover;"
-                                            alt="Producto sugerido">
+                                        <img src="/<?= htmlspecialchars($img) ?>" class="d-block"
+                                            style="width: 200px; height: 200px; object-fit: cover;" alt="Producto sugerido">
 
                                         <p class="mt-2 fw-bold"><?= htmlspecialchars($s['titulo']) ?></p>
                                         <p class="text-success"><?= number_format($s['precio'], 2) ?> €</p>
@@ -194,11 +245,13 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
 
                     </div>
 
-                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselSugeridos" data-bs-slide="prev">
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselSugeridos"
+                        data-bs-slide="prev">
                         <span class="carousel-control-prev-icon"></span>
                     </button>
 
-                    <button class="carousel-control-next" type="button" data-bs-target="#carouselSugeridos" data-bs-slide="next">
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselSugeridos"
+                        data-bs-slide="next">
                         <span class="carousel-control-next-icon"></span>
                     </button>
 
@@ -221,6 +274,66 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
 
     <!-- Cargamos el archivo externo que gestiona los favoritos -->
     <script src="/MercApp/public/js/favoritos.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+
+            const btnFollow = document.getElementById("btn-follow");
+            if (!btnFollow) return;
+
+            let sigue = btnFollow.dataset.sigue === "1";
+
+            actualizarBoton();
+
+            btnFollow.addEventListener("mouseenter", () => {
+                if (sigue) btnFollow.textContent = "Dejar de seguir";
+            });
+
+            btnFollow.addEventListener("mouseleave", () => {
+                actualizarBoton();
+            });
+
+            btnFollow.addEventListener("click", () => {
+
+                btnFollow.disabled = true;
+
+                const seguidor = btnFollow.dataset.seguidor;
+                const seguido = btnFollow.dataset.seguido;
+
+                const url = sigue
+                    ? "/MercApp/controllers/unfollow.php"
+                    : "/MercApp/controllers/follow.php";
+
+                fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: `seguidor=${seguidor}&seguido=${seguido}`
+                })
+                    .then(res => res.json())
+                    .then(data => {
+
+                        if (!data.success) {
+                            console.error("Error:", data);
+                            return;
+                        }
+
+                        sigue = !sigue;
+                        btnFollow.dataset.sigue = sigue ? "1" : "0";
+                        actualizarBoton();
+                    })
+                    .catch(err => console.error(err))
+                    .finally(() => btnFollow.disabled = false);
+            });
+
+            function actualizarBoton() {
+                btnFollow.classList.toggle("btn-primary", !sigue);
+                btnFollow.classList.toggle("btn-secondary", sigue);
+                btnFollow.textContent = sigue ? "Siguiendo" : "Seguir";
+            }
+
+        });
+    </script>
+
 
 </body>
 

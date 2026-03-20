@@ -124,7 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
           col.innerHTML = `
             <div class="card h-100 border rounded-3 shadow-sm">
 
-              <div id="${idCarrusel}" class="carousel carousel-dark slide" data-bs-ride="carousel">
+              <a href="detail_product.php?id=${prod.id}" id="${idCarrusel}" class="carousel carousel-dark slide" data-bs-ride="carousel">
                 <div class="carousel-inner">
                   ${imagenes.map((img, i) => `
                     <div class="carousel-item ${i === 0 ? "active" : ""}">
@@ -143,10 +143,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     <span class="carousel-control-next-icon"></span>
                   </button>
                 ` : ""}
-              </div>
+              </a>
 
               <div class="card-body">
-                <h2 class="card-title fw-semibold mb-2">${prod.titulo}</h2>
+                <a href="detail_product.php?id=${prod.id}" class="card-title fw-semibold mb-2">${prod.titulo}</a>
 
                 <div class="d-flex align-items-center mb-2">
                   <span class="badge bg-success me-2">€${prod.precio}</span>
@@ -277,8 +277,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const stats = data.data;
 
-      document.getElementById("stat-productos").textContent = stats.productos;
-      document.getElementById("stat-ventas").textContent = stats.ventas;
+      document.getElementById("stat-productos").textContent = stats.activos;
+      document.getElementById("stat-ventas").textContent = stats.vendidos;
       document.getElementById("stat-valoracion").textContent = stats.valoracion;
     })
     .catch(err => console.error("Error cargando estadísticas:", err));
