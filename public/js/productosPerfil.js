@@ -272,8 +272,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const stats = data.data;
 
-      document.getElementById("stat-productos").textContent = stats.productos;
-      document.getElementById("stat-ventas").textContent = stats.ventas;
+      document.getElementById("stat-productos").textContent = stats.activos;
+      document.getElementById("stat-ventas").textContent = stats.vendidos;
       document.getElementById("stat-valoracion").textContent = stats.valoracion;
     })
     .catch(err => console.error("Error cargando estadísticas:", err));
