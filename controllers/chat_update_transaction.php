@@ -43,21 +43,23 @@ if (
 }
 
 // Validar estados permitidos
-$estadosValidos = ['pendiente','aceptada','enviado','entregado','cancelada'];
+$estadosValidos = ['pendiente', 'aceptada', 'enviado', 'entregado', 'cancelada'];
 if (!in_array($nuevoEstado, $estadosValidos)) {
     exit("Estado no válido");
 }
 
-// Actualizar estado de la transacción
+// Actualizar estado de la transacción (una sola vez)
 $transactionModel->updateStatus($transaccionId, $nuevoEstado);
 
-// Cambiar estado de publicación del producto
 $productoId = intval($transaccion["producto_id"]);
 
 switch ($nuevoEstado) {
 
     case "aceptada":
-        // No cambia estado de publicación
+        $messageModel->enviarMensajeSistema(
+            $chatId,
+            "El vendedor ha aceptado la transacción."
+        );
         break;
 
     case "enviado":
@@ -65,9 +67,6 @@ switch ($nuevoEstado) {
         if ($usuarioActual != $transaccion["vendedor_id"]) {
             exit("No autorizado");
         }
-
-        $transactionModel->updateStatus($transaccionId, "enviado");
-
         $messageModel->enviarMensajeSistema(
             $chatId,
             "El vendedor ha marcado el producto como enviado."
@@ -79,12 +78,8 @@ switch ($nuevoEstado) {
         if ($usuarioActual != $transaccion["comprador_id"]) {
             exit("No autorizado");
         }
-
-        $transactionModel->updateStatus($transaccionId, "entregado");
-
-        // Producto vendido
+        // Marcar producto como vendido
         $productModel->cambiarEstadoPublicacion($productoId, "vendido");
-
         $messageModel->enviarMensajeSistema(
             $chatId,
             "El comprador ha marcado el producto como entregado. La transacción ha finalizado."
@@ -93,24 +88,13 @@ switch ($nuevoEstado) {
 
     case "cancelada":
         // Ambos pueden cancelar
-        $transactionModel->updateStatus($transaccionId, "cancelada");
-
-        // Reactivar publicación
         $productModel->cambiarEstadoPublicacion($productoId, "activo");
-
         $messageModel->enviarMensajeSistema(
             $chatId,
             "La transacción ha sido cancelada."
         );
         break;
 }
-
-
-// Mensaje automático
-$messageModel->enviarMensajeSistema(
-    $chatId,
-    "La transacción ha cambiado a estado: $nuevoEstado"
-);
 
 // Volver al chat
 header("Location: /MercApp/public/views/chat.php?id=" . $chatId);

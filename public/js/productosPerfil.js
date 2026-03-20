@@ -150,7 +150,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 <div class="d-flex align-items-center mb-2">
                   <span class="badge bg-success me-2">€${prod.precio}</span>
-                  <span class="badge bg-primary">${prod.estado_producto}</span>
+                  <span class="badge bg-primary me-2">${prod.estado_producto}</span>
+                  <span class="badge ${
+                    prod.estado_publicacion === 'activo' ? 'bg-success' :
+                    prod.estado_publicacion === 'pausado' ? 'bg-warning text-dark' :
+                    'bg-secondary'
+                  }">${prod.estado_publicacion}</span>
                 </div>
 
                 <div class="small text-muted mb-2">
@@ -298,8 +303,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }); // Cierre correcto del forEach
       }) // Cierre correcto del then
       .catch(err => console.error("Error actualizando badge:", err));
-}
-  
+  }
+
   //no mostrar el badge en otro perfil
   if (!ES_PROPIETARIO) return;
 
