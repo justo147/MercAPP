@@ -24,69 +24,70 @@ session_start();
   <link rel="stylesheet" href="../css/style-guide.css">
   <link rel="stylesheet" href="../css/help.css">
 
-
-
-  <!-- JS específico de la página de ayuda -->
-  <script src="../js/help.js" defer></script>
-
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
 
-
 </head>
- <body>
+
+<body>
   <?php
   $showSearch = false; // Mostrar barra de búsqueda en el navbar
   include("../../public/views/navbar.php");
   ?>
 
-<h1 id="centro-ayuda">Documentación técnica</h1>
+  <h1 id="centro-ayuda">Documentación técnica</h1>
 
-<p class="d-flex justify-content-center" title="Breve descripción">
-  Esta vista reúne la documentación técnica completa del proyecto,
-  permitiendo un acceso rápido y centralizado a todos los detalles relevantes.
-</p>
+  <p class="d-flex justify-content-center" title="Breve descripción">
+    Esta vista reúne la documentación técnica completa del proyecto,
+    permitiendo un acceso rápido y centralizado a todos los detalles relevantes.
+  </p>
 
-<h2 class="d-flex justify-content-center fs-4" title="Lenguajes documentados">Lenguajes</h2>
+  <h2 class="d-flex justify-content-center fs-4" title="Lenguajes documentados">Me interesa saber de...</h2>
 
-<ul class="nav nav-tabs justify-content-center gap-3" id="docTabs">
-  <li class="nav-item">
-    <button class="nav-link active" data-doc="php" title="PHP">Documentación PHPDoc</button>
-  </li>
-  <li class="nav-item">
-    <button class="nav-link" data-doc="js" title="JavaScript">Documentación JSDoc</button>
-  </li>
-</ul>
+  <ul class="nav nav-tabs justify-content-center gap-3" id="docTabs">
+    <li class="nav-item">
+      <button class="nav-link active" data-doc="php" title="PHP">Documentación PHPDoc</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" data-doc="js" title="JavaScript">Documentación JSDoc</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" data-doc="test" title="Test de rendimiento">Tests</button>
+    </li>
+  </ul>
 
-<div class="container-fluid mt-4 px-4">
-  <div class="ratio ratio-16x9">
-    <iframe 
-      id="docFrame"
-      src="../../docs/php/index.html"  
-      class="rounded"
-      style="border: none; width: 100%; height: 100%;">
-    </iframe>
+  <div class="container-fluid mt-4 px-4">
+    <div class="ratio ratio-16x9">
+      <iframe
+        id="docFrame"
+        src="../../docs/php/index.html"
+        class="rounded"
+        style="border: none; width: 100%; height: 100%;">
+      </iframe>
+    </div>
   </div>
-</div>
 
-<script>
-  const docFrame = document.getElementById("docFrame");
-  const tabs = document.querySelectorAll("#docTabs .nav-link");
+  <script>
+    const docFrame = document.getElementById("docFrame");
+    const tabs = document.querySelectorAll("#docTabs .nav-link");
 
-  tabs.forEach(tab => {
-    tab.addEventListener("click", () => {
-      tabs.forEach(t => t.classList.remove("active"));
-      tab.classList.add("active");
+    tabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        tabs.forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
 
-      const tipo = tab.dataset.doc;
-      if (tipo === "php") {
-        docFrame.src = "../../docs/php/index.html"; // PHPDoc
-      } else if (tipo === "js") {
-        docFrame.src = "../../docs/js/index.html"; // JSDoc
-      }
+        const tipo = tab.dataset.doc;
+        if (tipo === "php") {
+          docFrame.src = "../../docs/php/index.html";
+        } else if (tipo === "js") {
+          docFrame.src = "../../docs/js/index.html";
+        } else if (tipo === "test") {
+          //Reporte HTML generado por k6
+          docFrame.src = "../../docs/tests/index_test.html";
+        }
+      });
     });
-  });
-</script>
+  </script>
 
 
 

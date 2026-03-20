@@ -19,6 +19,7 @@
                 <path>models/</path>
                 <path>config/</path>
                 <path>public/</path>
+                <path>test/</path>
             </source>
 
             <ignore hidden="true">
