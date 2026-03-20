@@ -184,7 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </button>
                   </div>
                 ` : `
-                  <a href="mensaje.php?to=${prod.usuario_id}" class="btn btn-sm btn-primary w-100">Contactar</a>
+                  <a href="/MercApp/controllers/chat_start.php?producto_id=${prod.id}" class="btn btn-sm btn-primary w-100">Contactar</a>
                 `}
               </div>
 
