@@ -1,6 +1,7 @@
 <?php
 session_start();
-require_once "../models/UsuarioPDO.php";
+require_once "../models/User.php";
+require_once __DIR__ . "/../config/db.php";
 
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(["success" => false]);
