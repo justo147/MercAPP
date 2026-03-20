@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: navbar.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: navbar.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview Módulo de notificaciones de mensajes no leídos.
+ * Actualiza automáticamente el badge del icono de mensajes
+ * consultando el servidor cada 5 segundos.
+ *
+ * @module badge_mensajes
+ */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    /**
+     * Consulta el número de mensajes no leídos del usuario actual
+     * y actualiza todos los badges con id="badge-mensajes" en el DOM.
+     * Si el contador es 0, oculta el badge; si es mayor, lo muestra.
+     *
+     * @async
+     * @function actualizarBadgeMensajes
+     * @returns {void}
+     */
+    function actualizarBadgeMensajes() {
+        fetch("/MercApp/api/chat_unread_count.php")
+
+        /**
+         * @param {Response} res - Respuesta HTTP del servidor.
+         * @returns {Promise&lt;string>} Texto plano con el número de mensajes no leídos.
+         */
+        .then(res => res.text())
+
+        /**
+         * Actualiza la visibilidad y el contenido de los badges
+         * según el número de mensajes no leídos recibido.
+         *
+         * @param {string} num - Número de mensajes no leídos como string.
+         * @returns {void}
+         */
+        .then(num => {
+            const badges = document.querySelectorAll("#badge-mensajes");
+
+            /** @type {number} Mensajes no leídos parseados. 0 si la respuesta no es numérica. */
+            const count = parseInt(num) || 0;
+
+            /**
+             * Muestra u oculta cada badge según el contador.
+             * @param {HTMLElement} badge - Elemento badge a actualizar.
+             */
+            badges.forEach(badge => {
+                if (count > 0) {
+                    badge.textContent      = count;
+                    badge.style.display    = "inline-block";
+                    badge.style.opacity    = "1";
+                } else {
+                    badge.style.display    = "none";
+                    badge.style.opacity    = "0";
+                }
+            });
+        })
+
+        /**
+         * Captura y registra en consola cualquier error de red
+         * o fallo en el procesamiento de la respuesta.
+         *
+         * @param {Error} err - Error producido durante el fetch.
+         */
+        .catch(err => console.error("Error actualizando badge:", err));
+    }
+
+    /**
+     * Ejecuta la primera actualización del badge al cargar la página
+     * y establece un intervalo para repetirla cada 5 segundos.
+     *
+     * @type {number} ID del intervalo, retornado por setInterval.
+     */
+    actualizarBadgeMensajes();
+    setInterval(actualizarBadgeMensajes, 5000);
+
+});</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-badge_mensajes.html">badge_mensajes</a></li><li><a href="module-valoracion.html">valoracion</a></li></ul><h3>Global</h3><ul><li><a href="global.html#abrirModalExito">abrirModalExito</a></li><li><a href="global.html#body">body</a></li><li><a href="global.html#cargarFiltros">cargarFiltros</a></li><li><a href="global.html#cargarUsuarios">cargarUsuarios</a></li><li><a href="global.html#clearError">clearError</a></li><li><a href="global.html#currentPage">currentPage</a></li><li><a href="global.html#emailInput">emailInput</a></li><li><a href="global.html#enviarFormulario">enviarFormulario</a></li><li><a href="global.html#existingImages">existingImages</a></li><li><a href="global.html#formLogin">formLogin</a></li><li><a href="global.html#formRegister">formRegister</a></li><li><a href="global.html#grid">grid</a></li><li><a href="global.html#hideSkeleton">hideSkeleton</a></li><li><a href="global.html#input">input</a></li><li><a href="global.html#inputEmail">inputEmail</a></li><li><a href="global.html#inputName">inputName</a></li><li><a href="global.html#inputPass">inputPass</a></li><li><a href="global.html#limit">limit</a></li><li><a href="global.html#loadMoreProducts">loadMoreProducts</a></li><li><a href="global.html#loading">loading</a></li><li><a href="global.html#noMore">noMore</a></li><li><a href="global.html#observer">observer</a></li><li><a href="global.html#offset">offset</a></li><li><a href="global.html#onSort">onSort</a></li><li><a href="global.html#ordenInput">ordenInput</a></li><li><a href="global.html#pass1">pass1</a></li><li><a href="global.html#pass2">pass2</a></li><li><a href="global.html#rebuildFileList">rebuildFileList</a></li><li><a href="global.html#removeImage">removeImage</a></li><li><a href="global.html#renderGrid">renderGrid</a></li><li><a href="global.html#renderProducts">renderProducts</a></li><li><a href="global.html#renderizarPaginacion">renderizarPaginacion</a></li><li><a href="global.html#resetAndSearch">resetAndSearch</a></li><li><a href="global.html#searchCategoria">searchCategoria</a></li><li><a href="global.html#searchEstado">searchEstado</a></li><li><a href="global.html#searchOrden">searchOrden</a></li><li><a href="global.html#searchQuery">searchQuery</a></li><li><a href="global.html#searchTransaccion">searchTransaccion</a></li><li><a href="global.html#selectedFiles">selectedFiles</a></li><li><a href="global.html#sentinel">sentinel</a></li><li><a href="global.html#showError">showError</a></li><li><a href="global.html#showSkeleton">showSkeleton</a></li><li><a href="global.html#toggleBtn">toggleBtn</a></li><li><a href="global.html#toggleFavorito">toggleFavorito</a></li><li><a href="global.html#updateOrder">updateOrder</a></li><li><a href="global.html#validarEmail">validarEmail</a></li><li><a href="global.html#validateLogin">validateLogin</a></li><li><a href="global.html#validationForm">validationForm</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Fri Mar 20 2026 09:50:43 GMT+0100 (hora estándar de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

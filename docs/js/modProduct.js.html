@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: modProduct.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: modProduct.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @typedef {Object} ExistingImage
+ * @property {string} url - URL de la imagen existente.
+ * @property {number} orden - Orden asignado a la imagen.
+ */
+
+/**
+ * Lista de nuevas imágenes seleccionadas por el usuario.
+ * @type {File[]}
+ */
+let selectedFiles = [];
+
+/**
+ * Lista de imágenes ya existentes cargadas desde el servidor.
+ * @type {ExistingImage[]}
+ */
+let existingImages = [];
+
+/**
+ * Input de tipo file donde se seleccionan las imágenes.
+ * @type {HTMLInputElement}
+ */
+const input = document.getElementById("imagenesInput");
+
+/**
+ * Contenedor donde se renderizan las miniaturas de las imágenes seleccionadas.
+ * @type {HTMLElement}
+ */
+const grid = document.getElementById("previewGrid");
+
+/**
+ * Input oculto donde se guarda el orden de las imágenes.
+ * @type {HTMLInputElement}
+ */
+const ordenInput = document.getElementById("ordenImagenes");
+
+
+/* ============================================================
+   CARGA DE IMÁGENES EXISTENTES
+============================================================ */
+
+/**
+ * Carga las imágenes actuales desde los atributos data del DOM
+ * y las almacena en `existingImages`.
+ */
+document.querySelectorAll(".img-actual").forEach(img => {
+    existingImages.push({
+        url: img.dataset.url,
+        orden: Number(img.dataset.orden)
+    });
+});
+
+
+/* ============================================================
+   MANEJO DE NUEVAS IMÁGENES
+============================================================ */
+
+/**
+ * Evento que se ejecuta cuando el usuario selecciona nuevas imágenes.
+ * Agrega los archivos seleccionados a `selectedFiles`, renderiza la vista previa
+ * y reconstruye la lista interna de archivos.
+ * 
+ * @param {Event} e - Evento change del input file.
+ */
+input.addEventListener("change", function(e) {
+    const files = Array.from(e.target.files);
+    files.forEach(file => selectedFiles.push(file));
+
+    renderGrid();
+    rebuildFileList();
+});
+
+
+/* ============================================================
+   RENDERIZADO DE MINIATURAS
+============================================================ */
+
+/**
+ * Renderiza la cuadrícula de imágenes seleccionadas por el usuario.
+ * Utiliza FileReader para mostrar una vista previa de cada imagen.
+ */
+function renderGrid() {
+    grid.innerHTML = "";
+
+    selectedFiles.forEach((file, index) => {
+        const col = document.createElement("div");
+        col.className = "col-4";
+        col.dataset.index = String(index);
+
+        const reader = new FileReader();
+
+        reader.onload = function(event) {
+            col.innerHTML = `
+                &lt;div class="position-relative border rounded p-1">
+                    &lt;img src="${event.target.result}" class="img-fluid rounded">
+                    &lt;button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1"
+                        onclick="removeImage(${index})">
+                        &lt;i class="bi bi-x-lg">&lt;/i>
+                    &lt;/button>
+                &lt;/div>
+            `;
+        };
+
+        reader.readAsDataURL(file);
+        grid.appendChild(col);
+    });
+
+    updateOrder();
+}
+
+
+/* ============================================================
+   ELIMINAR IMÁGENES
+============================================================ */
+
+/**
+ * Elimina una imagen seleccionada según su índice.
+ * 
+ * @param {number} index - Índice de la imagen a eliminar.
+ */
+function removeImage(index) {
+    selectedFiles.splice(index, 1);
+    renderGrid();
+    rebuildFileList();
+}
+
+
+/* ============================================================
+   ACTUALIZAR ORDEN
+============================================================ */
+
+/**
+ * Actualiza el orden de las imágenes en el input oculto `ordenImagenes`.
+ */
+function updateOrder() {
+    const items = Array.from(grid.children);
+    const order = items.map(col => Number(col.dataset.index));
+    ordenInput.value = order.join(",");
+}
+
+
+/* ============================================================
+   SORTABLE.JS PARA REORDENAR IMÁGENES
+============================================================ */
+
+/**
+ * Inicializa SortableJS para permitir arrastrar y reordenar imágenes.
+ * Actualiza `selectedFiles` y el input oculto con el nuevo orden.
+ */
+new Sortable(grid, {
+    animation: 150,
+    ghostClass: "bg-light",
+
+    /**
+     * Evento que se ejecuta cuando se reordena la cuadrícula.
+     */
+    onSort: function() {
+        const items = Array.from(grid.children);
+        const newOrder = items.map(col => selectedFiles[col.dataset.index]);
+
+        selectedFiles = newOrder;
+
+        items.forEach((col, idx) => {
+            col.dataset.index = String(idx);
+        });
+
+        updateOrder();
+        rebuildFileList();
+    }
+});
+
+
+/* ============================================================
+   RECONSTRUIR LISTA DE ARCHIVOS
+============================================================ */
+
+/**
+ * Reconstruye el objeto FileList del input file usando DataTransfer,
+ * para que el formulario envíe las imágenes en el orden correcto.
+ */
+function rebuildFileList() {
+    const dataTransfer = new DataTransfer();
+    selectedFiles.forEach(file => dataTransfer.items.add(file));
+    input.files = dataTransfer.files;
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-badge_mensajes.html">badge_mensajes</a></li><li><a href="module-valoracion.html">valoracion</a></li></ul><h3>Global</h3><ul><li><a href="global.html#abrirModalExito">abrirModalExito</a></li><li><a href="global.html#body">body</a></li><li><a href="global.html#cargarFiltros">cargarFiltros</a></li><li><a href="global.html#cargarUsuarios">cargarUsuarios</a></li><li><a href="global.html#clearError">clearError</a></li><li><a href="global.html#currentPage">currentPage</a></li><li><a href="global.html#emailInput">emailInput</a></li><li><a href="global.html#enviarFormulario">enviarFormulario</a></li><li><a href="global.html#existingImages">existingImages</a></li><li><a href="global.html#formLogin">formLogin</a></li><li><a href="global.html#formRegister">formRegister</a></li><li><a href="global.html#grid">grid</a></li><li><a href="global.html#hideSkeleton">hideSkeleton</a></li><li><a href="global.html#input">input</a></li><li><a href="global.html#inputEmail">inputEmail</a></li><li><a href="global.html#inputName">inputName</a></li><li><a href="global.html#inputPass">inputPass</a></li><li><a href="global.html#limit">limit</a></li><li><a href="global.html#loadMoreProducts">loadMoreProducts</a></li><li><a href="global.html#loading">loading</a></li><li><a href="global.html#noMore">noMore</a></li><li><a href="global.html#observer">observer</a></li><li><a href="global.html#offset">offset</a></li><li><a href="global.html#onSort">onSort</a></li><li><a href="global.html#ordenInput">ordenInput</a></li><li><a href="global.html#pass1">pass1</a></li><li><a href="global.html#pass2">pass2</a></li><li><a href="global.html#rebuildFileList">rebuildFileList</a></li><li><a href="global.html#removeImage">removeImage</a></li><li><a href="global.html#renderGrid">renderGrid</a></li><li><a href="global.html#renderProducts">renderProducts</a></li><li><a href="global.html#renderizarPaginacion">renderizarPaginacion</a></li><li><a href="global.html#resetAndSearch">resetAndSearch</a></li><li><a href="global.html#searchCategoria">searchCategoria</a></li><li><a href="global.html#searchEstado">searchEstado</a></li><li><a href="global.html#searchOrden">searchOrden</a></li><li><a href="global.html#searchQuery">searchQuery</a></li><li><a href="global.html#searchTransaccion">searchTransaccion</a></li><li><a href="global.html#selectedFiles">selectedFiles</a></li><li><a href="global.html#sentinel">sentinel</a></li><li><a href="global.html#showError">showError</a></li><li><a href="global.html#showSkeleton">showSkeleton</a></li><li><a href="global.html#toggleBtn">toggleBtn</a></li><li><a href="global.html#toggleFavorito">toggleFavorito</a></li><li><a href="global.html#updateOrder">updateOrder</a></li><li><a href="global.html#validarEmail">validarEmail</a></li><li><a href="global.html#validateLogin">validateLogin</a></li><li><a href="global.html#validationForm">validationForm</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Fri Mar 20 2026 09:50:43 GMT+0100 (hora estándar de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

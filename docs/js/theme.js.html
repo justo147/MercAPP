@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: theme.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: theme.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Botón que alterna el tema claro/oscuro.
+ * @type {HTMLButtonElement}
+ */
+const toggleBtn = document.getElementById('themeToggle');
+
+/**
+ * Referencia al elemento &lt;body> para aplicar clases de tema.
+ * @type {HTMLBodyElement}
+ */
+const body = document.body;
+
+/**
+ * Intentamos leer el tema guardado en localStorage.
+ * Uso de try...catch porque:
+ * - localStorage puede estar deshabilitado por el navegador.
+ * - El usuario puede tener bloqueado el almacenamiento.
+ * - El valor guardado podría estar corrupto o inaccesible.
+ */
+try {
+  const savedTheme = localStorage.getItem('theme');
+
+  if (savedTheme === 'dark') {
+    body.classList.add('dark-mode');
+    toggleBtn.textContent = '☀️';
+  }
+} catch (error) {
+  console.error("Error al leer localStorage:", error);
+  // No aplicamos tema guardado, pero la app sigue funcionando.
+}
+
+/**
+ * Evento para alternar el tema.
+ */
+toggleBtn.addEventListener('click', () => {
+  const darkModeEnabled = body.classList.toggle('dark-mode');
+  toggleBtn.textContent = darkModeEnabled ? '☀️' : '🌙';
+
+  /**
+   * Guardamos la preferencia del usuario.
+   * try...catch necesario porque:
+   *   - localStorage.setItem puede lanzar excepciones si:
+   *   - El almacenamiento está lleno.
+   *   - El usuario está en modo incógnito (Safari).
+   *   - El navegador bloquea el acceso por políticas de seguridad.
+   */
+  try {
+    localStorage.setItem('theme', darkModeEnabled ? 'dark' : 'light');
+  } catch (error) {
+    console.error("No se pudo guardar la preferencia de tema:", error);
+    // La app sigue funcionando aunque no se guarde la preferencia.
+  }
+});
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-badge_mensajes.html">badge_mensajes</a></li><li><a href="module-valoracion.html">valoracion</a></li></ul><h3>Global</h3><ul><li><a href="global.html#abrirModalExito">abrirModalExito</a></li><li><a href="global.html#body">body</a></li><li><a href="global.html#cargarFiltros">cargarFiltros</a></li><li><a href="global.html#cargarUsuarios">cargarUsuarios</a></li><li><a href="global.html#clearError">clearError</a></li><li><a href="global.html#currentPage">currentPage</a></li><li><a href="global.html#emailInput">emailInput</a></li><li><a href="global.html#enviarFormulario">enviarFormulario</a></li><li><a href="global.html#existingImages">existingImages</a></li><li><a href="global.html#formLogin">formLogin</a></li><li><a href="global.html#formRegister">formRegister</a></li><li><a href="global.html#grid">grid</a></li><li><a href="global.html#hideSkeleton">hideSkeleton</a></li><li><a href="global.html#input">input</a></li><li><a href="global.html#inputEmail">inputEmail</a></li><li><a href="global.html#inputName">inputName</a></li><li><a href="global.html#inputPass">inputPass</a></li><li><a href="global.html#limit">limit</a></li><li><a href="global.html#loadMoreProducts">loadMoreProducts</a></li><li><a href="global.html#loading">loading</a></li><li><a href="global.html#noMore">noMore</a></li><li><a href="global.html#observer">observer</a></li><li><a href="global.html#offset">offset</a></li><li><a href="global.html#onSort">onSort</a></li><li><a href="global.html#ordenInput">ordenInput</a></li><li><a href="global.html#pass1">pass1</a></li><li><a href="global.html#pass2">pass2</a></li><li><a href="global.html#rebuildFileList">rebuildFileList</a></li><li><a href="global.html#removeImage">removeImage</a></li><li><a href="global.html#renderGrid">renderGrid</a></li><li><a href="global.html#renderProducts">renderProducts</a></li><li><a href="global.html#renderizarPaginacion">renderizarPaginacion</a></li><li><a href="global.html#resetAndSearch">resetAndSearch</a></li><li><a href="global.html#searchCategoria">searchCategoria</a></li><li><a href="global.html#searchEstado">searchEstado</a></li><li><a href="global.html#searchOrden">searchOrden</a></li><li><a href="global.html#searchQuery">searchQuery</a></li><li><a href="global.html#searchTransaccion">searchTransaccion</a></li><li><a href="global.html#selectedFiles">selectedFiles</a></li><li><a href="global.html#sentinel">sentinel</a></li><li><a href="global.html#showError">showError</a></li><li><a href="global.html#showSkeleton">showSkeleton</a></li><li><a href="global.html#toggleBtn">toggleBtn</a></li><li><a href="global.html#toggleFavorito">toggleFavorito</a></li><li><a href="global.html#updateOrder">updateOrder</a></li><li><a href="global.html#validarEmail">validarEmail</a></li><li><a href="global.html#validateLogin">validateLogin</a></li><li><a href="global.html#validationForm">validationForm</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Fri Mar 20 2026 09:50:43 GMT+0100 (hora estándar de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

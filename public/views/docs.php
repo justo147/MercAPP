@@ -62,7 +62,7 @@ session_start();
   <div class="ratio ratio-16x9">
     <iframe 
       id="docFrame"
-      src="../../docs/index.html"  
+      src="../../docs/php/index.html"  
       class="rounded"
       style="border: none; width: 100%; height: 100%;">
     </iframe>
@@ -80,7 +80,7 @@ session_start();
 
       const tipo = tab.dataset.doc;
       if (tipo === "php") {
-        docFrame.src = "../../docs/index.html"; // PHPDoc
+        docFrame.src = "../../docs/php/index.html"; // PHPDoc
       } else if (tipo === "js") {
         docFrame.src = "../../docs/js/index.html"; // JSDoc
       }

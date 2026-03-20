@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: home.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: home.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* ============================================================
+   VARIABLES GLOBALES
+============================================================ */
+
+/**
+ * Offset actual para la paginación de productos.
+ * @type {number}
+ */
+let offset = 0;
+
+/**
+ * Número máximo de productos cargados por petición.
+ * @type {number}
+ */
+const limit = 12;
+
+/**
+ * Indica si actualmente se está realizando una carga de productos.
+ * @type {boolean}
+ */
+let loading = false;
+
+/**
+ * Indica si ya no hay más productos para cargar.
+ * @type {boolean}
+ */
+let noMore = false;
+
+/* Filtros del buscador */
+
+/**
+ * Texto de búsqueda introducido por el usuario.
+ * @type {string}
+ */
+let searchQuery = "";
+
+/**
+ * ID de la categoría seleccionada.
+ * @type {string}
+ */
+let searchCategoria = "";
+
+/**
+ * ID del estado del producto seleccionado.
+ * @type {string}
+ */
+let searchEstado = "";
+
+/**
+ * Tipo de transacción seleccionada.
+ * @type {string}
+ */
+let searchTransaccion = "";
+
+/**
+ * Orden seleccionado para la búsqueda.
+ * @type {string}
+ */
+let searchOrden = "fecha_desc";
+
+/* ============================================================
+   SKELETON LOADER
+============================================================ */
+
+/**
+ * Muestra un skeleton loader con tarjetas simuladas mientras se cargan productos.
+ * @param {number} [count=8] - Número de tarjetas skeleton a mostrar.
+ */
+function showSkeleton(count = 8) {
+    const container = document.getElementById("skeleton-loader");
+    container.innerHTML = "";
+
+    for (let i = 0; i &lt; count; i++) {
+        const col = document.createElement("div");
+        col.classList.add("col-6", "col-md-4", "col-lg-3");
+
+        col.innerHTML = `
+            &lt;div class="card h-100 shadow-sm border-0">
+                &lt;div class="placeholder-glow">
+                    &lt;div class="card-img-top placeholder" style="height:180px;">&lt;/div>
+                &lt;/div>
+
+                &lt;div class="card-body">
+                    &lt;div class="card-title placeholder-glow">
+                        &lt;span class="placeholder col-8">&lt;/span>
+                    &lt;/div>
+
+                    &lt;p class="placeholder-glow">
+                        &lt;span class="placeholder col-4">&lt;/span>
+                    &lt;/p>
+
+                    &lt;div class="placeholder-glow mt-auto">
+                        &lt;span class="placeholder col-12 btn btn-outline-primary disabled">&lt;/span>
+                    &lt;/div>
+                &lt;/div>
+            &lt;/div>
+        `;
+
+        container.appendChild(col);
+    }
+
+    container.style.display = "flex";
+}
+
+/**
+ * Oculta el skeleton loader.
+ */
+function hideSkeleton() {
+    document.getElementById("skeleton-loader").style.display = "none";
+}
+
+/* ============================================================
+   CARGA DE FILTROS DESDE LA BD
+============================================================ */
+
+/**
+ * Carga los filtros disponibles desde la API y los inserta en los select correspondientes.
+ * @async
+ * @returns {Promise&lt;void>}
+ */
+async function cargarFiltros() {
+    try {
+        const res = await fetch("/MercApp/api/get_filters.php");
+        const json = await res.json();
+
+        if (!json.success) return;
+
+        // Categorías
+        const catSelect = document.getElementById("filtro-categoria");
+        json.categorias.forEach(cat => {
+            const opt = document.createElement("option");
+            opt.value = cat.id;
+            opt.textContent = cat.nombre;
+            catSelect.appendChild(opt);
+        });
+
+        // Estado del producto
+        const estadoSelect = document.getElementById("filtro-estado");
+        json.estado_producto.forEach(est => {
+            const opt = document.createElement("option");
+            opt.value = est.id;
+            opt.textContent = est.nombre;
+            estadoSelect.appendChild(opt);
+        });
+
+        // Tipo de transacción
+        const transSelect = document.getElementById("filtro-transaccion");
+        json.tipos_transaccion.forEach(tipo => {
+            const opt = document.createElement("option");
+            opt.value = tipo;
+            opt.textContent = tipo.charAt(0).toUpperCase() + tipo.slice(1);
+            transSelect.appendChild(opt);
+        });
+
+    } catch (err) {
+        console.error("Error cargando filtros:", err);
+    }
+}
+
+/* ============================================================
+   CARGA DE PRODUCTOS
+============================================================ */
+
+/**
+ * Carga más productos desde la API aplicando paginación y filtros.
+ * Gestiona el skeleton loader y actualiza el offset.
+ * @async
+ * @returns {Promise&lt;void>}
+ */
+async function loadMoreProducts() {
+    if (loading || noMore) return;
+
+    loading = true;
+
+    let skeletonTimeout = null;
+    const isFirstLoad = offset === 0;
+
+    if (isFirstLoad) {
+        skeletonTimeout = setTimeout(() => {
+            showSkeleton();
+        }, 150);
+    }
+
+    try {
+        let endpoint = "/MercApp/api/getProductsPaginated.php";
+
+        const params = new URLSearchParams({
+            limit,
+            offset
+        });
+
+        const usingFilters =
+            searchQuery ||
+            searchCategoria ||
+            searchEstado ||
+            searchTransaccion ||
+            searchOrden !== "fecha_desc";
+
+        if (usingFilters) {
+            endpoint = "/MercApp/api/search_products.php";
+
+            params.set("q", searchQuery);
+            params.set("categoria", searchCategoria);
+            params.set("estado_producto", searchEstado);
+            params.set("tipo_transaccion", searchTransaccion);
+            params.set("orden", searchOrden);
+        }
+
+        const res = await fetch(`${endpoint}?${params.toString()}`);
+        const json = await res.json();
+
+        if (!json.success) throw new Error("Error en API");
+
+        const products = json.data;
+
+        renderProducts(products);
+
+        if (products.length &lt; limit) {
+            noMore = true;
+            observer.disconnect();
+        }
+
+        offset += limit;
+
+    } catch (err) {
+        console.error(err);
+        document.getElementById("error").style.display = "block";
+
+    } finally {
+        loading = false;
+
+        if (skeletonTimeout) clearTimeout(skeletonTimeout);
+        if (isFirstLoad) hideSkeleton();
+    }
+}
+
+/* ============================================================
+   RENDER DE PRODUCTOS
+============================================================ */
+
+/**
+ * Renderiza una lista de productos en el contenedor principal.
+ * @param {Array&lt;Object>} products - Lista de productos obtenidos desde la API.
+ */
+function renderProducts(products) {
+    const container = document.getElementById("product-list");
+
+    products.forEach(p => {
+        const img = p.imagenes?.length
+            ? `/MercApp/${p.imagenes[0].url}`
+            : "/MercApp/uploads/products/default.jpg";
+
+        const col = document.createElement("div");
+        col.classList.add("col-6", "col-md-4", "col-lg-3", "mb-4", "sinFondo", "fade-in");
+
+        col.innerHTML = `
+            &lt;div class="card h-100 shadow-sm border">
+                &lt;img src="${img}" class="card-img-top" alt="Imagen de ${p.titulo}" style="height: 180px; object-fit: cover;">
+
+                &lt;div class="card-body d-flex flex-column">
+                    &lt;h2 class="card-title text-truncate small" title="${p.titulo}">${p.titulo}&lt;/h2>
+
+                    &lt;p class="card-text fw-bold text-primary mb-3">
+                        ${p.precio} €
+                    &lt;/p>
+
+                    &lt;a href="detail_product.php?id=${p.id}" 
+                       class="btn btn-outline-primary mt-auto w-100">
+                        Ver más
+                    &lt;/a>
+                &lt;/div>
+            &lt;/div>
+        `;
+
+        container.appendChild(col);
+
+        //Forzamos reflow para que la animación SIEMPRE se dispare
+        void col.offsetWidth;
+        col.classList.add("show");
+    });
+}
+
+/* ============================================================
+   RESET DE BÚSQUEDA
+============================================================ */
+
+/**
+ * Reinicia los parámetros de búsqueda y vuelve a cargar los productos desde cero.
+ */
+function resetAndSearch() {
+    offset = 0;
+    noMore = false;
+
+    document.getElementById("product-list").innerHTML = "";
+    observer.observe(sentinel);
+
+    loadMoreProducts();
+}
+
+/* ============================================================
+   EVENTOS
+============================================================ */
+
+/**
+ * Inicializa los eventos de la página, carga filtros y gestiona la búsqueda.
+ */
+document.addEventListener("DOMContentLoaded", async () => {
+
+    await cargarFiltros();
+
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get("q");
+
+    if (q) {
+        searchQuery = q;
+        const navbarInput = document.getElementById("navbar-search");
+        if (navbarInput) navbarInput.value = q;
+    }
+
+    const navbarInput = document.getElementById("navbar-search");
+    navbarInput?.addEventListener("input", e => {
+        searchQuery = e.target.value.trim();
+        resetAndSearch();
+    });
+
+    document.getElementById("filtro-categoria")?.addEventListener("change", e => {
+        searchCategoria = e.target.value;
+        resetAndSearch();
+    });
+
+    document.getElementById("filtro-estado")?.addEventListener("change", e => {
+        searchEstado = e.target.value;
+        resetAndSearch();
+    });
+
+    document.getElementById("filtro-transaccion")?.addEventListener("change", e => {
+        searchTransaccion = e.target.value;
+        resetAndSearch();
+    });
+
+    document.getElementById("filtro-orden")?.addEventListener("change", e => {
+        searchOrden = e.target.value;
+        resetAndSearch();
+    });
+
+    loadMoreProducts();
+});
+
+/* ============================================================
+   INTERSECTION OBSERVER
+============================================================ */
+
+/**
+ * Elemento utilizado como referencia para detectar el final del scroll.
+ * @type {HTMLElement}
+ */
+const sentinel = document.getElementById("sentinel");
+
+/**
+ * Observador que detecta cuando el usuario llega al final de la lista para cargar más productos.
+ * @type {IntersectionObserver}
+ */
+const observer = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting) {
+        loadMoreProducts();
+    }
+});
+
+observer.observe(sentinel);
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-badge_mensajes.html">badge_mensajes</a></li><li><a href="module-valoracion.html">valoracion</a></li></ul><h3>Global</h3><ul><li><a href="global.html#abrirModalExito">abrirModalExito</a></li><li><a href="global.html#body">body</a></li><li><a href="global.html#cargarFiltros">cargarFiltros</a></li><li><a href="global.html#cargarUsuarios">cargarUsuarios</a></li><li><a href="global.html#clearError">clearError</a></li><li><a href="global.html#currentPage">currentPage</a></li><li><a href="global.html#emailInput">emailInput</a></li><li><a href="global.html#enviarFormulario">enviarFormulario</a></li><li><a href="global.html#existingImages">existingImages</a></li><li><a href="global.html#formLogin">formLogin</a></li><li><a href="global.html#formRegister">formRegister</a></li><li><a href="global.html#grid">grid</a></li><li><a href="global.html#hideSkeleton">hideSkeleton</a></li><li><a href="global.html#input">input</a></li><li><a href="global.html#inputEmail">inputEmail</a></li><li><a href="global.html#inputName">inputName</a></li><li><a href="global.html#inputPass">inputPass</a></li><li><a href="global.html#limit">limit</a></li><li><a href="global.html#loadMoreProducts">loadMoreProducts</a></li><li><a href="global.html#loading">loading</a></li><li><a href="global.html#noMore">noMore</a></li><li><a href="global.html#observer">observer</a></li><li><a href="global.html#offset">offset</a></li><li><a href="global.html#onSort">onSort</a></li><li><a href="global.html#ordenInput">ordenInput</a></li><li><a href="global.html#pass1">pass1</a></li><li><a href="global.html#pass2">pass2</a></li><li><a href="global.html#rebuildFileList">rebuildFileList</a></li><li><a href="global.html#removeImage">removeImage</a></li><li><a href="global.html#renderGrid">renderGrid</a></li><li><a href="global.html#renderProducts">renderProducts</a></li><li><a href="global.html#renderizarPaginacion">renderizarPaginacion</a></li><li><a href="global.html#resetAndSearch">resetAndSearch</a></li><li><a href="global.html#searchCategoria">searchCategoria</a></li><li><a href="global.html#searchEstado">searchEstado</a></li><li><a href="global.html#searchOrden">searchOrden</a></li><li><a href="global.html#searchQuery">searchQuery</a></li><li><a href="global.html#searchTransaccion">searchTransaccion</a></li><li><a href="global.html#selectedFiles">selectedFiles</a></li><li><a href="global.html#sentinel">sentinel</a></li><li><a href="global.html#showError">showError</a></li><li><a href="global.html#showSkeleton">showSkeleton</a></li><li><a href="global.html#toggleBtn">toggleBtn</a></li><li><a href="global.html#toggleFavorito">toggleFavorito</a></li><li><a href="global.html#updateOrder">updateOrder</a></li><li><a href="global.html#validarEmail">validarEmail</a></li><li><a href="global.html#validateLogin">validateLogin</a></li><li><a href="global.html#validationForm">validationForm</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Fri Mar 20 2026 09:50:43 GMT+0100 (hora estándar de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

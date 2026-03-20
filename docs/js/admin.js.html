@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: admin.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: admin.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Variables globales para la paginación y búsqueda
+ */
+let currentPage = 1;
+const limit = 10;
+let searchQuery = "";
+
+/**
+ * Evento principal al cargar el DOM
+ */
+document.addEventListener("DOMContentLoaded", () => {
+    cargarUsuarios();
+
+    // Evento para el buscador
+    const btnSearch = document.getElementById("btn-search");
+    const inputSearch = document.getElementById("search-user");
+
+    btnSearch?.addEventListener("click", () => {
+        searchQuery = inputSearch.value.trim();
+        currentPage = 1; // Volver a la primera página al buscar
+        cargarUsuarios();
+    });
+
+    // Permitir buscar al presionar Enter
+    inputSearch?.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+            searchQuery = inputSearch.value.trim();
+            currentPage = 1;
+            cargarUsuarios();
+        }
+    });
+});
+
+/**
+ * Obtiene los usuarios de la API y los renderiza en la tabla
+ */
+async function cargarUsuarios() {
+    const tbody = document.getElementById("tabla-usuarios");
+    const paginacion = document.getElementById("paginacion-admin");
+
+    // Mostrar estado de carga
+    tbody.innerHTML = `
+        &lt;tr>
+            &lt;td colspan="7" class="text-center py-5 text-muted">
+                &lt;div class="spinner-border text-primary spinner-border-sm me-2" role="status">&lt;/div>
+                Cargando usuarios...
+            &lt;/td>
+        &lt;/tr>`;
+
+    try {
+        // Construir la URL con los parámetros
+        const params = new URLSearchParams({
+            page: currentPage,
+            limit: limit,
+            q: searchQuery
+        });
+
+        // Asegúrate de que la ruta coincida con el nombre de tu carpeta raíz si es necesario
+        const res = await fetch(`/MercApp/api/admin_get_users.php?${params.toString()}`);
+        const json = await res.json();
+
+        if (!json.success) {
+            tbody.innerHTML = `&lt;tr>&lt;td colspan="7" class="text-center text-danger py-4">${json.error || "Error cargando usuarios"}&lt;/td>&lt;/tr>`;
+            paginacion.innerHTML = "";
+            return;
+        }
+
+        const usuarios = json.data;
+        const total = json.total;
+
+        if (usuarios.length === 0) {
+            tbody.innerHTML = `&lt;tr>&lt;td colspan="7" class="text-center py-4 text-muted">No se encontraron usuarios.&lt;/td>&lt;/tr>`;
+            paginacion.innerHTML = "";
+            return;
+        }
+
+        // Limpiar tabla e inyectar usuarios
+        tbody.innerHTML = "";
+        usuarios.forEach(u => {
+            const tr = document.createElement("tr");
+
+            // Colores para los estados
+            let badgeEstado = "bg-success";
+            if (u.estado === "suspendido") badgeEstado = "bg-warning text-dark";
+            if (u.estado === "eliminado") badgeEstado = "bg-danger";
+
+            // Colores para los roles
+            const badgeRol = u.rol === "admin" ? "bg-primary" : "bg-secondary";
+
+            // Lógica de seguridad: Ocultar botones si el usuario es administrador
+            let botonesAccion = "";
+            if (u.rol === "admin") {
+                botonesAccion = `&lt;span class="text-muted small fw-bold">&lt;i class="bi bi-shield-check text-primary">&lt;/i> Protegido&lt;/span>`;
+            } else {
+                botonesAccion = `
+                    &lt;button class="btn btn-sm btn-outline-warning me-1" onclick="cambiarEstado(${u.id}, 'suspendido')" title="Suspender">
+                        &lt;i class="bi bi-pause-circle">&lt;/i>
+                    &lt;/button>
+                    &lt;button class="btn btn-sm btn-outline-success me-1" onclick="cambiarEstado(${u.id}, 'activo')" title="Activar">
+                        &lt;i class="bi bi-play-circle">&lt;/i>
+                    &lt;/button>
+                    &lt;button class="btn btn-sm btn-outline-danger" onclick="cambiarEstado(${u.id}, 'eliminado')" title="Eliminar">
+                        &lt;i class="bi bi-trash">&lt;/i>
+                    &lt;/button>
+                `;
+            }
+
+            tr.innerHTML = `
+                &lt;td class="fw-bold text-muted">#${u.id}&lt;/td>
+                &lt;td>
+                    &lt;div class="fw-semibold">${u.nombre} ${u.apellidos || ''}&lt;/div>
+                    &lt;div class="small text-muted">${u.telefono || 'Sin teléfono'}&lt;/div>
+                &lt;/td>
+                &lt;td>${u.email}&lt;/td>
+                &lt;td>${new Date(u.fecha_registro).toLocaleDateString()}&lt;/td>
+                &lt;td>&lt;span class="badge ${badgeRol}">${u.rol.toUpperCase()}&lt;/span>&lt;/td>
+                &lt;td>&lt;span class="badge ${badgeEstado}">${u.estado.toUpperCase()}&lt;/span>&lt;/td>
+                &lt;td class="text-center">
+                    ${botonesAccion}
+                &lt;/td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        renderizarPaginacion(total);
+
+    } catch (err) {
+        console.error("Error al cargar usuarios:", err);
+        tbody.innerHTML = `&lt;tr>&lt;td colspan="7" class="text-center text-danger py-4">Error de conexión al servidor.&lt;/td>&lt;/tr>`;
+    }
+}
+
+/**
+ * Dibuja los controles de paginación
+ */
+function renderizarPaginacion(total) {
+    const paginacion = document.getElementById("paginacion-admin");
+    const totalPages = Math.ceil(total / limit);
+
+    if (totalPages &lt;= 1) {
+        paginacion.innerHTML = "";
+        return;
+    }
+
+    paginacion.innerHTML = `
+        &lt;ul class="pagination">
+            &lt;li class="page-item ${currentPage &lt;= 1 ? "disabled" : ""}">
+                &lt;button class="page-link" onclick="cambiarPagina(${currentPage - 1})">Anterior&lt;/button>
+            &lt;/li>
+            &lt;li class="page-item disabled">
+                &lt;span class="page-link">Página ${currentPage} de ${totalPages}&lt;/span>
+            &lt;/li>
+            &lt;li class="page-item ${currentPage >= totalPages ? "disabled" : ""}">
+                &lt;button class="page-link" onclick="cambiarPagina(${currentPage + 1})">Siguiente&lt;/button>
+            &lt;/li>
+        &lt;/ul>
+    `;
+}
+
+/**
+ * Cambia la página actual y recarga la tabla
+ */
+window.cambiarPagina = function (newPage) {
+    currentPage = newPage;
+    cargarUsuarios();
+};
+
+/**
+ * Envía la petición a la API para cambiar el estado de un usuario
+ */
+window.cambiarEstado = async function (id, nuevoEstado) {
+    if (confirm(`¿Estás seguro de que deseas marcar al usuario #${id} como ${nuevoEstado}?`)) {
+        try {
+            // Ajusta la ruta a tu carpeta raíz si es diferente a /MercApp/
+            const res = await fetch("/MercApp/api/admin_update_status.php", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    id: id,
+                    estado: nuevoEstado
+                })
+            });
+
+            const json = await res.json();
+
+            if (json.success) {
+                // Si todo sale bien, recargamos la tabla para ver la insignia cambiar de color
+                cargarUsuarios();
+            } else {
+                // Si la API lo rechaza (ej. intentan banear a un admin saltándose el HTML)
+                alert("Error: " + json.error);
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Error de conexión al servidor.");
+        }
+    }
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-badge_mensajes.html">badge_mensajes</a></li><li><a href="module-valoracion.html">valoracion</a></li></ul><h3>Global</h3><ul><li><a href="global.html#abrirModalExito">abrirModalExito</a></li><li><a href="global.html#body">body</a></li><li><a href="global.html#cargarFiltros">cargarFiltros</a></li><li><a href="global.html#cargarUsuarios">cargarUsuarios</a></li><li><a href="global.html#clearError">clearError</a></li><li><a href="global.html#currentPage">currentPage</a></li><li><a href="global.html#emailInput">emailInput</a></li><li><a href="global.html#enviarFormulario">enviarFormulario</a></li><li><a href="global.html#existingImages">existingImages</a></li><li><a href="global.html#formLogin">formLogin</a></li><li><a href="global.html#formRegister">formRegister</a></li><li><a href="global.html#grid">grid</a></li><li><a href="global.html#hideSkeleton">hideSkeleton</a></li><li><a href="global.html#input">input</a></li><li><a href="global.html#inputEmail">inputEmail</a></li><li><a href="global.html#inputName">inputName</a></li><li><a href="global.html#inputPass">inputPass</a></li><li><a href="global.html#limit">limit</a></li><li><a href="global.html#loadMoreProducts">loadMoreProducts</a></li><li><a href="global.html#loading">loading</a></li><li><a href="global.html#noMore">noMore</a></li><li><a href="global.html#observer">observer</a></li><li><a href="global.html#offset">offset</a></li><li><a href="global.html#onSort">onSort</a></li><li><a href="global.html#ordenInput">ordenInput</a></li><li><a href="global.html#pass1">pass1</a></li><li><a href="global.html#pass2">pass2</a></li><li><a href="global.html#rebuildFileList">rebuildFileList</a></li><li><a href="global.html#removeImage">removeImage</a></li><li><a href="global.html#renderGrid">renderGrid</a></li><li><a href="global.html#renderProducts">renderProducts</a></li><li><a href="global.html#renderizarPaginacion">renderizarPaginacion</a></li><li><a href="global.html#resetAndSearch">resetAndSearch</a></li><li><a href="global.html#searchCategoria">searchCategoria</a></li><li><a href="global.html#searchEstado">searchEstado</a></li><li><a href="global.html#searchOrden">searchOrden</a></li><li><a href="global.html#searchQuery">searchQuery</a></li><li><a href="global.html#searchTransaccion">searchTransaccion</a></li><li><a href="global.html#selectedFiles">selectedFiles</a></li><li><a href="global.html#sentinel">sentinel</a></li><li><a href="global.html#showError">showError</a></li><li><a href="global.html#showSkeleton">showSkeleton</a></li><li><a href="global.html#toggleBtn">toggleBtn</a></li><li><a href="global.html#toggleFavorito">toggleFavorito</a></li><li><a href="global.html#updateOrder">updateOrder</a></li><li><a href="global.html#validarEmail">validarEmail</a></li><li><a href="global.html#validateLogin">validateLogin</a></li><li><a href="global.html#validationForm">validationForm</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Fri Mar 20 2026 09:50:43 GMT+0100 (hora estándar de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

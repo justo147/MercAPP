@@ -2,26 +2,30 @@
 <phpdocumentor
     configVersion="3"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="https://docs.phpdoc.org/latest/phpdoc.xsd"
->
+    xmlns="https://www.phpdoc.org"
+    xsi:noNamespaceSchemaLocation="https://docs.phpdoc.org/latest/phpdoc.xsd">
 
     <title>MercApp - Documentación</title>
 
     <paths>
-        <output>docs</output>
+        <output>docs/php</output>
+        <cache>docs/.cache</cache>
     </paths>
 
-    <versions>
-        <version number="1.0">
-            <api>
-                <source dsn=".">
-                    <path>models</path>
-                    <path>controllers</path>
-                    <path>api</path>
-                    <path>config</path>
-                </source>
-            </api>
-        </version>
-    </versions>
+    <version number="1.0.0">
+        <api>
+            <source dsn=".">
+                <path>controllers/</path>
+                <path>models/</path>
+                <path>config/</path>
+                <path>public/</path>
+            </source>
+
+            <ignore hidden="true">
+                <path>vendor/*</path>
+                <path>docs/*</path>
+            </ignore>
+        </api>
+    </version>
 
 </phpdocumentor>
