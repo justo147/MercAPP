@@ -14,7 +14,9 @@ require_once __DIR__ . '/../../models/User.php';
 // ===============================
 // INICIO DE SESIÓN Y CONTROL DE ACCESO
 // ===============================
-session_start();
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();}
 
 // Si el usuario no está logueado, redirigir al login
 if (!isset($_SESSION["user_id"])) {

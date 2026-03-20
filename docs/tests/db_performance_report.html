@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<!-- saved from url=(0063)http://localhost/MercApp/tests/prueba_bd/generate_db_report.php -->
+<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <title>DB Performance Report — MercApp</title>
+  <link href="./generate_db_report_files/css2" rel="stylesheet">
+  <style>
+    :root {
+      --bg:      #0d0f14;
+      --surface: #13161d;
+      --border:  #1e2230;
+      --accent:  #00e5ff;
+      --success: #00c896;
+      --warning: #f59e0b;
+      --danger:  #ef4444;
+      --text:    #e2e8f0;
+      --muted:   #718096;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text); padding: 2rem; }
+    h1 { font-size: 1.8rem; font-weight: 800; color: var(--accent); margin-bottom: 0.25rem; }
+    .subtitle { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--muted); margin-bottom: 2rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; text-align: center; }
+    .card .val { font-size: 2rem; font-weight: 800; color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+    .card .lbl { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.3rem; }
+    table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: 10px; overflow: hidden; margin-top: 1rem; }
+    thead { background: #1a1d28; }
+    th { padding: 0.85rem 1rem; text-align: left; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; font-family: 'JetBrains Mono', monospace; }
+    td { padding: 0.85rem 1rem; border-top: 1px solid var(--border); font-size: 0.8rem; vertical-align: top; }
+    td.mono { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: #a78bfa; max-width: 400px; word-break: break-all; }
+    .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.65rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+    .section-title { font-size: 1rem; font-weight: 700; color: var(--text); margin: 2rem 0 0.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    .footer { text-align: center; color: var(--muted); font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; margin-top: 2rem; }
+  </style>
+</head>
+<body>
+
+  <h1>🗄️ Database Performance Report — MercApp</h1>
+  <p class="subtitle">Fuente: slow_queries.log · MariaDB 10.4.32 · 2026-03-20 14:12</p>
+
+  <div class="grid">
+    <div class="card">
+      <div class="val">56</div>
+      <div class="lbl">Total queries</div>
+    </div>
+    <div class="card">
+      <div class="val">3</div>
+      <div class="lbl">Queries únicas</div>
+    </div>
+    <div class="card">
+      <div class="val">33.1ms</div>
+      <div class="lbl">Más lenta</div>
+    </div>
+    <div class="card">
+      <div class="val">71.0ms</div>
+      <div class="lbl">Tiempo total</div>
+    </div>
+  </div>
+
+  <p class="section-title">📋 Queries analizadas</p>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Query</th>
+        <th>Veces</th>
+        <th>Tiempo máx.</th>
+        <th>Tiempo total</th>
+        <th>Filas exam.</th>
+        <th>Estado</th>
+      </tr>
+    </thead>
+    <tbody>
+            <tr>
+        <td style="color:var(--muted); font-family:&#39;JetBrains Mono&#39;,monospace">1</td>
+        <td class="mono">SELECT COUNT(*) 
+            FROM Mensajes m
+            JOIN Chat c ON m.chat_id = c.id
+            WHERE (m.usuario_id != '1' OR m.usuario_id IS NULL)
+            AND m.leido = 0
+            AN...</td>
+        <td style="font-family:&#39;JetBrains Mono&#39;,monospace; color:var(--accent)">53x</td>
+        <td style="font-family:&#39;JetBrains Mono&#39;,monospace; color:#ef4444">33.13ms</td>
+        <td style="font-family:&#39;JetBrains Mono&#39;,monospace; color:var(--muted)">54.49ms</td>
+        <td style="font-family:&#39;JetBrains Mono&#39;,monospace">39</td>
+        <td><span class="badge" style="background:#ef444422; color:#ef4444; border:1px solid #ef444444">CRÍTICO</span></td>
+      </tr>
+            <tr>
+        <td style="color:var(--muted); font-family:&#39;JetBrains Mono&#39;,monospace">2</td>
+        <td class="mono">SELECT p.*
+            FROM Productos p
+            JOIN Usuario u ON p.usuario_id = u.id
+            WHERE p.estado_publicacion_id = 1 
+            AND u.estado = 'activo' AND p.id != 6 ORDER BY ...</td>
+        <td style="font-family:&#39;JetBrains Mono&#39;,monospace; color:var(--accent)">1x</td>
+        <td style="font-family:&#39;JetBrains Mono&#39;,monospace; color:#f59e0b">14.42ms</td>
+        <td style="font-family:&#39;JetBrains Mono&#39;,monospace; color:var(--muted)">14.42ms</td>
+        <td style="font-family:&#39;JetBrains Mono&#39;,monospace">16</td>
+        <td><span class="badge" style="background:#f59e0b22; color:#f59e0b; border:1px solid #f59e0b44">LENTO</span></td>
+      </tr>
+            <tr>
+        <td style="color:var(--muted); font-family:&#39;JetBrains Mono&#39;,monospace">3</td>
+        <td class="mono">SELECT 
+            c.id AS chat_id,
+            c.producto_id,
+            p.titulo AS producto_titulo,
+            img.url AS producto_imagen,
+
+            -- Último mensaje
+            (
+ ...</td>
+        <td style="font-family:&#39;JetBrains Mono&#39;,monospace; color:var(--accent)">2x</td>
+        <td style="font-family:&#39;JetBrains Mono&#39;,monospace; color:#00c896">1.34ms</td>
+        <td style="font-family:&#39;JetBrains Mono&#39;,monospace; color:var(--muted)">2.10ms</td>
+        <td style="font-family:&#39;JetBrains Mono&#39;,monospace">78</td>
+        <td><span class="badge" style="background:#00c89622; color:#00c896; border:1px solid #00c89644">NORMAL</span></td>
+      </tr>
+          </tbody>
+  </table>
+
+  <p class="footer">Generado automáticamente · MercApp DB Performance Test · 20/03/2026 14:12</p>
+
+
+
+```
+
+<!-- Ábrelo en el navegador:
+http://localhost/MercApp/tests/prueba_bd/generate_db_report.php --></body></html>

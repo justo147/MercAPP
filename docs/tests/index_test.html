@@ -1,27 +1,33 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Test de Rendimiento — MercApp</title>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap"
+    rel="stylesheet">
   <style>
     :root {
-      --bg:        #0d0f14;
-      --surface:   #13161d;
-      --border:    #1e2230;
-      --accent:    #00e5ff;
-      --accent2:   #7c3aed;
-      --success:   #00c896;
-      --warning:   #f59e0b;
-      --danger:    #ef4444;
-      --muted:     #4a5568;
-      --text:      #e2e8f0;
-      --text-dim:  #718096;
+      --bg: #0d0f14;
+      --surface: #13161d;
+      --border: #1e2230;
+      --accent: #00e5ff;
+      --success: #00c896;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --muted: #4a5568;
+      --text: #e2e8f0;
+      --text-dim: #718096;
       --sidebar-w: 280px;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
       font-family: 'Syne', sans-serif;
@@ -32,7 +38,6 @@
       overflow: hidden;
     }
 
-    /* ── SIDEBAR ── */
     .sidebar {
       width: var(--sidebar-w);
       min-width: var(--sidebar-w);
@@ -40,7 +45,6 @@
       border-right: 1px solid var(--border);
       display: flex;
       flex-direction: column;
-      padding: 0;
       overflow-y: auto;
       z-index: 10;
     }
@@ -105,7 +109,9 @@
     .test-card::before {
       content: '';
       position: absolute;
-      left: 0; top: 0; bottom: 0;
+      left: 0;
+      top: 0;
+      bottom: 0;
       width: 3px;
       background: var(--muted);
       transition: background 0.2s;
@@ -150,10 +156,6 @@
       gap: 0.5rem;
     }
 
-    .test-card-title .icon {
-      font-size: 1rem;
-    }
-
     .badge {
       font-size: 0.6rem;
       font-family: 'JetBrains Mono', monospace;
@@ -164,8 +166,17 @@
       letter-spacing: 0.05em;
     }
 
-    .badge-ready  { background: rgba(0,200,150,0.15); color: var(--success); border: 1px solid rgba(0,200,150,0.3); }
-    .badge-pending{ background: rgba(245,158,11,0.12); color: var(--warning); border: 1px solid rgba(245,158,11,0.25); }
+    .badge-ready {
+      background: rgba(0, 200, 150, 0.15);
+      color: var(--success);
+      border: 1px solid rgba(0, 200, 150, 0.3);
+    }
+
+    .badge-pending {
+      background: rgba(245, 158, 11, 0.12);
+      color: var(--warning);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+    }
 
     .test-card-desc {
       font-size: 0.72rem;
@@ -178,6 +189,7 @@
       display: flex;
       gap: 0.75rem;
       margin-top: 0.5rem;
+      flex-wrap: wrap;
     }
 
     .meta-item {
@@ -193,6 +205,47 @@
       color: var(--accent);
     }
 
+    /* Scores Lighthouse */
+    .scores {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.3rem;
+      margin-top: 0.5rem;
+    }
+
+    .score-box {
+      text-align: center;
+      background: var(--surface);
+      border-radius: 5px;
+      padding: 0.3rem 0.2rem;
+      border: 1px solid var(--border);
+    }
+
+    .score-val {
+      font-size: 0.85rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .score-label {
+      font-size: 0.5rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .score-good {
+      color: var(--success);
+    }
+
+    .score-average {
+      color: var(--warning);
+    }
+
+    .score-poor {
+      color: var(--danger);
+    }
+
     .sidebar-footer {
       margin-top: auto;
       padding: 1rem 1.25rem;
@@ -203,7 +256,6 @@
       line-height: 1.6;
     }
 
-    /* ── MAIN CONTENT ── */
     .main {
       flex: 1;
       display: flex;
@@ -238,7 +290,8 @@
     }
 
     .dot {
-      width: 8px; height: 8px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       background: var(--success);
       box-shadow: 0 0 6px var(--success);
@@ -246,8 +299,15 @@
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0.4; }
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.4;
+      }
     }
 
     .frame-container {
@@ -263,7 +323,6 @@
       background: #fff;
     }
 
-    /* ── PLACEHOLDER ── */
     .placeholder {
       position: absolute;
       inset: 0;
@@ -306,39 +365,51 @@
       margin-top: 0.5rem;
     }
 
-    .placeholder.hidden { display: none; }
+    .placeholder.hidden {
+      display: none;
+    }
 
-    /* ── SCROLLBAR ── */
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
   </style>
 </head>
+
 <body>
 
-  <!-- ── SIDEBAR ── -->
   <aside class="sidebar">
 
     <div class="sidebar-header">
       <div class="logo">
         <svg width="28" height="25" viewBox="0 0 50 45" fill="none">
-          <path d="M31.968 34.681a2.007 2.007 0 002.011-2.003c0-1.106-.9-2.003-2.011-2.003a2.007 2.007 0 00-2.012 2.003c0 1.106.9 2.003 2.012 2.003z" fill="#00e5ff"/>
-          <path d="M39.575 0L27.154 16.883 16.729 9.31 0 45h50L39.575 0zM23.663 37.17l-2.97-4.072v4.072h-2.751V22.038l2.75 1.989v7.66l3.659-5.014 2.086 1.51-3.071 4.21 3.486 4.776h-3.189v.001zm8.305.17c-2.586 0-4.681-2.088-4.681-4.662 0-1.025.332-1.972.896-2.743l4.695-6.435 2.086 1.51-2.239 3.07a4.667 4.667 0 013.924 4.6c0 2.572-2.095 4.66-4.681 4.66z" fill="#00e5ff"/>
+          <path
+            d="M31.968 34.681a2.007 2.007 0 002.011-2.003c0-1.106-.9-2.003-2.011-2.003a2.007 2.007 0 00-2.012 2.003c0 1.106.9 2.003 2.012 2.003z"
+            fill="#00e5ff" />
+          <path
+            d="M39.575 0L27.154 16.883 16.729 9.31 0 45h50L39.575 0zM23.663 37.17l-2.97-4.072v4.072h-2.751V22.038l2.75 1.989v7.66l3.659-5.014 2.086 1.51-3.071 4.21 3.486 4.776h-3.189v.001zm8.305.17c-2.586 0-4.681-2.088-4.681-4.662 0-1.025.332-1.972.896-2.743l4.695-6.435 2.086 1.51-2.239 3.07a4.667 4.667 0 013.924 4.6c0 2.572-2.095 4.66-4.681 4.66z"
+            fill="#00e5ff" />
         </svg>
         <h1>MercApp</h1>
       </div>
       <p>// performance tests dashboard</p>
     </div>
 
+    <!-- Tests k6 -->
     <div class="sidebar-section">
-      <div class="sidebar-section-label">Tests de rendimiento</div>
+      <div class="sidebar-section-label">Tests k6</div>
 
-      <!-- Test 1 — Carga -->
       <div class="test-card active" onclick="loadTest('load_test_report.html', this)" id="card-load">
         <div class="test-card-header">
-          <div class="test-card-title">
-            <span class="icon">📊</span> Prueba de Carga
-          </div>
+          <div class="test-card-title"><span class="icon">📊</span> Prueba de Carga</div>
           <span class="badge badge-ready">Listo</span>
         </div>
         <div class="test-card-desc">Simula 200 usuarios concurrentes en condiciones normales de uso.</div>
@@ -348,13 +419,10 @@
         </div>
       </div>
 
-      <!-- Test 2 — Estrés -->
-      <div class="test-card disabled" id="card-stress">
+      <div class="test-card" onclick="loadTest('stress_test_report.html', this)" id="card-stress">
         <div class="test-card-header">
-          <div class="test-card-title">
-            <span class="icon">🔥</span> Prueba de Estrés
-          </div>
-          <span class="badge badge-pending">Pendiente</span>
+          <div class="test-card-title"><span class="icon">🔥</span> Prueba de Estrés</div>
+          <span class="badge badge-ready">Listo</span>
         </div>
         <div class="test-card-desc">Lleva el sistema más allá del límite para encontrar el punto de ruptura.</div>
         <div class="test-card-meta">
@@ -363,18 +431,64 @@
         </div>
       </div>
 
-      <!-- Test 3 — Pico -->
-      <div class="test-card disabled" id="card-spike">
+      <div class="test-card" onclick="loadTest('spike_test_report.html', this)" id="card-spike">
         <div class="test-card-header">
-          <div class="test-card-title">
-            <span class="icon">⚡</span> Prueba de Pico
-          </div>
-          <span class="badge badge-pending">Pendiente</span>
+          <div class="test-card-title"><span class="icon">⚡</span> Prueba de Pico</div>
+          <span class="badge badge-ready">Listo</span>
         </div>
         <div class="test-card-desc">Simula un aumento repentino y brutal de usuarios en pocos segundos.</div>
         <div class="test-card-meta">
           <div class="meta-item">👥 <span>100</span> VUs</div>
-          <div class="meta-item">⏱ <span>30s</span> duración</div>
+          <div class="meta-item">⏱ <span>45s</span> duración</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Tests Frontend -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Tests Frontend</div>
+
+      <div class="test-card" onclick="loadTest('lighthouse_home_report.html', this)" id="card-lighthouse">
+        <div class="test-card-header">
+          <div class="test-card-title"><span class="icon">🔦</span> Lighthouse — Home</div>
+          <span class="badge badge-ready">Listo</span>
+        </div>
+        <div class="test-card-desc">Análisis de rendimiento frontend con Google Lighthouse.</div>
+        <div class="scores">
+          <div class="score-box">
+            <div class="score-val score-average">71</div>
+            <div class="score-label">Perf</div>
+          </div>
+          <div class="score-box">
+            <div class="score-val score-good">87</div>
+            <div class="score-label">Access</div>
+          </div>
+          <div class="score-box">
+            <div class="score-val score-good">96</div>
+            <div class="score-label">Best P.</div>
+          </div>
+          <div class="score-box">
+            <div class="score-val score-good">82</div>
+            <div class="score-label">SEO</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Tests Base de Datos -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Tests Base de Datos</div>
+
+      <div class="test-card" onclick="loadTest('db_performance_report.html', this)" id="card-db">
+        <div class="test-card-header">
+          <div class="test-card-title"><span class="icon">🗄️</span> Database Performance</div>
+          <span class="badge badge-ready">Listo</span>
+        </div>
+        <div class="test-card-desc">Análisis de queries lentas con MySQL Slow Query Log.</div>
+        <div class="test-card-meta">
+          <div class="meta-item">🛠 <span>MySQL</span> XAMPP</div>
         </div>
       </div>
 
@@ -382,15 +496,14 @@
 
     <div class="sidebar-footer">
       <div>k6 v1.6.1 · Grafana Labs</div>
-      <div style="margin-top:0.25rem; color: #2d3748">
-        Genera los reportes pendientes ejecutando<br>
-        los scripts correspondientes con k6.
+      <div style="margin-top:0.25rem; color:#2d3748">
+        Lighthouse · Chrome DevTools<br>
+        MySQL · Slow Query Log
       </div>
     </div>
 
   </aside>
 
-  <!-- ── MAIN ── -->
   <main class="main">
 
     <div class="topbar">
@@ -399,18 +512,18 @@
       </div>
       <div class="topbar-info">
         <div class="dot"></div>
-        <span style="font-size:0.7rem; font-family:'JetBrains Mono',monospace; color:var(--text-dim)">XAMPP activo</span>
+        <span style="font-size:0.7rem; font-family:'JetBrains Mono',monospace; color:var(--text-dim)">XAMPP
+          activo</span>
       </div>
     </div>
 
     <div class="frame-container">
 
-      <!-- Placeholder para tests pendientes -->
       <div class="placeholder hidden" id="placeholder">
         <div class="placeholder-icon">⚙️</div>
         <h2>Reporte no generado aún</h2>
-        <p>Ejecuta el test correspondiente con k6 para generar este reporte.</p>
-        <code id="placeholder-cmd">k6 run tests/prueba_estres/stress_test.js</code>
+        <p>Genera el reporte correspondiente para poder visualizarlo aquí.</p>
+        <code id="placeholder-cmd"></code>
       </div>
 
       <iframe id="docFrame" src="load_test_report.html"></iframe>
@@ -424,45 +537,35 @@
      * Carga el reporte HTML del test seleccionado en el iframe.
      * Actualiza el estado visual de las tarjetas del sidebar.
      *
-     * @param {string} file    - Nombre del archivo HTML a cargar.
-     * @param {HTMLElement} el - Tarjeta clickada en el sidebar.
+     * @param {string}      file - Nombre del archivo HTML a cargar.
+     * @param {HTMLElement} el   - Tarjeta clickada en el sidebar.
      */
     function loadTest(file, el) {
       if (el.classList.contains('disabled')) return;
-
-      // Actualiza tarjetas activas
       document.querySelectorAll('.test-card').forEach(c => c.classList.remove('active'));
       el.classList.add('active');
-
-      // Actualiza topbar
       document.getElementById('current-file').textContent = file;
-
-      // Carga el iframe
       document.getElementById('placeholder').classList.add('hidden');
       document.getElementById('docFrame').style.display = 'block';
       document.getElementById('docFrame').src = file;
     }
 
     /**
-     * Activa una tarjeta de test pendiente cuando su reporte ya está disponible.
-     * Llamar a esta función una vez generado el HTML del test correspondiente.
+     * Activa una tarjeta pendiente cuando su reporte ya está disponible.
      *
-     * @param {'stress'|'spike'} testId  - ID del test a activar.
-     * @param {string}           file    - Nombre del archivo HTML generado.
-     * @param {string}           cmd     - Comando k6 que generó el reporte.
+     * @param {string} cardId - ID de la tarjeta sin prefijo 'card-'.
+     * @param {string} file   - Nombre del archivo HTML generado.
      */
-    function enableTest(testId, file, cmd) {
-      const card = document.getElementById(`card-${testId}`);
+    function enableTest(cardId, file) {
+      const card = document.getElementById(`card-${cardId}`);
       if (!card) return;
       card.classList.remove('disabled');
       card.querySelector('.badge').className = 'badge badge-ready';
       card.querySelector('.badge').textContent = 'Listo';
       card.setAttribute('onclick', `loadTest('${file}', this)`);
     }
-
-    enableTest('stress', 'stress_test_report.html', 'k6 run tests/prueba_estres/stress_test.js');
-    enableTest('spike',  'spike_test_report.html',  'k6 run tests/prueba_pico/spike_test.js');
   </script>
 
 </body>
+
 </html>
