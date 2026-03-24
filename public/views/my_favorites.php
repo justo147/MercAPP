@@ -1,14 +1,14 @@
 <?php
-session_start();
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-// Si no está logueado, lo mandamos al login
-if (!isset($_SESSION["user_id"])) {
-    header("Location: login.php");
-    exit;
-}
+session_start();
+require_once __DIR__ . '/../../config/db.php';
 
 // Conexión a la base de datos (TU FORMA)
-$bd = new PDO("mysql:host=localhost;dbname=mercapp", "root", "");
+$db = new Database();
+$conn = $db->getConnection();
 
 // Obtenemos los favoritos del usuario
 $sql = "SELECT 
@@ -16,15 +16,15 @@ $sql = "SELECT
             p.titulo, 
             p.precio,
             (SELECT url 
-             FROM imagenes_prod 
+             FROM Imagenes_prod 
              WHERE id_producto = p.id 
              ORDER BY orden ASC 
              LIMIT 1) AS imagen
-        FROM favoritos f
-        JOIN productos p ON p.id = f.producto_id
+        FROM Favoritos f
+        JOIN Productos p ON p.id = f.producto_id
         WHERE f.usuario_id = :uid";
 
-$stmt = $bd->prepare($sql);
+$stmt = $conn->prepare($sql);
 $stmt->execute([":uid" => $_SESSION["user_id"]]);
 $favoritos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>

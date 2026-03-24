@@ -97,5 +97,5 @@ switch ($nuevoEstado) {
 }
 
 // Volver al chat
-header("Location: /MercApp/public/views/chat.php?id=" . $chatId);
+header("Location: {$BASE}/public/views/chat.php?id=" . $chatId);
 exit;

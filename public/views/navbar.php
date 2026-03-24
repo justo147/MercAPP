@@ -1,3 +1,6 @@
+<?php
+require_once __DIR__ . '/../../config/bootstrap.php'; 
+?>
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4 shadow-sm" aria-label="Navegación principal">
   <div class="container-fluid">
 
@@ -34,7 +37,7 @@
               data-bs-toggle="dropdown">
 
               <?php if (!empty($_SESSION["profile_photo"])): ?>
-                <img src="/MercApp/<?php echo htmlspecialchars($_SESSION["profile_photo"]) ?>" class="rounded-circle me-2"
+                <img src="<?=$BASE?>/<?php echo htmlspecialchars($_SESSION["profile_photo"]) ?>" class="rounded-circle me-2"
                   width="24" height="24">
               <?php else: ?>
                 <i class="bi bi-person me-2 fs-5"></i>
@@ -112,4 +115,7 @@
 </nav>
 
 <script src="../js/theme.js"></script>
-<script src="/MercApp/public/js/navbar.js"></script>
+<script src="<?=$BASE?>/public/js/navbar.js"></script>
+<script>
+    const BASE = "<?php echo $_ENV['BASE_PATH']; ?>";
+</script>

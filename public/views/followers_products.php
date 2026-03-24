@@ -59,8 +59,8 @@ function renderProducts(products) {
 
     products.forEach(p => {
         const img = p.imagenes?.length
-            ? `/MercApp/${p.imagenes[0].url}`
-            : "/MercApp/uploads/products/default.jpg";
+            ? `${BASE}/${p.imagenes[0].url}`
+            : `${BASE}/uploads/products/default.jpg`;
 
         const col = document.createElement("div");
         col.classList.add("col-6", "col-md-4", "col-lg-3", "mb-4", "sinFondo", "fade-in");
@@ -93,7 +93,7 @@ function renderProducts(products) {
 }
 
 function loadProducts() {
-    fetch(`/MercApp/api/products_following.php?page=${page}&limit=8`)
+    fetch(`${BASE}/api/products_following.php?page=${page}&limit=8`)
         .then(res => res.json())
         .then(data => {
 

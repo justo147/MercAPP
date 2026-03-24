@@ -91,7 +91,7 @@ $esPropietario = ($perfilId === $usuarioLogueado);
                       <div class="container text-center mt-5">
                         <h1 class="display-5 fw-bold text-danger">Usuario no encontrado</h1>
                         <p class="lead">El perfil que intentas ver no existe o ha sido eliminado.</p>
-                        <a href="/MercApp/public/views/home.php" class="btn btn-primary mt-3">
+                        <a href="<?=$BASE?>/public/views/home.php" class="btn btn-primary mt-3">
                           Volver al inicio
                         </a>
                       </div>
@@ -106,7 +106,7 @@ $esPropietario = ($perfilId === $usuarioLogueado);
 
                 <!-- Mostrar foto de perfil o icono por defecto -->
                 <?php if ($user && !empty($user['foto_perfil'])): ?>
-                  <img src="/MercApp/<?= htmlspecialchars($user['foto_perfil']) ?>" class="rounded-circle mt-5"
+                  <img src="<?=$BASE?>/<?= htmlspecialchars($user['foto_perfil']) ?>" class="rounded-circle mt-5"
                     width="120" height="120" style="object-fit: cover;" alt="Foto de perfil">
                 <?php else: ?>
                   <i class="bi bi-person-circle mb-3 text-secondary" style="font-size: 120px; display: block;"></i>
@@ -148,7 +148,7 @@ $esPropietario = ($perfilId === $usuarioLogueado);
 
                 <!-- Botones de acción -->
                 <div class="d-flex">
-                  <a href="/MercApp/public/views/chat_list.php"
+                  <a href="<?=$BASE?>/public/views/chat_list.php"
                     class="btn btn-outline-primary me-1 flex-grow-1 position-relative">
                     Message
                     <span id="badge-mensajes"
@@ -254,7 +254,7 @@ document.addEventListener("DOMContentLoaded", () => {
         modal.addEventListener("show.bs.modal", event => {
             const button = event.relatedTarget;
             const productId = button.getAttribute("data-product-id");
-            btnConfirmar.href = `/MercApp/controllers/handlers/delete_product_handler.php?id=${productId}`;
+            btnConfirmar.href = `<?=$BASE?>/controllers/handlers/delete_product_handler.php?id=${productId}`;
         });
     }
 
@@ -290,8 +290,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const seguido  = btnFollow.dataset.seguido;
 
         const url = sigue
-            ? "/MercApp/controllers/unfollow.php"
-            : "/MercApp/controllers/follow.php";
+            ? "<?=$BASE?>/controllers/unfollow.php"
+            : "<?=$BASE?>/controllers/follow.php";
 
         fetch(url, {
             method: "POST",

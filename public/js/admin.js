@@ -56,7 +56,7 @@ async function cargarUsuarios() {
         });
 
         // Asegúrate de que la ruta coincida con el nombre de tu carpeta raíz si es necesario
-        const res = await fetch(`/MercApp/api/admin_get_users.php?${params.toString()}`);
+        const res = await fetch(`${BASE}/api/admin_get_users.php?${params.toString()}`);
         const json = await res.json();
 
         if (!json.success) {
@@ -172,7 +172,7 @@ window.cambiarEstado = async function (id, nuevoEstado) {
     if (confirm(`¿Estás seguro de que deseas marcar al usuario #${id} como ${nuevoEstado}?`)) {
         try {
             // Ajusta la ruta a tu carpeta raíz si es diferente a /MercApp/
-            const res = await fetch("/MercApp/api/admin_update_status.php", {
+            const res = await fetch(`${BASE}/api/admin_update_status.php`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

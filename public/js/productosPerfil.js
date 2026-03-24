@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
    */
   function cargarProductos() {
 
-    const url = new URL("/MercApp/api/productos_usuario.php", window.location.origin);
+    const url = new URL(`${BASE}/api/productos_usuario.php`, window.location.origin);
     url.searchParams.set("id", userId);
     url.searchParams.set("page", page);
     url.searchParams.set("limit", limit);
@@ -128,7 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="carousel-inner">
                   ${imagenes.map((img, i) => `
                     <div class="carousel-item ${i === 0 ? "active" : ""}">
-                      <img src="/MercApp/${img.url}" class="d-block w-100"
+                      <img src="${BASE}/${img.url}" class="d-block w-100"
                         alt="Imagen ${i + 1} de ${prod.titulo}"
                         style="height: 200px; object-fit: cover; border-bottom: 1px solid #ddd;">
                     </div>
@@ -270,7 +270,7 @@ document.addEventListener("DOMContentLoaded", () => {
      ESTADÍSTICAS DEL USUARIO
   ============================================================ */
 
-  fetch(`/MercApp/api/stats.php?id=${PERFIL_ID}`)
+  fetch(`${BASE}/api/stats.php?id=${PERFIL_ID}`)
     .then(res => res.json())
     .then(data => {
       if (!data.success) return;
@@ -285,7 +285,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   function actualizarBadgeMensajes() {
-    fetch("/MercApp/api/chat_unread_count.php")
+    fetch(`${BASE}/api/chat_unread_count.php`)
       .then(res => res.text())
       .then(num => {
         const badges = document.querySelectorAll("#badge-mensajes");

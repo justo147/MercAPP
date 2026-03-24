@@ -44,12 +44,12 @@ include __DIR__ . '/../../controllers/chat_list.php';
         <?php endif; ?>
 
         <?php foreach ($chats as $chat): ?>
-            <a href="/MercApp/public/views/chat.php?id=<?= $chat["chat_id"] ?>" class="text-decoration-none text-dark">
+            <a href="<?= $BASE ?>/public/views/chat.php?id=<?= $chat["chat_id"] ?>" class="text-decoration-none text-dark">
                 <div class="card mb-3 p-2">
                     <div class="d-flex align-items-center">
 
                         <!-- Imagen del producto -->
-                        <img src="/MercApp/<?= htmlspecialchars($chat["producto_imagen"]) ?>" class="rounded me-3"
+                        <img src="<?= $BASE ?>/<?= htmlspecialchars($chat["producto_imagen"]) ?>" class="rounded me-3"
                             style="width: 70px; height: 70px; object-fit: cover;">
 
                         <div class="flex-grow-1">

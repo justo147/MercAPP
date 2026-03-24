@@ -425,16 +425,24 @@ class User
      * @return float Valoración media.
      */
     public function obtenerValoracion($userId)
-    {
-        $sql = "SELECT reputacion_media FROM vw_usuario_reputacion 
-                WHERE usuario_id = ?";
+{
+    $sql = "
+        SELECT 
+            COALESCE(AVG(v.puntuacion), 0) AS reputacion_media
+        FROM usuario u
+        LEFT JOIN Valoraciones v 
+            ON v.usuario_valorado = u.id
+        WHERE u.id = ?
+        GROUP BY u.id
+    ";
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([$userId]);
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute([$userId]);
 
-        $valor = $stmt->fetchColumn();
-        return $valor ? round($valor, 1) : 0;
-    }
+    $valor = $stmt->fetchColumn();
+    return $valor ? round($valor, 1) : 0;
+}
+
 
     /**
      * Devuelve un paquete completo de estadísticas del usuario.
@@ -497,7 +505,7 @@ class User
      */
     public function obtenerFechaRegistro($userId)
     {
-        $sql = "SELECT fecha_registro FROM Usuario WHERE id = ?";
+        $sql = "SELECT fecha_registro FROM usuario WHERE id = ?";
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$userId]);
@@ -555,7 +563,7 @@ public function obtenerSeguidores($usuarioId)
 {
     $sql = "SELECT u.id, u.nombre, u.apellidos, u.foto_perfil, s.fecha_seguimiento
             FROM Seguidores s
-            JOIN Usuario u ON u.id = s.seguidor_id
+            JOIN usuario u ON u.id = s.seguidor_id
             WHERE s.seguido_id = ?
             ORDER BY s.fecha_seguimiento DESC";
 
@@ -568,7 +576,7 @@ public function obtenerSeguidos($usuarioId)
 {
     $sql = "SELECT u.id, u.nombre, u.apellidos, u.foto_perfil, s.fecha_seguimiento
             FROM Seguidores s
-            JOIN Usuario u ON u.id = s.seguido_id
+            JOIN usuario u ON u.id = s.seguido_id
             WHERE s.seguidor_id = ?
             ORDER BY s.fecha_seguimiento DESC";
 

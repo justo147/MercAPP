@@ -96,7 +96,7 @@ if (!isset($_GET["id"]) || !is_numeric($_GET["id"])) {
                             <div class="alert alert-danger">
                                 <?= htmlspecialchars($fatalError) ?>
                             </div>
-                            <a href="/MercApp/public/views/profile.php?id=<?= $_SESSION["user_id"] ?>" class="btn btn-primary mt-3">
+                            <a href="<?=$BASE?>/public/views/profile.php?id=<?= $_SESSION["user_id"] ?>" class="btn btn-primary mt-3">
                                 Volver a mi perfil
                             </a>
                         <?php else: ?>
@@ -170,7 +170,7 @@ if (!isset($_GET["id"]) || !is_numeric($_GET["id"])) {
                                 <div class="row g-3">
                                     <?php foreach ($producto["imagenes"] as $img): ?>
                                         <div class="col-4 text-center">
-                                            <img src="/MercApp/<?= $img["url"] ?>"
+                                            <img src="<?=$BASE?>/<?= $img["url"] ?>"
                                                 class="img-fluid rounded mb-2 img-actual"
                                                 data-url="<?= $img["url"] ?>"
                                                 data-orden="<?= $img["orden"] ?>"

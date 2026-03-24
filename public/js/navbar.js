@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
      * @returns {void}
      */
     function actualizarBadgeMensajes() {
-        fetch("/MercApp/api/chat_unread_count.php")
+        fetch(`${BASE}/api/chat_unread_count.php`)
 
         /**
          * @param {Response} res - Respuesta HTTP del servidor.

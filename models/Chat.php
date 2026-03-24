@@ -44,7 +44,7 @@ class Chat
                    img.url AS producto_imagen
             FROM Chat c
             LEFT JOIN Productos p ON c.producto_id = p.id
-            LEFT JOIN Imagenes_prod img ON img.id_producto = p.id AND img.orden = 1
+            LEFT JOIN Imagenes_prod img ON img.id_producto = p.id AND img.orden = 0
             WHERE c.id = :id";
 
         $stmt = $this->conn->prepare($sql);
@@ -222,7 +222,7 @@ public function getChatsByUser(int $userId)
 
         FROM Chat c
         JOIN Productos p ON c.producto_id = p.id
-        LEFT JOIN Imagenes_prod img ON img.id_producto = p.id AND img.orden = 1
+        LEFT JOIN Imagenes_prod img ON img.id_producto = p.id AND img.orden = 0
         WHERE c.usuario_comprador = :uid OR c.usuario_vendedor = :uid
         ORDER BY fecha_ultimo_mensaje DESC
     ";

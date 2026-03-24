@@ -292,7 +292,7 @@ $mensajes = $mensajeModel->getByChat($chatId);
             <?php $estado = $transaccion["estado"]; ?>
 
             <!-- BOTONES SEGÚN ESTADO -->
-            <form action="/MercApp/controllers/chat_update_transaction.php" method="POST" class="mb-3">
+            <form action="<?= $BASE ?>/controllers/chat_update_transaction.php" method="POST" class="mb-3">
                 <input type="hidden" name="transaccion_id" value="<?= $transaccion["id"] ?>">
                 <input type="hidden" name="chat_id" value="<?= $chatId ?>">
 
@@ -339,7 +339,7 @@ $mensajes = $mensajeModel->getByChat($chatId);
 
         <!-- BOTÓN INICIAR TRANSACCIÓN -->
         <?php if ($esVendedor && !$transaccion): ?>
-            <form action="/MercApp/controllers/chat_start_transaction.php" method="POST" class="mb-3">
+            <form action="<?= $BASE ?>/controllers/chat_start_transaction.php" method="POST" class="mb-3">
                 <input type="hidden" name="chat_id" value="<?= $chatId ?>">
                 <button class="btn btn-success w-100">
                     Iniciar transacción

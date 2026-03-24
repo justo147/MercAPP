@@ -42,7 +42,7 @@ class Message
     {
         $sql = "SELECT m.*, u.nombre AS sender_name
                 FROM Mensajes m
-                JOIN Usuario u ON m.usuario_id = u.id
+                JOIN usuario u ON m.usuario_id = u.id
                 WHERE m.chat_id = :chat
                 ORDER BY m.fecha_envio ASC";
 

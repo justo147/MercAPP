@@ -120,7 +120,7 @@ function hideSkeleton() {
  */
 async function cargarFiltros() {
     try {
-        const res = await fetch("/MercApp/api/get_filters.php");
+        const res = await fetch(`${BASE}/api/get_filters.php`);
         const json = await res.json();
 
         if (!json.success) return;
@@ -182,7 +182,7 @@ async function loadMoreProducts() {
     }
 
     try {
-        let endpoint = "/MercApp/api/getProductsPaginated.php";
+        let endpoint = `${BASE}/api/getProductsPaginated.php`;
 
         const params = new URLSearchParams({
             limit,
@@ -197,7 +197,7 @@ async function loadMoreProducts() {
             searchOrden !== "fecha_desc";
 
         if (usingFilters) {
-            endpoint = "/MercApp/api/search_products.php";
+            endpoint = `${BASE}/api/search_products.php`;
 
             params.set("q", searchQuery);
             params.set("categoria", searchCategoria);
@@ -247,8 +247,8 @@ function renderProducts(products) {
 
     products.forEach(p => {
         const img = p.imagenes?.length
-            ? `/MercApp/${p.imagenes[0].url}`
-            : "/MercApp/uploads/products/default.jpg";
+            ? `${BASE}/${p.imagenes[0].url}`
+            : `${BASE}/uploads/products/default.jpg`;
 
         const col = document.createElement("div");
         col.classList.add("col-6", "col-md-4", "col-lg-3", "mb-4", "sinFondo", "fade-in");

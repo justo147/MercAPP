@@ -37,7 +37,7 @@ class Transaction
      */
     public function create($productoId, $compradorId, $vendedorId, $tipo, $estado, $precioFinal, $dineroExtra)
     {
-        $sql = "INSERT INTO transacciones 
+        $sql = "INSERT INTO Transacciones 
                 (producto_id, comprador_id, vendedor_id, tipo, estado, fecha_transaccion, precio_final, dinero_extra)
                 VALUES 
                 (:producto_id, :comprador_id, :vendedor_id, :tipo, :estado, NOW(), :precio_final, :dinero_extra)";
@@ -66,7 +66,7 @@ class Transaction
      */
     public function getAll()
     {
-        $sql = "SELECT * FROM transacciones ORDER BY fecha_transaccion DESC";
+        $sql = "SELECT * FROM Transacciones ORDER BY fecha_transaccion DESC";
         return $this->conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -78,7 +78,7 @@ class Transaction
      */
     public function getByUser($usuarioId)
     {
-        $sql = "SELECT * FROM transacciones
+        $sql = "SELECT * FROM Transacciones
                 WHERE comprador_id = :id OR vendedor_id = :id
                 ORDER BY fecha_transaccion DESC";
 
@@ -96,7 +96,7 @@ class Transaction
      */
     public function getByProduct($productoId)
     {
-        $sql = "SELECT * FROM transacciones
+        $sql = "SELECT * FROM Transacciones
                 WHERE producto_id = :producto_id
                 ORDER BY fecha_transaccion DESC";
 
@@ -119,7 +119,7 @@ class Transaction
      */
     public function updateStatus($id, $estado)
     {
-        $sql = "UPDATE transacciones SET estado = :estado WHERE id = :id";
+        $sql = "UPDATE Transacciones SET estado = :estado WHERE id = :id";
 
         $stmt = $this->conn->prepare($sql);
         return $stmt->execute([
@@ -140,7 +140,7 @@ class Transaction
      */
     public function delete($id)
     {
-        $sql = "DELETE FROM transacciones WHERE id = :id";
+        $sql = "DELETE FROM Transacciones WHERE id = :id";
 
         $stmt = $this->conn->prepare($sql);
         return $stmt->execute([':id' => $id]);
@@ -149,7 +149,7 @@ class Transaction
 
     public function getActiveTransactionByProduct($productoId)
 {
-    $sql = "SELECT * FROM transacciones
+    $sql = "SELECT * FROM Transacciones
             WHERE producto_id = :producto_id
             AND estado IN ('pendiente', 'aceptada')
             ORDER BY id DESC
@@ -163,7 +163,7 @@ class Transaction
 
 public function createFromChat($productoId, $compradorId, $vendedorId)
 {
-    $sql = "INSERT INTO transacciones 
+    $sql = "INSERT INTO Transacciones 
             (producto_id, comprador_id, vendedor_id, tipo, estado, fecha_transaccion)
             VALUES 
             (:producto_id, :comprador_id, :vendedor_id, 'venta', 'pendiente', NOW())";
@@ -181,7 +181,7 @@ public function createFromChat($productoId, $compradorId, $vendedorId)
 
 public function getById($id)
 {
-    $sql = "SELECT * FROM transacciones WHERE id = :id LIMIT 1";
+    $sql = "SELECT * FROM Transacciones WHERE id = :id LIMIT 1";
     $stmt = $this->conn->prepare($sql);
     $stmt->execute([':id' => $id]);
     return $stmt->fetch(PDO::FETCH_ASSOC);
@@ -190,7 +190,7 @@ public function getById($id)
 
 public function getLastTransactionByProduct($productoId)
 {
-    $sql = "SELECT * FROM transacciones
+    $sql = "SELECT * FROM Transacciones
             WHERE producto_id = :producto_id
             ORDER BY id DESC
             LIMIT 1";

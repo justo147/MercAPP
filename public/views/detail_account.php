@@ -65,7 +65,7 @@ require_once __DIR__ . '/../../controllers/handlers/detail_account_handlers.php'
                                 <label for="inputFoto" class="form-label">Cambiar foto de perfil</label>
                                 <div class="d-flex justify-content-center">
                                     <?php if (!empty($user['foto_perfil'])): ?>
-                                        <img src="/MercApp/<?= htmlspecialchars($user['foto_perfil']) ?>"
+                                        <img src="<?= $BASE ?>/<?= htmlspecialchars($user['foto_perfil']) ?>"
                                             class="rounded-circle mb-3" width="120" height="120"
                                             alt="Foto de perfil actual">
                                     <?php else: ?>

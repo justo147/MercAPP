@@ -38,7 +38,7 @@ class Rating
      */
     public function create($transaccionId, $usuarioValorador, $usuarioValorado, $puntuacion, $comentario = null, $fiabilidad = null, $comunicacion = null, $puntualidad = null)
     {
-        $sql = "INSERT INTO valoraciones 
+        $sql = "INSERT INTO Valoraciones 
                 (transaccion_id, usuario_valorador, usuario_valorado, puntuacion, comentario, fecha_valoracion, fiabilidad, comunicacion, puntualidad)
                 VALUES 
                 (:transaccion_id, :usuario_valorador, :usuario_valorado, :puntuacion, :comentario, NOW(), :fiabilidad, :comunicacion, :puntualidad)";
@@ -68,7 +68,7 @@ class Rating
      */
     public function getAll()
     {
-        $sql = "SELECT * FROM valoraciones ORDER BY fecha_valoracion DESC";
+        $sql = "SELECT * FROM Valoraciones ORDER BY fecha_valoracion DESC";
         return $this->conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -80,7 +80,7 @@ class Rating
      */
     public function getReceivedByUser($usuarioId)
     {
-        $sql = "SELECT * FROM valoraciones 
+        $sql = "SELECT * FROM Valoraciones 
                 WHERE usuario_valorado = :id
                 ORDER BY fecha_valoracion DESC";
 
@@ -98,7 +98,7 @@ class Rating
      */
     public function getGivenByUser($usuarioId)
     {
-        $sql = "SELECT * FROM valoraciones 
+        $sql = "SELECT * FROM Valoraciones 
                 WHERE usuario_valorador = :id
                 ORDER BY fecha_valoracion DESC";
 
@@ -116,7 +116,7 @@ class Rating
      */
     public function getByTransaction($transaccionId)
     {
-        $sql = "SELECT * FROM valoraciones WHERE transaccion_id = :id";
+        $sql = "SELECT * FROM Valoraciones WHERE transaccion_id = :id";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->execute([':id' => $transaccionId]);
@@ -137,7 +137,7 @@ class Rating
     public function getAverageScore($usuarioId)
     {
         $sql = "SELECT AVG(puntuacion) AS promedio 
-                FROM valoraciones 
+                FROM Valoraciones 
                 WHERE usuario_valorado = :id";
 
         $stmt = $this->conn->prepare($sql);
@@ -159,7 +159,7 @@ class Rating
                     AVG(fiabilidad) AS promedio_fiabilidad,
                     AVG(comunicacion) AS promedio_comunicacion,
                     AVG(puntualidad) AS promedio_puntualidad
-                FROM valoraciones
+                FROM Valoraciones
                 WHERE usuario_valorado = :id";
 
         $stmt = $this->conn->prepare($sql);
@@ -181,7 +181,7 @@ class Rating
      */
     public function hasRated($transaccionId, $usuarioValorador)
     {
-        $sql = "SELECT COUNT(*) FROM valoraciones
+        $sql = "SELECT COUNT(*) FROM Valoraciones
                 WHERE transaccion_id = :transaccion_id
                   AND usuario_valorador = :usuario_valorador";
 
@@ -206,7 +206,7 @@ class Rating
      */
     public function delete($id)
     {
-        $sql = "DELETE FROM valoraciones WHERE id = :id";
+        $sql = "DELETE FROM Valoraciones WHERE id = :id";
 
         $stmt = $this->conn->prepare($sql);
         return $stmt->execute([':id' => $id]);

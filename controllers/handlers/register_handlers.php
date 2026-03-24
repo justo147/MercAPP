@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../models/User.php';
+require_once __DIR__ . '/../../config/db.php';
 /**
  * Script de registro de usuario.
  *
@@ -54,8 +55,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // ===============================
             // CONEXIÓN A LA BASE DE DATOS
             // ===============================
-            $bd = new PDO("mysql:host=localhost;dbname=mercapp", "root", "");
-            $userModel = new User($bd);
+            $db = new Database();
+	    $conn = $db->getConnection();
+            $userModel = new User($conn);
             // ===============================
             // COMPROBAR SI EL EMAIL YA ESTÁ REGISTRADO
             // ===============================
@@ -80,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // ENVIAR EMAIL DE VERIFICACIÓN
             // ===============================
             require __DIR__ . '/../../config/mail_config.php';
-            $verifyUrl = "http://localhost/MercApp/public/views/verify_email.php?token={$verifyToken}&email=" . urlencode($email);
+            $verifyUrl = "{$BASE}/public/views/verify_email.php?token={$verifyToken}&email=" . urlencode($email);
             $subject = "Confirma tu correo en MercaAPP";
             $body = "Bienvenido {$name}, confirma tu correo: {$verifyUrl}";
 

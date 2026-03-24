@@ -5,7 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Si no hay sesión iniciada, lo mandamos al login
 if (!isset($_SESSION["user_id"])) {
-    header("Location: /MercApp/public/views/auth/login.php"); // Ajusta la ruta a tu login si es diferente
+    header("Location: {$base}/public/views/auth/login.php"); // Ajusta la ruta a tu login si es diferente
     exit;
 }
 
@@ -29,7 +29,7 @@ try {
         session_destroy();
         
         // 3. Lo echamos al login con una etiqueta de error en la URL
-        header("Location: /MercApp/public/views/auth/login.php?error=cuenta_inactiva");
+        header("Location: {$BASE}/public/views/auth/login.php?error=cuenta_inactiva");
         exit;
     }
 

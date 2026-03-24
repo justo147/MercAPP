@@ -57,7 +57,7 @@ class Notification
      */
     public function getByUser($usuarioId)
     {
-        $sql = "SELECT * FROM notificaciones
+        $sql = "SELECT * FROM Notificaciones
                 WHERE usuario_id = :usuario_id
                 ORDER BY fecha DESC";
 
@@ -75,7 +75,7 @@ class Notification
      */
     public function getUnread($usuarioId)
     {
-        $sql = "SELECT * FROM notificaciones
+        $sql = "SELECT * FROM Notificaciones
                 WHERE usuario_id = :usuario_id AND leida = 0
                 ORDER BY fecha DESC";
 
@@ -97,7 +97,7 @@ class Notification
      */
     public function markAsRead($id)
     {
-        $sql = "UPDATE notificaciones SET leida = 1 WHERE id = :id";
+        $sql = "UPDATE Notificaciones SET leida = 1 WHERE id = :id";
 
         $stmt = $this->conn->prepare($sql);
         return $stmt->execute([':id' => $id]);
@@ -111,7 +111,7 @@ class Notification
      */
     public function markAllAsRead($usuarioId)
     {
-        $sql = "UPDATE notificaciones SET leida = 1 WHERE usuario_id = :usuario_id";
+        $sql = "UPDATE Notificaciones SET leida = 1 WHERE usuario_id = :usuario_id";
 
         $stmt = $this->conn->prepare($sql);
         return $stmt->execute([':usuario_id' => $usuarioId]);
@@ -129,7 +129,7 @@ class Notification
      */
     public function delete($id)
     {
-        $sql = "DELETE FROM notificaciones WHERE id = :id";
+        $sql = "DELETE FROM Notificaciones WHERE id = :id";
 
         $stmt = $this->conn->prepare($sql);
         return $stmt->execute([':id' => $id]);

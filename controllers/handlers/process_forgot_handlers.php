@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $userModel->setResetToken($email, $token, $expires);
 
         // Enlace de recuperación
-        $resetLink = "http://localhost/MercApp/public/views/reset_password.php?token=$token&email=" . urlencode($email);
+        $resetLink = "{$BASE}/public/views/reset_password.php?token=$token&email=" . urlencode($email);
 
         $htmlBody = "
             <p>Has solicitado restablecer tu contraseña.</p>

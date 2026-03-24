@@ -94,7 +94,7 @@ try {
         // ===============================
         if (!empty($_FILES["imagenes"]["name"][0])) {
 
-            $targetDir = "../../uploads/productos/";
+            $targetDir =__DIR__."/../../uploads/products/";
 
             if (!is_dir($targetDir)) {
                 mkdir($targetDir, 0777, true);

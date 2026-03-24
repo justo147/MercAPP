@@ -33,5 +33,5 @@ if ($owner != $_SESSION["user_id"]) {
 $productModel->deleteWithImages($productId);
 
 // Redirigir al perfil
-header("Location: /MercApp/public/views/profile.php?id=$userId&deleted=1");
+header("Location: {$BASE}/public/views/profile.php?id=$userId&deleted=1");
 exit;

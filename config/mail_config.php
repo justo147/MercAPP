@@ -26,7 +26,7 @@ function sendMail($toEmail, $toName, $subject, $htmlBody, $altBody = ''): bool {
     $mail->Host = 'smtp.gmail.com';
     $mail->SMTPAuth = true;
     $mail->Username = 'mercappbusiness@gmail.com';          // tu correo Gmail completo
-    $mail->Password = 'vfkw dpey uwzu fcqv';  // contraseña de aplicación
+    $mail->Password = $_ENV['EMAIL_API_KEY'];  // contraseña de aplicación
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port = 587;
 

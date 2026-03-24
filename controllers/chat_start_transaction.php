@@ -1,13 +1,17 @@
 <?php
 session_start();
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 
 if (!isset($_SESSION["user_id"])) {
-    header("Location: /MercApp/public/views/auth/login.php");
+    header("Location: {$BASE}/public/views/auth/login.php");
     exit;
 }
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    header("Location: /MercApp/public/views/home.php");
+    header("Location: {$BASE}/public/views/home.php");
     exit;
 }
 
@@ -15,7 +19,7 @@ $usuarioActual = intval($_SESSION["user_id"]);
 $chatId = intval($_POST["chat_id"] ?? 0);
 
 if ($chatId <= 0) {
-    header("Location: /MercApp/public/views/home.php");
+    header("Location: {$BASE}/public/views/home.php");
     exit;
 }
 
@@ -51,7 +55,7 @@ $vendedorId = $usuarioActual;
 
 // Si el chat ya tiene una transacción, no crear otra
 if (!empty($chat["transaccion_id"])) {
-    header("Location: /MercApp/public/views/chat.php?id=" . $chatId);
+    header("Location: {$BASE}/public/views/chat.php?id=" . $chatId);
     exit;
 }
 
@@ -76,5 +80,5 @@ $mensajeModel->enviarMensajeSistema(
 );
 
 // Redirigir al chat
-header("Location: /MercApp/public/views/chat.php?id=" . $chatId);
+header("Location: {$BASE}/public/views/chat.php?id=" . $chatId);
 exit;

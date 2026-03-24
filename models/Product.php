@@ -50,13 +50,13 @@ class Product
      */
     public function getPaginated($limit, $offset, $userId = null)
     {
-        // 1. Base de la consulta con JOIN a Usuario para verificar su estado
+        // 1. Base de la consulta con JOIN a usuario para verificar su estado
         $sql = "SELECT 
                     p.*, 
                     u.nombre AS usuario_nombre,
                     c.nombre AS categoria_nombre
                 FROM Productos p
-                JOIN Usuario u ON p.usuario_id = u.id
+                JOIN usuario u ON p.usuario_id = u.id
                 JOIN Categorias c ON p.categoria_id = c.id
                 WHERE u.estado = 'activo'
                 AND p.estado_publicacion_id = (SELECT id FROM EstadoPublicacion WHERE nombre = 'activo')";
@@ -134,7 +134,7 @@ class Product
                 JOIN Categorias c ON p.categoria_id = c.id
                 JOIN EstadoProducto ep ON p.estado_producto_id = ep.id
                 JOIN EstadoPublicacion epu ON p.estado_publicacion_id = epu.id
-                JOIN Usuario u ON p.usuario_id = u.id
+                JOIN usuario u ON p.usuario_id = u.id
                 WHERE p.id = :id";
 
         $stmt = $this->conn->prepare($sql);
@@ -431,7 +431,7 @@ class Product
                 JOIN Categorias c ON p.categoria_id = c.id
                 JOIN EstadoProducto ep ON p.estado_producto_id = ep.id
                 JOIN EstadoPublicacion epu ON p.estado_publicacion_id = epu.id
-                JOIN Usuario u ON p.usuario_id = u.id
+                JOIN usuario u ON p.usuario_id = u.id
                 WHERE u.estado = 'activo'
                 AND p.estado_publicacion_id = (SELECT id FROM EstadoPublicacion WHERE nombre = 'activo')";
 
@@ -622,10 +622,10 @@ class Product
         // 1. Construcción de la consulta base con JOIN de seguridad
         // -------------------------------------------------------------
         // Seleccionamos p.* para obtener los datos del producto
-        // JOIN con Usuario (u) para verificar que el vendedor no esté baneado/eliminado
+        // JOIN con usuario (u) para verificar que el vendedor no esté baneado/eliminado
         $sql = "SELECT p.*
             FROM Productos p
-            JOIN Usuario u ON p.usuario_id = u.id
+            JOIN usuario u ON p.usuario_id = u.id
             WHERE p.estado_publicacion_id = 1 
             AND u.estado = 'activo'"; // <--- FILTRO DE SEGURIDAD
 

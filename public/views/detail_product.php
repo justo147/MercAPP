@@ -81,16 +81,16 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
 
                     <!-- Imagen principal -->
                     <?php if (!empty($producto['imagenes'])): ?>
-                        <img src="/MercApp/<?= htmlspecialchars($producto['imagenes'][0]['url']) ?>"
+                        <img src="<?= $BASE ?>/<?= htmlspecialchars($producto['imagenes'][0]['url']) ?>"
                             class="img-fluid rounded mb-3" alt="Imagen del producto">
                     <?php else: ?>
-                        <img src="/uploads/products/default.jpg" class="img-fluid rounded mb-3" alt="Imagen por defecto">
+                        <img src="<?= $BASE ?>/uploads/products/default.jpg" class="img-fluid rounded mb-3" alt="Imagen por defecto">
                     <?php endif; ?>
 
                     <!-- Miniaturas -->
                     <div class="d-flex flex-wrap gap-2">
                         <?php foreach ($producto['imagenes'] as $img): ?>
-                            <img src="/<?= htmlspecialchars($img['url']) ?>" class="img-thumbnail"
+                            <img src="<?= $BASE ?>/<?= htmlspecialchars($img['url']) ?>" class="img-thumbnail"
                                 style="width: 80px; height: 80px; object-fit: cover;" alt="Miniatura">
                         <?php endforeach; ?>
                     </div>
@@ -136,14 +136,14 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
 
 
                     <!-- Contactar con el vendedor -->
-                    <a href="/MercApp/controllers/chat_start.php?producto_id=<?= $producto["id"] ?>"
+                    <a href="<?= $BASE ?>/controllers/chat_start.php?producto_id=<?= $producto["id"] ?>"
                         class="btn btn-primary w-100 mb-3 d-flex align-items-center justify-content-center gap-2">
                         <i class="bi bi-chat-dots"></i>
                         Contactar con el vendedor
                     </a>
 
                     <div class="text-center mb-3">
-                        <a href="/MercApp/controllers/chat_start.php?producto_id=<?= $producto["id"] ?>">
+                        <a href="<?= $BASE ?>/controllers/chat_start.php?producto_id=<?= $producto["id"] ?>">
                             ¿Tienes dudas? Chatea con el vendedor
                         </a>
                     </div>
@@ -173,9 +173,9 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
                 <div class="d-flex align-items-center">
 
                     <!-- Foto -->
-                    <a href="/MercApp/public/views/profile.php?id=<?= $vendedorId ?>" class="me-3">
+                    <a href="<?= $BASE ?>/public/views/profile.php?id=<?= $vendedorId ?>" class="me-3">
                         <?php if (!empty($vendedor['foto_perfil'])): ?>
-                            <img src="/MercApp/<?= htmlspecialchars($vendedor['foto_perfil']) ?>" class="rounded-circle"
+                            <img src="<?= $BASE ?>/<?= htmlspecialchars($vendedor['foto_perfil']) ?>" class="rounded-circle"
                                 width="80" height="80" style="object-fit: cover;">
                         <?php else: ?>
                             <i class="bi bi-person-circle text-secondary" style="font-size: 80px;"></i>
@@ -185,7 +185,7 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
                     <!-- Info -->
                     <div class="flex-grow-1">
                         <h5 class="mb-1">
-                            <a href="/MercApp/public/views/profile.php?id=<?= $vendedorId ?>">
+                            <a href="<?= $BASE ?>/public/views/profile.php?id=<?= $vendedorId ?>">
                                 <?= htmlspecialchars($vendedor['nombre'] . " " . $vendedor['apellidos']) ?>
                             </a>
                         </h5>
@@ -223,7 +223,7 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
 
                         <?php foreach ($productosSugeridos as $index => $s): ?>
                             <?php
-                            $img = 'MercApp/uploads/products/default.jpg';
+                            $img = "$BASE/uploads/products/default.jpg";
                             if (!empty($s['imagenes']) && isset($s['imagenes'][0]['url'])) {
                                 $img = $s['imagenes'][0]['url'];
                             }
@@ -273,7 +273,8 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
     </script>
 
     <!-- Cargamos el archivo externo que gestiona los favoritos -->
-    <script src="/MercApp/public/js/favoritos.js"></script>
+    <script src="<?php echo $_ENV['BASE_PATH']; ?>/public/js/favorite.js"></script>
+
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
@@ -301,8 +302,8 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
                 const seguido = btnFollow.dataset.seguido;
 
                 const url = sigue
-                    ? "/MercApp/controllers/unfollow.php"
-                    : "/MercApp/controllers/follow.php";
+                    ? `${BASE}/controllers/unfollow.php`
+                    : `${BASE}/controllers/follow.php`;
 
                 fetch(url, {
                     method: "POST",

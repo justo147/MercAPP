@@ -14,5 +14,5 @@ session_start(); // Iniciar la sesión para poder destruirla
 session_destroy(); // Eliminar todas las variables de sesión
 
 // Redirigir al usuario a la landing page
-header("location: ../public/views/landing_page.php");
+header("location: ../public/views/home.php");
 exit; // Asegurar que no se ejecute código adicional
