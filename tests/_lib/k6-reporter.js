@@ -16,7 +16,7 @@
  *   + Comando en PowerShell para generar la prueba → k6 run tests/prueba_estres/stress_test.js
  * 
  * - tests/prueba_pico/spike_test.js    → genera docs/tests/spike_test_report.html
- *   + Comando en PowerShell para generar la prueba →
+ *   + Comando en PowerShell para generar la prueba → k6 run tests/prueba_pico/spike_test.js
  *
  * Los tres tests importan esta misma librería desde la carpeta _lib/
  * para evitar duplicar el archivo en cada carpeta. El reporte generado
