@@ -3,9 +3,11 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+require_once __DIR__ . '/../config/bootstrap.php';
+
 // Si no hay sesión iniciada, lo mandamos al login
 if (!isset($_SESSION["user_id"])) {
-    header("Location: {$base}/public/views/auth/login.php"); // Ajusta la ruta a tu login si es diferente
+    header("Location: {$BASE}/public/views/auth/login.php");
     exit;
 }
 
