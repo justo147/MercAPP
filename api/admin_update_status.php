@@ -53,5 +53,6 @@ try {
     }
 
 } catch (Exception $e) {
-    echo json_encode(["success" => false, "error" => "Error interno del servidor.", "details" => $e->getMessage()]);
+    error_log("admin_update_status error: " . $e->getMessage());
+    echo json_encode(["success" => false, "error" => "Error interno del servidor."]);
 }
