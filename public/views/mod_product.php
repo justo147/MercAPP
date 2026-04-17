@@ -170,11 +170,12 @@ if (!isset($_GET["id"]) || !is_numeric($_GET["id"])) {
                                 <div class="row g-3">
                                     <?php foreach ($producto["imagenes"] as $img): ?>
                                         <div class="col-4 text-center">
-                                            <img src="<?=$BASE?>/<?= $img["url"] ?>"
+                                            <img src="<?= $BASE ?>/<?= htmlspecialchars($img["url"]) ?>"
                                                 class="img-fluid rounded mb-2 img-actual"
-                                                data-url="<?= $img["url"] ?>"
-                                                data-orden="<?= $img["orden"] ?>"
-                                                style="height:120px; object-fit:cover;">
+                                                data-url="<?= htmlspecialchars($img["url"]) ?>"
+                                                data-orden="<?= intval($img["orden"]) ?>"
+                                                style="height:120px; object-fit:cover;"
+                                                onerror="this.onerror=null;this.src='<?= $BASE ?>/public/img/default.jpg'">
                                             <div>
                                                 <input type="checkbox" name="delete_images[]" value="<?= $img["url"] ?>">
                                                 <small>Eliminar</small>

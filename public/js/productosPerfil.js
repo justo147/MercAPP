@@ -115,9 +115,10 @@ document.addEventListener("DOMContentLoaded", () => {
            * Lista de imágenes del producto.
            * @type {Array<{url: string}>}
            */
+          const DEFAULT_IMG = `${BASE}/public/img/default.jpg`;
           const imagenes = prod.imagenes?.length
             ? prod.imagenes
-            : [{ url: "uploads/products/default.jpg" }];
+            : [{ url: "public/img/default.jpg" }];
 
           const idCarrusel = "carousel_" + prod.id;
 
@@ -130,7 +131,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     <div class="carousel-item ${i === 0 ? "active" : ""}">
                       <img src="${BASE}/${img.url}" class="d-block w-100"
                         alt="Imagen ${i + 1} de ${prod.titulo}"
-                        style="height: 200px; object-fit: cover; border-bottom: 1px solid #ddd;">
+                        style="height: 200px; object-fit: cover; border-bottom: 1px solid #ddd;"
+                        onerror="this.onerror=null;this.src='${DEFAULT_IMG}'">
                     </div>
                   `).join("")}
                 </div>

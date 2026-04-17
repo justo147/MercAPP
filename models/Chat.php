@@ -211,12 +211,13 @@ public function getChatsByUser(int $userId)
                 LIMIT 1
             ) AS fecha_ultimo_mensaje,
 
-            -- Mensajes sin leer
+            -- Mensajes sin leer (excluye mensajes del sistema)
             (
-                SELECT COUNT(*) 
-                FROM Mensajes 
-                WHERE chat_id = c.id 
-                AND (usuario_id != :uid OR usuario_id IS NULL)
+                SELECT COUNT(*)
+                FROM Mensajes
+                WHERE chat_id     = c.id
+                AND usuario_id IS NOT NULL
+                AND usuario_id   != :uid
                 AND leido = 0
             ) AS no_leidos
 

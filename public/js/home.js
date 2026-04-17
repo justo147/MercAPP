@@ -246,16 +246,19 @@ function renderProducts(products) {
     const container = document.getElementById("product-list");
 
     products.forEach(p => {
+        const DEFAULT_IMG = `${BASE}/public/img/default.jpg`;
         const img = p.imagenes?.length
             ? `${BASE}/${p.imagenes[0].url}`
-            : `${BASE}/uploads/products/default.jpg`;
+            : DEFAULT_IMG;
 
         const col = document.createElement("div");
         col.classList.add("col-6", "col-md-4", "col-lg-3", "mb-4", "sinFondo", "fade-in");
 
         col.innerHTML = `
             <div class="card h-100 shadow-sm border">
-                <img src="${img}" class="card-img-top" alt="Imagen de ${p.titulo}" style="height: 180px; object-fit: cover;">
+                <img src="${img}" class="card-img-top" alt="Imagen de ${p.titulo}"
+                     style="height: 180px; object-fit: cover;"
+                     onerror="this.onerror=null;this.src='${DEFAULT_IMG}'">
 
                 <div class="card-body d-flex flex-column">
                     <h2 class="card-title text-truncate small" title="${p.titulo}">${p.titulo}</h2>

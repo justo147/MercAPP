@@ -1,13 +1,12 @@
 <?php
-
-//session_status() devuelve tres posibles valores:
-//PHP_SESSION_NONE → No hay sesión activa, es seguro iniciarla.
-
 if (session_status() === PHP_SESSION_NONE) {
-    session_start();}
+    session_start();
+}
+
+require_once __DIR__ . '/../config/bootstrap.php';
 
 if (!isset($_SESSION["user_id"])) {
-    header("Location: ../views/auth/login.php");
+    header("Location: {$BASE}/public/views/auth/login.php");
     exit;
 }
 

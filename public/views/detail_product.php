@@ -80,18 +80,22 @@ $productosSugeridos = $productModel->getRandomProducts(20, $productId);
                 <div class="card p-3">
 
                     <!-- Imagen principal -->
-                    <?php if (!empty($producto['imagenes'])): ?>
-                        <img src="<?= $BASE ?>/<?= htmlspecialchars($producto['imagenes'][0]['url']) ?>"
-                            class="img-fluid rounded mb-3" alt="Imagen del producto">
-                    <?php else: ?>
-                        <img src="<?= $BASE ?>/uploads/products/default.jpg" class="img-fluid rounded mb-3" alt="Imagen por defecto">
-                    <?php endif; ?>
+                    <?php
+                    $imgPrincipal = !empty($producto['imagenes'])
+                        ? $BASE . '/' . htmlspecialchars($producto['imagenes'][0]['url'])
+                        : $BASE . '/public/img/default.jpg';
+                    ?>
+                    <img src="<?= $imgPrincipal ?>"
+                         class="img-fluid rounded mb-3" alt="Imagen del producto"
+                         onerror="this.onerror=null;this.src='<?= $BASE ?>/public/img/default.jpg'">
 
                     <!-- Miniaturas -->
                     <div class="d-flex flex-wrap gap-2">
                         <?php foreach ($producto['imagenes'] as $img): ?>
-                            <img src="<?= $BASE ?>/<?= htmlspecialchars($img['url']) ?>" class="img-thumbnail"
-                                style="width: 80px; height: 80px; object-fit: cover;" alt="Miniatura">
+                            <img src="<?= $BASE ?>/<?= htmlspecialchars($img['url']) ?>"
+                                 class="img-thumbnail"
+                                 style="width: 80px; height: 80px; object-fit: cover;" alt="Miniatura"
+                                 onerror="this.onerror=null;this.src='<?= $BASE ?>/public/img/default.jpg'">
                         <?php endforeach; ?>
                     </div>
 

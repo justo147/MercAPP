@@ -80,9 +80,10 @@ $favoritos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <a href="detail_product.php?id=<?= $p['id'] ?>" class="text-decoration-none text-dark">
                             <div class="card shadow-sm">
 
-                                <img src="/<?= htmlspecialchars($p['imagen'] ?? 'uploads/products/default.jpg') ?>"
+                                <img src="<?= $BASE ?>/<?= htmlspecialchars($p['imagen'] ?? 'public/img/default.jpg') ?>"
                                     class="card-img-top"
-                                    style="height: 200px; object-fit: cover;">
+                                    style="height: 200px; object-fit: cover;"
+                                    onerror="this.onerror=null;this.src='<?= $BASE ?>/public/img/default.jpg'">
 
                                 <div class="card-body">
                                     <h5 class="card-title"><?= htmlspecialchars($p['titulo']) ?></h5>
