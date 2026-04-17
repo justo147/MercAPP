@@ -14,7 +14,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $productId = intval($_POST["id"] ?? 0);
 
     // Verificar que el producto pertenece al usuario logueado
-    session_start();
+    if (session_status() === PHP_SESSION_NONE) {
+    session_start();}
     $userId = $_SESSION["user_id"] ?? 0;
 
     $stmt = $conn->prepare("SELECT usuario_id FROM Productos WHERE id = ?");

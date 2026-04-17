@@ -3,3 +3,4 @@ vendor/
 uploads/
 .phpdoc/
 .phpunit.result.cache
+.claude/
