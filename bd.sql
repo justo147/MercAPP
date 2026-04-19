@@ -131,14 +131,28 @@ CREATE TABLE Deseos (
 
 CREATE TABLE Transacciones (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  producto_id INT NOT NULL,      -- producto principal (del vendedor)
+  producto_id INT NOT NULL,
   comprador_id INT NOT NULL,
   vendedor_id INT NOT NULL,
   tipo ENUM('venta','intercambio','mixto') NOT NULL,
-  estado ENUM('pendiente','aceptada','enviado','entregado','cancelada') DEFAULT 'pendiente',
+  -- Estado ampliado: pago_pendiente = comprador pagó, vendedor aún no confirmó
+  estado ENUM('pendiente','aceptada','pago_pendiente','enviado','entregado','cancelada') DEFAULT 'pendiente',
   fecha_transaccion DATETIME DEFAULT CURRENT_TIMESTAMP,
-  precio_final DECIMAL(10,2) DEFAULT 0.00, -- usado si venta o mixto
-  dinero_extra DECIMAL(10,2) DEFAULT 0.00, -- diferencia aportada en mixto
+  precio_final DECIMAL(10,2) DEFAULT 0.00,
+  dinero_extra DECIMAL(10,2) DEFAULT 0.00,
+  -- Método de pago elegido por el comprador al aceptar
+  metodo_pago ENUM('efectivo','transferencia','bizum','paypal','otro') NULL,
+  -- Dirección de envío normalizada (vía Nominatim)
+  direccion_envio VARCHAR(300) NULL,
+  -- Número de seguimiento que añade el vendedor al marcar como enviado
+  numero_seguimiento VARCHAR(100) NULL,
+  -- Notas del comprador (instrucciones de entrega, etc.)
+  notas_comprador TEXT NULL,
+  -- Timestamps de cada paso del flujo
+  fecha_aceptacion DATETIME NULL,
+  fecha_pago_confirmado DATETIME NULL,
+  fecha_envio DATETIME NULL,
+  fecha_entrega DATETIME NULL,
   FOREIGN KEY (producto_id) REFERENCES Productos(id)
     ON DELETE RESTRICT ON UPDATE CASCADE,
   FOREIGN KEY (comprador_id) REFERENCES Usuario(id)

@@ -43,7 +43,7 @@ if (!$transaccion) {
     exit;
 }
 
-// Verificar que el usuario pertenece a la transacción
+// Solo los participantes de la transacción pueden actuar
 if (
     $usuarioActual != $transaccion["comprador_id"] &&
     $usuarioActual != $transaccion["vendedor_id"]
@@ -56,21 +56,21 @@ $estadoActual = $transaccion["estado"];
 $esComprador  = ($usuarioActual == $transaccion["comprador_id"]);
 $esVendedor   = ($usuarioActual == $transaccion["vendedor_id"]);
 
-// ── Máquina de estados ───────────────────────────────────────
-// Transiciones válidas y quién puede ejecutarlas
-$transicionesValidas = [
-    'pendiente' => ['aceptada', 'cancelada'],
-    'aceptada'  => ['enviado',  'cancelada'],
-    'enviado'   => ['entregado','cancelada'],
-];
-
 // Estados terminales: no se puede avanzar
 if (in_array($estadoActual, ['entregado', 'cancelada'])) {
     header("Location: {$BASE}/public/views/chat.php?id={$chatId}");
     exit;
 }
 
-// Verificar que la transición es válida desde el estado actual
+// ── Máquina de estados ────────────────────────────────────────
+// Mapa: estado_actual → [estados_destino_válidos]
+$transicionesValidas = [
+    'pendiente'     => ['aceptada',        'cancelada'],
+    'aceptada'      => ['pago_pendiente',   'cancelada'],
+    'pago_pendiente'=> ['enviado',          'cancelada'],
+    'enviado'       => ['entregado',        'cancelada'],
+];
+
 if (
     !isset($transicionesValidas[$estadoActual]) ||
     !in_array($nuevoEstado, $transicionesValidas[$estadoActual])
@@ -79,10 +79,18 @@ if (
     exit;
 }
 
-// ── Autorización por rol para cada transición ─────────────────
+// ── Autorización por rol ──────────────────────────────────────
 switch ($nuevoEstado) {
     case 'aceptada':
-        // Solo el comprador acepta la transacción
+        // Solo el comprador acepta y aporta datos de pago y envío
+        if (!$esComprador) {
+            header("Location: {$BASE}/public/views/chat.php?id={$chatId}");
+            exit;
+        }
+        break;
+
+    case 'pago_pendiente':
+        // Solo el comprador informa que ha pagado
         if (!$esComprador) {
             header("Location: {$BASE}/public/views/chat.php?id={$chatId}");
             exit;
@@ -90,7 +98,7 @@ switch ($nuevoEstado) {
         break;
 
     case 'enviado':
-        // Solo el vendedor marca como enviado
+        // Solo el vendedor marca como enviado (confirma pago + añade tracking)
         if (!$esVendedor) {
             header("Location: {$BASE}/public/views/chat.php?id={$chatId}");
             exit;
@@ -106,39 +114,75 @@ switch ($nuevoEstado) {
         break;
 
     case 'cancelada':
-        // Cualquiera de los dos puede cancelar
+        // Cualquiera puede cancelar
         break;
 }
 
-// ── Ejecutar el cambio ────────────────────────────────────────
-$transactionModel->updateStatus($transaccionId, $nuevoEstado);
+// ── Ejecutar la transición ────────────────────────────────────
 $productoId = intval($transaccion["producto_id"]);
 
 switch ($nuevoEstado) {
 
     case 'aceptada':
+        $metodoPago     = trim($_POST["metodo_pago"]     ?? "");
+        $direccionEnvio = trim($_POST["direccion_envio"] ?? "");
+        $notas          = trim($_POST["notas_comprador"] ?? "");
+
+        // Validar que se eligió método de pago
+        $metodosValidos = ['efectivo', 'transferencia', 'bizum', 'paypal', 'otro'];
+        if (!in_array($metodoPago, $metodosValidos)) {
+            header("Location: {$BASE}/public/views/chat.php?id={$chatId}&error=metodo_pago");
+            exit;
+        }
+
+        $transactionModel->aceptar($transaccionId, $metodoPago, $direccionEnvio, $notas);
+
+        $etiquetas = [
+            'efectivo'      => 'Efectivo al entregar',
+            'transferencia' => 'Transferencia bancaria',
+            'bizum'         => 'Bizum',
+            'paypal'        => 'PayPal',
+            'otro'          => 'Otro método',
+        ];
+        $etiqueta = $etiquetas[$metodoPago] ?? $metodoPago;
+
         $messageModel->enviarMensajeSistema(
             $chatId,
-            "El comprador ha aceptado la transacción."
+            "El comprador ha aceptado la transacción. Método de pago: {$etiqueta}."
+            . ($direccionEnvio ? " Dirección de envío: {$direccionEnvio}." : "")
+        );
+        break;
+
+    case 'pago_pendiente':
+        $transactionModel->marcarPagado($transaccionId);
+        $messageModel->enviarMensajeSistema(
+            $chatId,
+            "El comprador indica que ha realizado el pago. El vendedor debe confirmarlo antes de enviar."
         );
         break;
 
     case 'enviado':
-        $messageModel->enviarMensajeSistema(
-            $chatId,
-            "El vendedor ha marcado el producto como enviado."
-        );
+        $numeroSeguimiento = trim($_POST["numero_seguimiento"] ?? "");
+        $transactionModel->marcarEnviado($transaccionId, $numeroSeguimiento);
+
+        $msgEnvio = "El vendedor ha enviado el producto.";
+        if ($numeroSeguimiento) {
+            $msgEnvio .= " Número de seguimiento: {$numeroSeguimiento}.";
+        }
+        $messageModel->enviarMensajeSistema($chatId, $msgEnvio);
         break;
 
     case 'entregado':
+        $transactionModel->marcarEntregado($transaccionId);
         $productModel->cambiarEstadoPublicacion($productoId, "vendido");
         $messageModel->enviarMensajeSistema(
             $chatId,
-            "El comprador ha confirmado la entrega. ¡Transacción completada!"
+            "¡El comprador ha confirmado la entrega! Transacción completada con éxito."
         );
         break;
 
     case 'cancelada':
+        $transactionModel->cancelar($transaccionId);
         $productModel->cambiarEstadoPublicacion($productoId, "activo");
         $messageModel->enviarMensajeSistema(
             $chatId,

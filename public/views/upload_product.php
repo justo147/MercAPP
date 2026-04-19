@@ -108,8 +108,18 @@ require_once __DIR__ . '/../../controllers/handlers/upload_product_handler.php';
                             </div>
 
                             <div class="mb-3">
-                                <label for="ubicacion" class="form-label">Ubicación</label>
-                                <input type="text" id="ubicacion" name="ubicacion" class="form-control">
+                                <label for="ubicacion" class="form-label">
+                                    Ubicación
+                                    <small class="text-muted fw-normal">— empieza a escribir para ver sugerencias</small>
+                                </label>
+                                <input type="text" id="ubicacion" name="ubicacion" class="form-control"
+                                       placeholder="Ej: Sevilla, Calle Mayor 5 Madrid…"
+                                       autocomplete="off"
+                                       value="<?= htmlspecialchars($_POST['ubicacion'] ?? '') ?>">
+                                <div class="form-text">
+                                    <i class="bi bi-geo-alt me-1"></i>
+                                    Dirección normalizada gracias a OpenStreetMap.
+                                </div>
                             </div>
 
                             <div class="mb-3">
@@ -136,6 +146,14 @@ require_once __DIR__ . '/../../controllers/handlers/upload_product_handler.php';
 
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="../js/uploadProduct.js"></script>
+    <script src="../js/address_autocomplete.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof initAddressAutocomplete === 'function') {
+            initAddressAutocomplete('ubicacion', '<?= $BASE ?>/api/normalize_address.php');
+        }
+    });
+    </script>
 
 </main>
 </body>
