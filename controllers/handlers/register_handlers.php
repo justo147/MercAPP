@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../models/User.php';
+require_once __DIR__ . '/../../models/RateLimiter.php';
 require_once __DIR__ . '/../../config/db.php';
 /**
  * Script de registro de usuario.
@@ -27,6 +28,17 @@ if (isset($_SESSION["user_id"])) {
 // PROCESAMIENTO DEL FORMULARIO
 // ===============================
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // Rate limiting por IP
+    $db_rl   = new Database();
+    $rl      = new RateLimiter($db_rl->getConnection());
+    $ip      = RateLimiter::getClientIp();
+
+    if ($rl->estaBloqueado($ip)) {
+        $min = ceil($rl->segundosRestantes($ip) / 60);
+        echo "<div class='alert alert-danger'>Demasiados intentos. Espera {$min} minuto(s) antes de volver a registrarte.</div>";
+        exit;
+    }
 
     // ===============================
     // VALIDACIONES DE CAMPOS
@@ -62,6 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // COMPROBAR SI EL EMAIL YA ESTÁ REGISTRADO
             // ===============================
             if ($userModel->emailExists($email)) {
+                $rl->registrarIntento($ip, $email);
                 echo "<div class='alert alert-danger'>El correo electrónico ya está registrado.</div>";
                 exit;
             }

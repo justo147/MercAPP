@@ -37,24 +37,58 @@ class Transaction
     }
 
     /**
-     * Crea una transacción desde el chat (el vendedor la inicia).
-     * Estado inicial: 'pendiente'.
+     * Crea una transacción desde el chat.
+     * El tipo (venta/intercambio/mixto) se hereda del producto si no se indica.
      */
-    public function createFromChat($productoId, $compradorId, $vendedorId)
+    public function createFromChat($productoId, $compradorId, $vendedorId, $tipo = null)
     {
+        if ($tipo === null) {
+            $s = $this->conn->prepare("SELECT tipo_transaccion FROM Productos WHERE id = :id");
+            $s->execute([':id' => $productoId]);
+            $tipo = $s->fetchColumn() ?: 'venta';
+        }
+
+        $tiposValidos = ['venta', 'intercambio', 'mixto'];
+        if (!in_array($tipo, $tiposValidos)) $tipo = 'venta';
+
         $sql = "INSERT INTO Transacciones
                 (producto_id, comprador_id, vendedor_id, tipo, estado, fecha_transaccion)
                 VALUES
-                (:producto_id, :comprador_id, :vendedor_id, 'venta', 'pendiente', NOW())";
+                (:producto_id, :comprador_id, :vendedor_id, :tipo, 'pendiente', NOW())";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->execute([
             ':producto_id'  => $productoId,
             ':comprador_id' => $compradorId,
             ':vendedor_id'  => $vendedorId,
+            ':tipo'         => $tipo,
         ]);
 
         return $this->conn->lastInsertId();
+    }
+
+    /** Añade un producto ofrecido por el comprador al detalle de intercambio. */
+    public function addIntercambioProducto($transaccionId, $productoId)
+    {
+        $stmt = $this->conn->prepare(
+            "INSERT INTO Intercambio_Detalle (transaccion_id, producto_id, tipo_item)
+             VALUES (:tid, :pid, 'producto')
+             ON DUPLICATE KEY UPDATE producto_id = :pid"
+        );
+        return $stmt->execute([':tid' => $transaccionId, ':pid' => $productoId]);
+    }
+
+    /** Obtiene los productos ofrecidos en un intercambio. */
+    public function getIntercambioDetalle($transaccionId)
+    {
+        $sql = "SELECT id.*, p.titulo, p.precio, img.url AS imagen
+                FROM Intercambio_Detalle id
+                LEFT JOIN Productos p       ON p.id = id.producto_id
+                LEFT JOIN Imagenes_prod img ON img.id_producto = p.id AND img.orden = 1
+                WHERE id.transaccion_id = :tid";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([':tid' => $transaccionId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /* ============================================================

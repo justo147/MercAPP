@@ -316,6 +316,18 @@ CREATE TABLE Seguidores (
 ) ENGINE=InnoDB;
 
 -- -----------------------------
+-- Rate limiting (intentos de login/registro por IP)
+-- -----------------------------
+
+CREATE TABLE LoginIntentos (
+  id    INT AUTO_INCREMENT PRIMARY KEY,
+  ip    VARCHAR(45)  NOT NULL,
+  email VARCHAR(100) DEFAULT NULL,
+  fecha DATETIME     DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_ip_fecha (ip, fecha)
+) ENGINE=InnoDB;
+
+-- -----------------------------
 -- Buenas prácticas adicionales
 -- -----------------------------
 

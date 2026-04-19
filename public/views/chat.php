@@ -341,13 +341,24 @@ include("navbar.php");
         </div>
         <?php endif; ?>
 
+        <?php
+        $esIntercambio   = in_array($transaccion['tipo'] ?? '', ['intercambio', 'mixto']);
+        $intercambioDetalle = $esIntercambio ? $transactionModel->getIntercambioDetalle($transaccion['id']) : [];
+        ?>
+
         <!-- Aviso contextual -->
         <?php if ($estado === 'pendiente'): ?>
             <div class="alert alert-warning">
                 <i class="bi bi-hourglass me-1"></i>
-                <?= $esComprador
-                    ? 'El vendedor ha iniciado una transacción. Revisa los detalles, elige cómo pagar y acepta o cancela.'
-                    : 'Esperando a que el comprador acepte la transacción.' ?>
+                <?php if ($esIntercambio): ?>
+                    <?= $esComprador
+                        ? 'El vendedor quiere hacer un intercambio. Elige qué producto ofreces a cambio y acepta o cancela.'
+                        : 'Esperando a que el comprador proponga un producto para el intercambio.' ?>
+                <?php else: ?>
+                    <?= $esComprador
+                        ? 'El vendedor ha iniciado una transacción. Revisa los detalles, elige cómo pagar y acepta o cancela.'
+                        : 'Esperando a que el comprador acepte la transacción.' ?>
+                <?php endif; ?>
             </div>
         <?php elseif ($estado === 'aceptada'): ?>
             <div class="alert alert-info">
@@ -389,7 +400,8 @@ include("navbar.php");
             <?php if ($estado === 'pendiente' && $esComprador): ?>
             <div class="card mb-3 shadow-sm">
                 <div class="card-header fw-semibold">
-                    <i class="bi bi-hand-thumbs-up me-1"></i> Aceptar transacción
+                    <i class="bi bi-hand-thumbs-up me-1"></i>
+                    <?= $esIntercambio ? 'Proponer intercambio' : 'Aceptar transacción' ?>
                 </div>
                 <div class="card-body">
                     <form action="<?= $BASE ?>/controllers/chat_update_transaction.php" method="POST">
@@ -397,9 +409,33 @@ include("navbar.php");
                         <input type="hidden" name="chat_id"        value="<?= $chatId ?>">
                         <input type="hidden" name="estado"         value="aceptada">
 
+                        <?php if ($esIntercambio): ?>
+                        <!-- Selector de producto a ofrecer en el intercambio -->
                         <div class="mb-3">
                             <label class="form-label fw-semibold">
-                                Método de pago <span class="text-danger">*</span>
+                                <i class="bi bi-arrow-left-right me-1"></i>
+                                Tu producto a cambio <span class="text-danger">*</span>
+                            </label>
+                            <select name="producto_ofrecido_id" id="sel-producto-ofrecido"
+                                    class="form-select" required>
+                                <option value="">Cargando tus productos...</option>
+                            </select>
+                            <div id="preview-producto-ofrecido" class="mt-2 d-none">
+                                <img id="img-producto-ofrecido" src="" alt=""
+                                     class="rounded" style="width:56px;height:56px;object-fit:cover;">
+                                <span id="titulo-producto-ofrecido" class="small ms-2"></span>
+                            </div>
+                            <div class="form-text">Solo se muestran tus productos activos.</div>
+                        </div>
+                        <?php endif; ?>
+
+                        <?php if (!$esIntercambio || $transaccion['tipo'] === 'mixto'): ?>
+                        <!-- Método de pago (no aplica en intercambio puro) -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                Método de pago
+                                <?= $transaccion['tipo'] === 'mixto' ? '<span class="text-danger">*</span>' : '' ?>
+                                <?= $transaccion['tipo'] === 'mixto' ? '<small class="text-muted fw-normal">(parte en dinero)</small>' : '' ?>
                             </label>
                             <div class="d-grid gap-2">
                                 <?php
@@ -414,7 +450,8 @@ include("navbar.php");
                                 ?>
                                 <div class="form-check border rounded p-2">
                                     <input class="form-check-input" type="radio"
-                                           name="metodo_pago" id="mp-<?= $val ?>" value="<?= $val ?>" required>
+                                           name="metodo_pago" id="mp-<?= $val ?>" value="<?= $val ?>"
+                                           <?= $transaccion['tipo'] !== 'intercambio' ? 'required' : '' ?>>
                                     <label class="form-check-label w-100" for="mp-<?= $val ?>">
                                         <i class="bi <?= $ic ?> me-1"></i> <?= $lbl ?>
                                     </label>
@@ -422,21 +459,19 @@ include("navbar.php");
                                 <?php endforeach; ?>
                             </div>
                         </div>
+                        <?php endif; ?>
 
                         <div class="mb-3">
                             <label for="direccion_envio" class="form-label fw-semibold">
                                 <i class="bi bi-geo-alt me-1"></i> Dirección de envío
                                 <small class="text-muted fw-normal">(opcional para recogida en mano)</small>
                             </label>
-                            <input type="text"
-                                   id="direccion_envio"
-                                   name="direccion_envio"
+                            <input type="text" id="direccion_envio" name="direccion_envio"
                                    class="form-control"
                                    placeholder="Escribe tu dirección para buscar..."
                                    autocomplete="off">
                             <div class="form-text">
-                                <i class="bi bi-info-circle me-1"></i>
-                                Las sugerencias provienen de OpenStreetMap.
+                                <i class="bi bi-info-circle me-1"></i> Sugerencias de OpenStreetMap.
                             </div>
                         </div>
 
@@ -451,9 +486,75 @@ include("navbar.php");
                         </div>
 
                         <button type="submit" class="btn btn-success w-100">
-                            <i class="bi bi-hand-thumbs-up me-1"></i> Aceptar y confirmar datos
+                            <i class="bi bi-hand-thumbs-up me-1"></i>
+                            <?= $esIntercambio ? 'Proponer intercambio' : 'Aceptar y confirmar datos' ?>
                         </button>
                     </form>
+                </div>
+            </div>
+
+            <?php if ($esIntercambio): ?>
+            <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const sel     = document.getElementById('sel-producto-ofrecido');
+                const preview = document.getElementById('preview-producto-ofrecido');
+                const img     = document.getElementById('img-producto-ofrecido');
+                const tit     = document.getElementById('titulo-producto-ofrecido');
+                if (!sel) return;
+
+                fetch(`${BASE}/api/mis_productos_activos.php`)
+                    .then(r => r.json())
+                    .then(res => {
+                        sel.innerHTML = '<option value="">— Selecciona un producto —</option>';
+                        (res.data || []).forEach(p => {
+                            const opt = document.createElement('option');
+                            opt.value = p.id;
+                            opt.textContent = `${p.titulo}${p.precio ? ' (' + parseFloat(p.precio).toFixed(2) + ' €)' : ''}`;
+                            opt.dataset.imagen = p.imagen || '';
+                            sel.appendChild(opt);
+                        });
+                        if (!res.data || res.data.length === 0) {
+                            sel.innerHTML = '<option value="">No tienes productos activos para intercambiar</option>';
+                        }
+                    });
+
+                sel.addEventListener('change', () => {
+                    const opt = sel.options[sel.selectedIndex];
+                    if (opt.value && opt.dataset.imagen) {
+                        img.src = `${BASE}/${opt.dataset.imagen}`;
+                        tit.textContent = opt.textContent;
+                        preview.classList.remove('d-none');
+                    } else {
+                        preview.classList.add('d-none');
+                    }
+                });
+            });
+            </script>
+            <?php endif; ?>
+
+            <?php endif; ?>
+
+            <?php if (!empty($intercambioDetalle) && in_array($estado, ['aceptada','pago_pendiente','enviado','entregado'])): ?>
+            <div class="card mb-3 border-0 bg-light shadow-sm">
+                <div class="card-body py-2 px-3">
+                    <div class="fw-semibold small mb-2">
+                        <i class="bi bi-arrow-left-right me-1 text-primary"></i> Productos del intercambio
+                    </div>
+                    <?php foreach ($intercambioDetalle as $det): ?>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <?php if ($det['imagen']): ?>
+                        <img src="<?= $BASE . '/' . htmlspecialchars($det['imagen']) ?>"
+                             class="rounded" style="width:40px;height:40px;object-fit:cover;"
+                             onerror="this.src='<?= $BASE ?>/public/img/default.jpg'">
+                        <?php endif; ?>
+                        <span class="small"><?= htmlspecialchars($det['titulo'] ?? 'Producto eliminado') ?></span>
+                        <?php if ($det['precio']): ?>
+                        <span class="ms-auto small fw-semibold text-primary">
+                            <?= number_format($det['precio'], 2) ?> €
+                        </span>
+                        <?php endif; ?>
+                    </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
             <?php endif; ?>

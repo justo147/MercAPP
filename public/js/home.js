@@ -288,6 +288,25 @@ function renderProducts(products) {
 ============================================================ */
 
 /**
+ * Sincroniza el estado actual de los filtros con la URL usando history.pushState,
+ * para que el usuario pueda copiar/compartir la búsqueda y volver con el botón atrás.
+ */
+function syncURL() {
+    const params = new URLSearchParams();
+    if (searchQuery)                          params.set("q",      searchQuery);
+    if (searchCategoria)                      params.set("cat",    searchCategoria);
+    if (searchEstado)                         params.set("estado", searchEstado);
+    if (searchTransaccion)                    params.set("tipo",   searchTransaccion);
+    if (searchOrden && searchOrden !== "fecha_desc") params.set("orden", searchOrden);
+
+    const newUrl = params.toString()
+        ? `${window.location.pathname}?${params}`
+        : window.location.pathname;
+
+    history.pushState({ q: searchQuery, cat: searchCategoria }, "", newUrl);
+}
+
+/**
  * Reinicia los parámetros de búsqueda y vuelve a cargar los productos desde cero.
  */
 function resetAndSearch() {
@@ -297,6 +316,7 @@ function resetAndSearch() {
     document.getElementById("product-list").innerHTML = "";
     observer.observe(sentinel);
 
+    syncURL();
     loadMoreProducts();
 }
 
@@ -311,14 +331,56 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     await cargarFiltros();
 
+    // Restaurar estado de filtros desde la URL
     const params = new URLSearchParams(window.location.search);
-    const q = params.get("q");
 
-    if (q) {
-        searchQuery = q;
+    if (params.get("q")) {
+        searchQuery = params.get("q");
         const navbarInput = document.getElementById("navbar-search");
-        if (navbarInput) navbarInput.value = q;
+        if (navbarInput) navbarInput.value = searchQuery;
     }
+    if (params.get("cat")) {
+        searchCategoria = params.get("cat");
+        const sel = document.getElementById("filtro-categoria");
+        if (sel) sel.value = searchCategoria;
+    }
+    if (params.get("estado")) {
+        searchEstado = params.get("estado");
+        const sel = document.getElementById("filtro-estado");
+        if (sel) sel.value = searchEstado;
+    }
+    if (params.get("tipo")) {
+        searchTransaccion = params.get("tipo");
+        const sel = document.getElementById("filtro-transaccion");
+        if (sel) sel.value = searchTransaccion;
+    }
+    if (params.get("orden")) {
+        searchOrden = params.get("orden");
+        const sel = document.getElementById("filtro-orden");
+        if (sel) sel.value = searchOrden;
+    }
+
+    // Restaurar estado al navegar con botón atrás
+    window.addEventListener("popstate", () => {
+        const p = new URLSearchParams(window.location.search);
+        searchQuery       = p.get("q")      || "";
+        searchCategoria   = p.get("cat")    || "";
+        searchEstado      = p.get("estado") || "";
+        searchTransaccion = p.get("tipo")   || "";
+        searchOrden       = p.get("orden")  || "fecha_desc";
+
+        const nav = document.getElementById("navbar-search");
+        if (nav) nav.value = searchQuery;
+        const selCat   = document.getElementById("filtro-categoria");   if (selCat)   selCat.value   = searchCategoria;
+        const selEst   = document.getElementById("filtro-estado");      if (selEst)   selEst.value   = searchEstado;
+        const selTipo  = document.getElementById("filtro-transaccion"); if (selTipo)  selTipo.value  = searchTransaccion;
+        const selOrden = document.getElementById("filtro-orden");       if (selOrden) selOrden.value = searchOrden;
+
+        offset = 0; noMore = false;
+        document.getElementById("product-list").innerHTML = "";
+        observer.observe(sentinel);
+        loadMoreProducts();
+    });
 
     const navbarInput = document.getElementById("navbar-search");
     navbarInput?.addEventListener("input", e => {

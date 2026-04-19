@@ -127,15 +127,32 @@ switch ($nuevoEstado) {
         $metodoPago     = trim($_POST["metodo_pago"]     ?? "");
         $direccionEnvio = trim($_POST["direccion_envio"] ?? "");
         $notas          = trim($_POST["notas_comprador"] ?? "");
+        $productoOfrecidoId = intval($_POST["producto_ofrecido_id"] ?? 0);
 
-        // Validar que se eligió método de pago
+        $tipoTransaccion = $transaccion['tipo'];
+        $esIntercambio   = in_array($tipoTransaccion, ['intercambio', 'mixto']);
+
+        // Para venta y mixto se requiere método de pago; intercambio puro no
         $metodosValidos = ['efectivo', 'transferencia', 'bizum', 'paypal', 'otro'];
-        if (!in_array($metodoPago, $metodosValidos)) {
-            header("Location: {$BASE}/public/views/chat.php?id={$chatId}&error=metodo_pago");
+        if (!$esIntercambio || $tipoTransaccion === 'mixto') {
+            if (!in_array($metodoPago, $metodosValidos)) {
+                header("Location: {$BASE}/public/views/chat.php?id={$chatId}&error=metodo_pago");
+                exit;
+            }
+        }
+
+        // En intercambio/mixto el comprador debe proponer un producto
+        if ($esIntercambio && $productoOfrecidoId <= 0) {
+            header("Location: {$BASE}/public/views/chat.php?id={$chatId}&error=producto_ofrecido");
             exit;
         }
 
-        $transactionModel->aceptar($transaccionId, $metodoPago, $direccionEnvio, $notas);
+        $transactionModel->aceptar($transaccionId, $metodoPago ?: null, $direccionEnvio, $notas);
+
+        // Guardar producto ofrecido en Intercambio_Detalle
+        if ($esIntercambio && $productoOfrecidoId > 0) {
+            $transactionModel->addIntercambioProducto($transaccionId, $productoOfrecidoId);
+        }
 
         $etiquetas = [
             'efectivo'      => 'Efectivo al entregar',
@@ -144,13 +161,16 @@ switch ($nuevoEstado) {
             'paypal'        => 'PayPal',
             'otro'          => 'Otro método',
         ];
-        $etiqueta = $etiquetas[$metodoPago] ?? $metodoPago;
+        $etiqueta = isset($etiquetas[$metodoPago]) ? $etiquetas[$metodoPago] : '';
 
-        $messageModel->enviarMensajeSistema(
-            $chatId,
-            "El comprador ha aceptado la transacción. Método de pago: {$etiqueta}."
-            . ($direccionEnvio ? " Dirección de envío: {$direccionEnvio}." : "")
-        );
+        $msgAceptada = "El comprador ha aceptado la transacción.";
+        if ($etiqueta)      $msgAceptada .= " Método de pago: {$etiqueta}.";
+        if ($direccionEnvio) $msgAceptada .= " Dirección de envío: {$direccionEnvio}.";
+        if ($esIntercambio && $productoOfrecidoId > 0) {
+            $msgAceptada .= " El comprador ha propuesto un producto a cambio.";
+        }
+
+        $messageModel->enviarMensajeSistema($chatId, $msgAceptada);
         break;
 
     case 'pago_pendiente':

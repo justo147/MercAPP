@@ -19,6 +19,24 @@ require_once __DIR__ . '/../../config/bootstrap.php';
 
         <div class="d-flex align-items-center justify-content-end order-1 order-lg-2 ms-lg-auto mb-3 mb-lg-0">
 
+          <!-- Campana de notificaciones -->
+          <div class="dropdown me-2" id="notif-dropdown">
+            <button class="btn btn-outline-light position-relative"
+                    id="notif-btn"
+                    data-bs-toggle="dropdown"
+                    aria-label="Notificaciones"
+                    onclick="marcarNotificacionesLeidas()">
+              <i class="bi bi-bell"></i>
+              <span id="badge-notif"
+                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                    style="display:none; font-size:.65rem;"></span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end p-0" id="notif-lista"
+                style="min-width:300px; max-height:360px; overflow-y:auto;">
+              <li class="px-3 py-2 text-muted small" id="notif-vacio">Sin notificaciones nuevas</li>
+            </ul>
+          </div>
+
           <!-- Botón de seguidores -->
           <a href="followers_products.php?id=<?php echo $_SESSION['user_id'] ?>"
             class="btn btn-outline-light me-2 d-flex align-items-center">
