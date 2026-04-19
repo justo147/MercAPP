@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../config/db.php';
+require_once __DIR__ . '/../../models/Notification.php';
 
 session_start();
 
@@ -176,6 +177,60 @@ try {
                 ");
                 $stmtImg->execute([$productoId, $rutaBD, $pos + 1]);
             }
+        }
+
+        // ===============================
+        // NOTIFICAR COINCIDENCIAS EN DESEOS
+        // ===============================
+        // Buscar usuarios que tienen deseos que coinciden con este producto.
+        // Se usa la misma lógica de keywords que api/deseos.php.
+        try {
+            $stmtDeseos = $bd->query(
+                "SELECT d.id, d.usuario_id, d.etiquetas, d.categoria_id, d.estado_producto_id
+                 FROM Deseos d
+                 WHERE d.usuario_id != {$userId}"   // no notificarse a uno mismo
+            );
+            $todosDeseos = $stmtDeseos->fetchAll(PDO::FETCH_ASSOC);
+
+            $notifModel    = new Notification($bd);
+            $notificados   = [];   // evitar duplicados por usuario
+
+            foreach ($todosDeseos as $deseo) {
+                $destinatario = intval($deseo['usuario_id']);
+                if (in_array($destinatario, $notificados)) continue;
+
+                // Comprobar categoría (si el deseo la especifica)
+                if (!empty($deseo['categoria_id']) && intval($deseo['categoria_id']) !== $categoria) continue;
+
+                // Comprobar estado del producto (si el deseo lo especifica)
+                if (!empty($deseo['estado_producto_id']) && intval($deseo['estado_producto_id']) !== $estadoProd) continue;
+
+                // Comprobar keywords en título y descripción
+                $palabras = array_filter(
+                    array_map('trim', preg_split('/[\s,;]+/', $deseo['etiquetas'] ?? '')),
+                    fn($p) => mb_strlen($p) >= 2
+                );
+                if (empty($palabras)) continue;
+
+                $hayCoincidencia = false;
+                foreach ($palabras as $p) {
+                    if (mb_stripos($titulo, $p) !== false || mb_stripos($descripcion, $p) !== false) {
+                        $hayCoincidencia = true;
+                        break;
+                    }
+                }
+
+                if ($hayCoincidencia) {
+                    $notifModel->create(
+                        $destinatario,
+                        'coincidencia',
+                        "¡Hay un nuevo producto que coincide con tu deseo \"{$deseo['etiquetas']}\": {$titulo}."
+                    );
+                    $notificados[] = $destinatario;
+                }
+            }
+        } catch (Exception $eNotif) {
+            // Fallo silencioso — no interrumpe la publicación
         }
 
         // ===============================
