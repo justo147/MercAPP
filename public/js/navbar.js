@@ -107,6 +107,15 @@ function mostrarToast(mensaje, tipo = "info") {
 
 document.addEventListener("DOMContentLoaded", () => {
 
+    // Marcar como leídas al abrir el dropdown de notificaciones
+    const notifBtn = document.getElementById("notif-btn");
+    if (notifBtn) {
+        notifBtn.addEventListener("click", () => {
+            marcarNotificacionesLeidas();
+        });
+    }
+
+
     /**
      * Consulta el número de mensajes no leídos del usuario actual
      * y actualiza todos los badges con id="badge-mensajes" en el DOM.

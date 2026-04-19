@@ -24,8 +24,7 @@ require_once __DIR__ . '/../../config/bootstrap.php';
             <button class="btn btn-outline-light position-relative"
                     id="notif-btn"
                     data-bs-toggle="dropdown"
-                    aria-label="Notificaciones"
-                    onclick="marcarNotificacionesLeidas()">
+                    aria-label="Notificaciones">
               <i class="bi bi-bell"></i>
               <span id="badge-notif"
                     class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
