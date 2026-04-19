@@ -73,6 +73,10 @@ require_once __DIR__ . '/../../config/bootstrap.php';
                   <i class="bi bi-upload"></i> Subir producto
                 </a></li>
 
+              <li><a class="dropdown-item" href="my_wishlist.php">
+                  <i class="bi bi-stars"></i> Lista de deseos
+                </a></li>
+
               <li><a class="dropdown-item" href="../../public/views/help.php">
                   <i class="bi bi-question-circle"></i> Ayuda
                 </a></li>
