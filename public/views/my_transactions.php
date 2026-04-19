@@ -87,7 +87,7 @@ include 'navbar.php';
 <?php include __DIR__ . '/footer.php'; ?>
 
 <script>
-const BASE = "<?= $_ENV['BASE_PATH'] ?>";
+// BASE ya está definido por navbar.php
 
 let estado = { page: 1, limit: 10, rol: '', estadoFiltro: '' };
 
@@ -128,7 +128,7 @@ function renderTarjeta(tx) {
 
     const imgOtro = otraFoto
         ? `${BASE}/${otraFoto}`
-        : `${BASE}/public/img/default_user.jpg`;
+        : `${BASE}/public/img/default.jpg`;
 
     const rolLabel = esCompra
         ? `<span class="badge text-bg-secondary rol-tag"><i class="bi bi-bag me-1"></i>Compra</span>`
@@ -163,7 +163,7 @@ function renderTarjeta(tx) {
                 <div class="d-flex align-items-center gap-2 mt-1 small text-muted">
                     <img src="${imgOtro}" class="rounded-circle"
                          width="20" height="20" style="object-fit:cover;"
-                         onerror="this.src='${BASE}/public/img/default_user.jpg'">
+                         onerror="this.src='${BASE}/public/img/default.jpg'">
                     ${escapeHtml(otroNombre ?? '')}
                     ${precio ? '·' : ''} ${precio}
                 </div>
