@@ -31,8 +31,16 @@ try {
     $db = new Database();
     $conn = $db->getConnection();
 
-    // 1. Obtener Categorías
-    $stmt = $conn->query("SELECT id, nombre FROM Categorias ORDER BY nombre ASC");
+    // 1. Obtener Categorías con conteo de productos activos
+    $stmt = $conn->query(
+        "SELECT c.id, c.nombre,
+                COUNT(p.id) AS total
+         FROM Categorias c
+         LEFT JOIN Productos p ON p.categoria_id = c.id
+             AND p.estado_publicacion_id = (SELECT id FROM EstadoPublicacion WHERE nombre='activo' LIMIT 1)
+         GROUP BY c.id, c.nombre
+         ORDER BY c.nombre ASC"
+    );
     $categorias = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // 2. Obtener Estados físicos del producto

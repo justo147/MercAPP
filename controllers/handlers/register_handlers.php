@@ -41,6 +41,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // ===============================
+    // VERIFICACIÓN HCAPTCHA
+    // ===============================
+    $hcaptchaSecret   = $_ENV['HCAPTCHA_SECRET'] ?? '0x0000000000000000000000000000000000000000'; // clave test
+    $hcaptchaResponse = trim($_POST['h-captcha-response'] ?? '');
+
+    if (empty($hcaptchaResponse)) {
+        echo "<div class='alert alert-danger'>Por favor, completa el captcha.</div>";
+        exit;
+    }
+
+    $verifyData = http_build_query(['secret' => $hcaptchaSecret, 'response' => $hcaptchaResponse]);
+    $opts = ['http' => ['method' => 'POST', 'header' => "Content-Type: application/x-www-form-urlencoded\r\n",
+                        'content' => $verifyData, 'timeout' => 5, 'ignore_errors' => true]];
+    $verifyResult = @file_get_contents('https://api.hcaptcha.com/siteverify', false, stream_context_create($opts));
+    $verifyJson   = $verifyResult ? json_decode($verifyResult, true) : null;
+
+    if (!$verifyJson || empty($verifyJson['success'])) {
+        echo "<div class='alert alert-danger'>Verificación de captcha fallida. Inténtalo de nuevo.</div>";
+        exit;
+    }
+
+    // ===============================
     // VALIDACIONES DE CAMPOS
     // ===============================
     if (empty($_POST["name"]) || empty($_POST["password"]) || empty($_POST["confirmPass"]) || empty($_POST["email"])) {

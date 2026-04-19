@@ -116,6 +116,8 @@ require_once __DIR__ . '/../../controllers/handlers/upload_product_handler.php';
                                        placeholder="Ej: Sevilla, Calle Mayor 5 Madrid…"
                                        autocomplete="off"
                                        value="<?= htmlspecialchars($_POST['ubicacion'] ?? '') ?>">
+                                <input type="hidden" id="lat" name="lat" value="<?= htmlspecialchars($_POST['lat'] ?? '') ?>">
+                                <input type="hidden" id="lon" name="lon" value="<?= htmlspecialchars($_POST['lon'] ?? '') ?>">
                                 <div class="form-text">
                                     <i class="bi bi-geo-alt me-1"></i>
                                     Dirección normalizada gracias a OpenStreetMap.
@@ -150,7 +152,7 @@ require_once __DIR__ . '/../../controllers/handlers/upload_product_handler.php';
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         if (typeof initAddressAutocomplete === 'function') {
-            initAddressAutocomplete('ubicacion', '<?= $BASE ?>/api/normalize_address.php');
+            initAddressAutocomplete('ubicacion', '<?= $BASE ?>/api/normalize_address.php', 'lat', 'lon');
         }
     });
     </script>

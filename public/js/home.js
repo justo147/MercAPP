@@ -58,6 +58,11 @@ let searchTransaccion = "";
  */
 let searchOrden = "fecha_desc";
 
+/** Coordenadas para filtro de proximidad */
+let searchLat = null;
+let searchLon = null;
+let searchDistancia = 10;
+
 /* ============================================================
    SKELETON LOADER
 ============================================================ */
@@ -125,12 +130,14 @@ async function cargarFiltros() {
 
         if (!json.success) return;
 
-        // Categorías
+        // Categorías (con conteo de productos activos)
         const catSelect = document.getElementById("filtro-categoria");
         json.categorias.forEach(cat => {
             const opt = document.createElement("option");
             opt.value = cat.id;
-            opt.textContent = cat.nombre;
+            opt.textContent = cat.total > 0
+                ? `${cat.nombre} (${cat.total})`
+                : cat.nombre;
             catSelect.appendChild(opt);
         });
 
@@ -194,7 +201,8 @@ async function loadMoreProducts() {
             searchCategoria ||
             searchEstado ||
             searchTransaccion ||
-            searchOrden !== "fecha_desc";
+            searchOrden !== "fecha_desc" ||
+            (searchOrden === "distancia" && searchLat && searchLon);
 
         if (usingFilters) {
             endpoint = `${BASE}/api/search_products.php`;
@@ -204,6 +212,12 @@ async function loadMoreProducts() {
             params.set("estado_producto", searchEstado);
             params.set("tipo_transaccion", searchTransaccion);
             params.set("orden", searchOrden);
+
+            if (searchLat && searchLon && searchOrden === "distancia") {
+                params.set("lat", searchLat);
+                params.set("lon", searchLon);
+                params.set("distancia_km", searchDistancia);
+            }
         }
 
         const res = await fetch(`${endpoint}?${params.toString()}`);
@@ -405,7 +419,33 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     document.getElementById("filtro-orden")?.addEventListener("change", e => {
         searchOrden = e.target.value;
+        const proximidadWrap = document.getElementById("filtro-proximidad-wrap");
+        if (proximidadWrap) {
+            proximidadWrap.style.display = (searchOrden === "distancia") ? "block" : "none";
+        }
         resetAndSearch();
+    });
+
+    document.getElementById("filtro-distancia")?.addEventListener("change", e => {
+        searchDistancia = parseInt(e.target.value);
+        resetAndSearch();
+    });
+
+    document.getElementById("btn-geolocalizar")?.addEventListener("click", () => {
+        if (!navigator.geolocation) {
+            alert("Tu navegador no soporta geolocalización.");
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                searchLat = pos.coords.latitude;
+                searchLon = pos.coords.longitude;
+                const label = document.getElementById("proximidad-coords-label");
+                if (label) label.textContent = `Lat ${searchLat.toFixed(4)}, Lon ${searchLon.toFixed(4)}`;
+                resetAndSearch();
+            },
+            () => alert("No se pudo obtener tu ubicación. Asegúrate de dar permiso al navegador.")
+        );
     });
 
     loadMoreProducts();

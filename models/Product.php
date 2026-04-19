@@ -478,20 +478,44 @@ class Product
             $params[":ubicacion"] = "%" . $filters["ubicacion"] . "%";
         }
 
+        // Filtro de proximidad (Haversine) — requiere lat, lon y distancia_km
+        $hasProximidad = !empty($filters["lat"]) && !empty($filters["lon"]) && !empty($filters["distancia_km"]);
+        if ($hasProximidad) {
+            $sql .= " AND p.lat IS NOT NULL AND p.lon IS NOT NULL
+                      AND (6371 * ACOS(
+                              COS(RADIANS(:lat)) * COS(RADIANS(p.lat))
+                              * COS(RADIANS(p.lon) - RADIANS(:lon))
+                              + SIN(RADIANS(:lat)) * SIN(RADIANS(p.lat))
+                          )) <= :distancia_km";
+            $params[':lat']          = floatval($filters['lat']);
+            $params[':lon']          = floatval($filters['lon']);
+            $params[':distancia_km'] = floatval($filters['distancia_km']);
+        }
+
         // Orden
-        switch ($filters["orden"] ?? "fecha_desc") {
-            case "precio_asc":
-                $sql .= " ORDER BY p.precio ASC";
-                break;
-            case "precio_desc":
-                $sql .= " ORDER BY p.precio DESC";
-                break;
-            case "fecha_asc":
-                $sql .= " ORDER BY p.fecha_publicacion ASC";
-                break;
-            default:
-                $sql .= " ORDER BY p.fecha_publicacion DESC";
-                break;
+        if ($hasProximidad && ($filters["orden"] ?? '') === 'distancia') {
+            $sql .= " ORDER BY (6371 * ACOS(
+                          COS(RADIANS(:lat2)) * COS(RADIANS(p.lat))
+                          * COS(RADIANS(p.lon) - RADIANS(:lon2))
+                          + SIN(RADIANS(:lat2)) * SIN(RADIANS(p.lat))
+                      )) ASC";
+            $params[':lat2'] = floatval($filters['lat']);
+            $params[':lon2'] = floatval($filters['lon']);
+        } else {
+            switch ($filters["orden"] ?? "fecha_desc") {
+                case "precio_asc":
+                    $sql .= " ORDER BY p.precio ASC";
+                    break;
+                case "precio_desc":
+                    $sql .= " ORDER BY p.precio DESC";
+                    break;
+                case "fecha_asc":
+                    $sql .= " ORDER BY p.fecha_publicacion ASC";
+                    break;
+                default:
+                    $sql .= " ORDER BY p.fecha_publicacion DESC";
+                    break;
+            }
         }
 
         // Paginación

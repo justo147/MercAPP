@@ -1,53 +1,41 @@
-/**
- * Botón que alterna el tema claro/oscuro.
- * @type {HTMLButtonElement}
- */
 const toggleBtn = document.getElementById('themeToggle');
-
-/**
- * Referencia al elemento <body> para aplicar clases de tema.
- * @type {HTMLBodyElement}
- */
 const body = document.body;
 
-/**
- * Intentamos leer el tema guardado en localStorage.
- * Uso de try...catch porque:
- * - localStorage puede estar deshabilitado por el navegador.
- * - El usuario puede tener bloqueado el almacenamiento.
- * - El valor guardado podría estar corrupto o inaccesible.
- */
-try {
-  const savedTheme = localStorage.getItem('theme');
-
-  if (savedTheme === 'dark') {
-    body.classList.add('dark-mode');
-    toggleBtn.textContent = '☀️';
-  }
-} catch (error) {
-  console.error("Error al leer localStorage:", error);
-  // No aplicamos tema guardado, pero la app sigue funcionando.
+// Aplica el tema: primero del atributo data-theme (PHP/session), luego localStorage
+function applyTheme(theme) {
+    if (theme === 'dark') {
+        body.classList.add('dark-mode');
+        if (toggleBtn) toggleBtn.textContent = '☀️';
+    } else {
+        body.classList.remove('dark-mode');
+        if (toggleBtn) toggleBtn.textContent = '🌙';
+    }
 }
 
-/**
- * Evento para alternar el tema.
- */
-toggleBtn.addEventListener('click', () => {
-  const darkModeEnabled = body.classList.toggle('dark-mode');
-  toggleBtn.textContent = darkModeEnabled ? '☀️' : '🌙';
+try {
+    // data-theme se inyecta desde PHP leyendo $_SESSION['theme']
+    const serverTheme = document.documentElement.dataset.theme;
+    const savedTheme  = serverTheme || localStorage.getItem('theme') || 'light';
+    applyTheme(savedTheme);
+} catch (e) {
+    // sin acceso a localStorage ni data-theme: modo claro por defecto
+}
 
-  /**
-   * Guardamos la preferencia del usuario.
-   * try...catch necesario porque:
-   *   - localStorage.setItem puede lanzar excepciones si:
-   *   - El almacenamiento está lleno.
-   *   - El usuario está en modo incógnito (Safari).
-   *   - El navegador bloquea el acceso por políticas de seguridad.
-   */
-  try {
-    localStorage.setItem('theme', darkModeEnabled ? 'dark' : 'light');
-  } catch (error) {
-    console.error("No se pudo guardar la preferencia de tema:", error);
-    // La app sigue funcionando aunque no se guarde la preferencia.
-  }
-});
+if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+        const dark = body.classList.toggle('dark-mode');
+        const theme = dark ? 'dark' : 'light';
+        toggleBtn.textContent = dark ? '☀️' : '🌙';
+
+        try { localStorage.setItem('theme', theme); } catch (_) {}
+
+        // Persistir en sesión del servidor (best-effort)
+        if (typeof BASE !== 'undefined') {
+            fetch(`${BASE}/api/set_theme.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `theme=${theme}`
+            }).catch(() => {});
+        }
+    });
+}

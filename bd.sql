@@ -77,6 +77,8 @@ CREATE TABLE Productos (
   fecha_publicacion DATETIME DEFAULT CURRENT_TIMESTAMP,
   estado_publicacion_id INT NOT NULL,
   ubicacion VARCHAR(120),
+  lat DECIMAL(10,7) NULL,
+  lon DECIMAL(10,7) NULL,
   FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
     ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY (categoria_id) REFERENCES Categorias(id)
@@ -92,6 +94,7 @@ CREATE INDEX idx_productos_categoria ON Productos(categoria_id);
 CREATE INDEX idx_productos_estado_prod ON Productos(estado_producto_id);
 CREATE INDEX idx_productos_estado_pub ON Productos(estado_publicacion_id);
 CREATE INDEX idx_productos_ubicacion ON Productos(ubicacion);
+CREATE INDEX idx_productos_latlon    ON Productos(lat, lon);
 CREATE INDEX idx_productos_precio ON Productos(precio);
 CREATE INDEX idx_productos_fecha ON Productos(fecha_publicacion);
 

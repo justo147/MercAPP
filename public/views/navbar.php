@@ -136,8 +136,10 @@ require_once __DIR__ . '/../../config/bootstrap.php';
   </div>
 </nav>
 
-<script src="../js/theme.js"></script>
-<script src="<?=$BASE?>/public/js/navbar.js"></script>
 <script>
     const BASE = "<?php echo $_ENV['BASE_PATH']; ?>";
+    // Inyectar tema de sesión antes de cargar theme.js (evita flash)
+    document.documentElement.dataset.theme = "<?php echo htmlspecialchars($_SESSION['theme'] ?? 'light'); ?>";
 </script>
+<script src="../js/theme.js"></script>
+<script src="<?=$BASE?>/public/js/navbar.js"></script>

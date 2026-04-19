@@ -83,7 +83,26 @@ exit;
               <option value="fecha_asc">Más antiguos</option>
               <option value="precio_asc">Precio: menor a mayor</option>
               <option value="precio_desc">Precio: mayor a menor</option>
+              <option value="distancia">Más cercanos</option>
             </select>
+          </div>
+
+          <!-- Proximidad -->
+          <div class="col-12" id="filtro-proximidad-wrap" style="display:none;">
+            <div class="d-flex flex-wrap align-items-center gap-2">
+              <i class="bi bi-geo-alt-fill text-primary"></i>
+              <span class="small" id="proximidad-coords-label">Detectando ubicación…</span>
+              <select id="filtro-distancia" class="form-select form-select-sm" style="width:auto;">
+                <option value="5">5 km</option>
+                <option value="10" selected>10 km</option>
+                <option value="25">25 km</option>
+                <option value="50">50 km</option>
+                <option value="100">100 km</option>
+              </select>
+              <button class="btn btn-sm btn-outline-secondary" id="btn-geolocalizar">
+                <i class="bi bi-crosshair"></i> Usar mi ubicación
+              </button>
+            </div>
           </div>
 
         </div>
