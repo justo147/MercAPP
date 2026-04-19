@@ -39,12 +39,18 @@ class Chat
      */
     public function getById(int $chatId)
     {
-        $sql = "SELECT c.*, 
+        $sql = "SELECT c.*,
                    p.titulo AS producto_titulo,
-                   img.url AS producto_imagen
+                   img.url AS producto_imagen,
+                   uc.nombre       AS comprador_nombre,
+                   uc.foto_perfil  AS comprador_foto,
+                   uv.nombre       AS vendedor_nombre,
+                   uv.foto_perfil  AS vendedor_foto
             FROM Chat c
-            LEFT JOIN Productos p ON c.producto_id = p.id
+            LEFT JOIN Productos p   ON c.producto_id = p.id
             LEFT JOIN Imagenes_prod img ON img.id_producto = p.id AND img.orden = 0
+            LEFT JOIN Usuario uc    ON uc.id = c.usuario_comprador
+            LEFT JOIN Usuario uv    ON uv.id = c.usuario_vendedor
             WHERE c.id = :id";
 
         $stmt = $this->conn->prepare($sql);

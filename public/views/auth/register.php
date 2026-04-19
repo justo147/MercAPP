@@ -32,6 +32,8 @@ require_once __DIR__ . '/../../../controllers/handlers/register_handlers.php';
   <link rel="stylesheet" href="../../css/style-guide.css">
   <link rel="stylesheet" href="../../css/loginStyle.css">
 
+  <!-- hCaptcha -->
+  <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
   <!-- Scripts: validación y toggle de tema -->
   <script src="../../js/registerValidation.js" defer></script>
   <script src="../../js/theme.js" defer></script>
@@ -76,6 +78,13 @@ require_once __DIR__ . '/../../../controllers/handlers/register_handlers.php';
           <label for="confirmPass" class="form-label">Confirmar contraseña</label>
           <input type="password" class="form-control border border-primary rounded" id="confirmPass" name="confirmPass"
             required>
+        </div>
+
+        <!-- hCaptcha — clave de prueba: siempre pasa en desarrollo -->
+        <div class="mb-3 d-flex justify-content-center">
+          <div class="h-captcha"
+               data-sitekey="10000000-ffff-ffff-ffff-000000000001"
+               data-theme="light"></div>
         </div>
 
         <!-- Botón de envío del formulario -->

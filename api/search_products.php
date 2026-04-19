@@ -10,16 +10,19 @@ $productModel = new Product($conn);
 
 // Recoger filtros desde GET
 $filters = [
-    "q" => $_GET["q"] ?? "",
-    "categoria" => $_GET["categoria"] ?? null,
+    "q"               => $_GET["q"] ?? "",
+    "categoria"       => $_GET["categoria"] ?? null,
     "estado_producto" => $_GET["estado_producto"] ?? null,
-    "tipo_transaccion" => $_GET["tipo_transaccion"] ?? null,
-    "precio_min" => $_GET["precio_min"] ?? null,
-    "precio_max" => $_GET["precio_max"] ?? null,
-    "ubicacion" => $_GET["ubicacion"] ?? null,
-    "orden" => $_GET["orden"] ?? "fecha_desc",
-    "limit" => $_GET["limit"] ?? 12,
-    "offset" => $_GET["offset"] ?? 0
+    "tipo_transaccion"=> $_GET["tipo_transaccion"] ?? null,
+    "precio_min"      => $_GET["precio_min"] ?? null,
+    "precio_max"      => $_GET["precio_max"] ?? null,
+    "ubicacion"       => $_GET["ubicacion"] ?? null,
+    "lat"             => is_numeric($_GET["lat"] ?? '') ? $_GET["lat"] : null,
+    "lon"             => is_numeric($_GET["lon"] ?? '') ? $_GET["lon"] : null,
+    "distancia_km"    => is_numeric($_GET["distancia_km"] ?? '') ? $_GET["distancia_km"] : null,
+    "orden"           => $_GET["orden"] ?? "fecha_desc",
+    "limit"           => $_GET["limit"] ?? 12,
+    "offset"          => $_GET["offset"] ?? 0,
 ];
 
 try {

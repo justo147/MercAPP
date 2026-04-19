@@ -43,6 +43,8 @@ try {
         $estadoProd  = intval($_POST["estado_producto_id"] ?? 0);
         $tipoTrans   = trim($_POST["tipo_transaccion"] ?? "");
         $ubicacion   = trim($_POST["ubicacion"] ?? "");
+        $lat         = is_numeric($_POST["lat"] ?? '') ? floatval($_POST["lat"]) : null;
+        $lon         = is_numeric($_POST["lon"] ?? '') ? floatval($_POST["lon"]) : null;
 
         // ===============================
         // VALIDACIONES
@@ -65,9 +67,9 @@ try {
         // INSERTAR PRODUCTO
         // ===============================
         $stmt = $bd->prepare("
-            INSERT INTO Productos 
-            (usuario_id, categoria_id, titulo, descripcion, precio, estado_producto_id, tipo_transaccion, estado_publicacion_id, ubicacion)
-            VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?)
+            INSERT INTO Productos
+            (usuario_id, categoria_id, titulo, descripcion, precio, estado_producto_id, tipo_transaccion, estado_publicacion_id, ubicacion, lat, lon)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?)
         ");
 
         $stmt->execute([
@@ -78,7 +80,9 @@ try {
             $precio !== "" ? $precio : null,
             $estadoProd,
             $tipoTrans,
-            $ubicacion
+            $ubicacion,
+            $lat,
+            $lon,
         ]);
 
         $productoId = $bd->lastInsertId();

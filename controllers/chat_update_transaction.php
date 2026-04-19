@@ -17,6 +17,7 @@ require_once __DIR__ . '/../models/Transaction.php';
 require_once __DIR__ . '/../models/Message.php';
 require_once __DIR__ . '/../models/Chat.php';
 require_once __DIR__ . '/../models/Product.php';
+require_once __DIR__ . '/../config/mail_config.php';
 
 $db   = new Database();
 $conn = $db->getConnection();
@@ -179,6 +180,32 @@ switch ($nuevoEstado) {
             $chatId,
             "¡El comprador ha confirmado la entrega! Transacción completada con éxito."
         );
+
+        // Enviar email de confirmación a comprador y vendedor
+        $stmtUsers = $conn->prepare(
+            "SELECT u.email, u.nombre, u.id FROM Usuario u WHERE u.id IN (:cid, :vid)"
+        );
+        $stmtUsers->execute([':cid' => $transaccion['comprador_id'], ':vid' => $transaccion['vendedor_id']]);
+        $usuarios = $stmtUsers->fetchAll(PDO::FETCH_ASSOC);
+
+        $stmtProd = $conn->prepare("SELECT titulo FROM Productos WHERE id = :pid");
+        $stmtProd->execute([':pid' => $productoId]);
+        $productoTitulo = $stmtProd->fetchColumn() ?: 'producto';
+
+        foreach ($usuarios as $u) {
+            $esCompradorEmail = ($u['id'] == $transaccion['comprador_id']);
+            $rol  = $esCompradorEmail ? 'comprador' : 'vendedor';
+            $msg  = $esCompradorEmail
+                ? "Has confirmado la recepción de <strong>{$productoTitulo}</strong>. ¡Gracias por usar MercApp!"
+                : "El comprador ha confirmado la entrega de <strong>{$productoTitulo}</strong>. La transacción está completada.";
+
+            $html = "<h2 style='color:#0d6efd'>MercApp — Transacción completada</h2>"
+                  . "<p>Hola <strong>{$u['nombre']}</strong>,</p>"
+                  . "<p>{$msg}</p>"
+                  . "<p style='color:#6c757d;font-size:.9em'>Este es un correo automático. No respondas a este mensaje.</p>";
+
+            sendMail($u['email'], $u['nombre'], "Transacción completada — {$productoTitulo}", $html);
+        }
         break;
 
     case 'cancelada':

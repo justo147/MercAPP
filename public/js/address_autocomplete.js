@@ -9,8 +9,16 @@
  * Al elegir una sugerencia, el input se rellena con la dirección normalizada.
  */
 
-function initAddressAutocomplete(inputId, apiUrl) {
-    const input = document.getElementById(inputId);
+/**
+ * @param {string} inputId      - id del campo de texto de dirección
+ * @param {string} apiUrl       - URL del proxy Nominatim
+ * @param {string} [latInputId] - id de input hidden para latitud (opcional)
+ * @param {string} [lonInputId] - id de input hidden para longitud (opcional)
+ */
+function initAddressAutocomplete(inputId, apiUrl, latInputId, lonInputId) {
+    const input    = document.getElementById(inputId);
+    const latInput = latInputId ? document.getElementById(latInputId) : null;
+    const lonInput = lonInputId ? document.getElementById(lonInputId) : null;
     if (!input) return;
 
     // Contenedor de sugerencias
@@ -32,6 +40,10 @@ function initAddressAutocomplete(inputId, apiUrl) {
         const q = input.value.trim();
         if (q === lastQuery) return;
         lastQuery = q;
+
+        // Limpiar coords al editar manualmente (hasta que se elija sugerencia)
+        if (latInput) latInput.value = '';
+        if (lonInput) lonInput.value = '';
 
         clearTimeout(debounceTimer);
         dropdown.style.display = 'none';
@@ -80,12 +92,14 @@ function initAddressAutocomplete(inputId, apiUrl) {
             li.title = item.display_name;
 
             li.addEventListener('mousedown', (e) => {
-                // mousedown antes que blur del input
                 e.preventDefault();
                 input.value = item.label || item.display_name;
                 lastQuery = input.value;
                 dropdown.style.display = 'none';
                 dropdown.innerHTML = '';
+                // Guardar coordenadas en inputs hidden si existen
+                if (latInput) latInput.value = item.lat ?? '';
+                if (lonInput) lonInput.value = item.lon ?? '';
                 input.dispatchEvent(new Event('change', { bubbles: true }));
             });
 

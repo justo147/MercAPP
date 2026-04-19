@@ -137,6 +137,18 @@ if (!isset($_SESSION["user_id"]) || $_SESSION["role"] !== 'admin') {
             </div>
         </div>
 
+        <!-- Exportar datos -->
+        <div class="d-flex gap-2 mb-3 justify-content-end flex-wrap">
+            <a href="<?= $BASE ?>/api/admin_export_usuarios.php"
+               class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-download me-1"></i>Exportar usuarios CSV
+            </a>
+            <a href="<?= $BASE ?>/api/admin_export_transacciones.php"
+               class="btn btn-sm btn-outline-success">
+                <i class="bi bi-download me-1"></i>Exportar transacciones CSV
+            </a>
+        </div>
+
         <!-- Navegación de tabs -->
         <ul class="nav admin-nav mb-3 flex-nowrap overflow-auto" id="admin-tabs">
             <li class="nav-item">
