@@ -742,9 +742,11 @@ class Product
 
     public function getProductsFromFollowing($userId, $limit, $offset, $q)
     {
-        $sql = "SELECT 
+        $sql = "SELECT
                 p.id, p.titulo, p.descripcion, p.precio, p.fecha_publicacion,
-                p.usuario_id, u.nombre, u.apellidos,
+                p.tipo_transaccion,
+                p.usuario_id,
+                u.nombre AS usuario_nombre, u.apellidos AS usuario_apellidos,
                 (
                     SELECT CONCAT(
                         '[', 
