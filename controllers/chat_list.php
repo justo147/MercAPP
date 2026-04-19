@@ -19,4 +19,8 @@ $conn = $db->getConnection();
 $chatModel = new Chat($conn);
 
 $usuarioActual = intval($_SESSION["user_id"]);
-$chats = $chatModel->getChatsByUser($usuarioActual);
+
+$filtrosValidos = ['', 'no_leidos', 'con_transaccion', 'sin_transaccion', 'abierto', 'cerrado'];
+$filtroActual   = in_array($_GET['filtro'] ?? '', $filtrosValidos) ? ($_GET['filtro'] ?? '') : '';
+
+$chats = $chatModel->getChatsByUser($usuarioActual, $filtroActual);

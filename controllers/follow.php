@@ -10,11 +10,23 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-$seguidor = $_POST['seguidor'] ?? null;
-$seguido  = $_POST['seguido'] ?? null;
+$seguidor = intval($_POST['seguidor'] ?? 0);
+$seguido  = intval($_POST['seguido']  ?? 0);
 
 if (!$seguidor || !$seguido) {
     echo json_encode(["success" => false, "error" => "Datos inválidos"]);
+    exit;
+}
+
+// Un usuario no puede seguirse a sí mismo
+if ($seguidor === $seguido) {
+    echo json_encode(["success" => false, "error" => "No puedes seguirte a ti mismo"]);
+    exit;
+}
+
+// Verificar que el seguidor es el usuario en sesión (evitar IDOR)
+if ($seguidor !== intval($_SESSION['user_id'])) {
+    echo json_encode(["success" => false, "error" => "No autorizado"]);
     exit;
 }
 

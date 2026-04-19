@@ -22,13 +22,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->execute([$productId]);
     $owner = $stmt->fetchColumn();
 
-    if ($owner != $userId) {
-        $error = "No tienes permiso para editar este producto";
+    if (!$owner) {
+        $error = "El producto no existe";
         return;
     }
 
-    if (!$owner) {
-        $error = "El producto no existe";
+    if ((int)$owner !== (int)$userId) {
+        $error = "No tienes permiso para editar este producto";
         return;
     }
 

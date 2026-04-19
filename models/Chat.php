@@ -191,48 +191,79 @@ class Chat
  * - último mensaje
  * - número de mensajes sin leer
  */
-public function getChatsByUser(int $userId)
+/**
+ * @param int    $userId  Usuario en sesión
+ * @param string $filtro  '' | 'no_leidos' | 'con_transaccion' | 'sin_transaccion'
+ *                        | 'abierto' (transacción activa) | 'cerrado' (entregado/cancelada)
+ */
+public function getChatsByUser(int $userId, string $filtro = '')
 {
     $sql = "
-        SELECT 
+        SELECT
             c.id AS chat_id,
             c.producto_id,
+            c.usuario_comprador,
+            c.usuario_vendedor,
+            c.transaccion_id,
             p.titulo AS producto_titulo,
-            img.url AS producto_imagen,
+            img.url  AS producto_imagen,
+
+            -- Otro participante
+            CASE
+                WHEN c.usuario_comprador = :uid THEN uv.nombre
+                ELSE uc.nombre
+            END AS otro_nombre,
+            CASE
+                WHEN c.usuario_comprador = :uid THEN uv.foto_perfil
+                ELSE uc.foto_perfil
+            END AS otro_foto,
+            CASE
+                WHEN c.usuario_comprador = :uid THEN uv.id
+                ELSE uc.id
+            END AS otro_id,
 
             -- Último mensaje
-            (
-                SELECT contenido 
-                FROM Mensajes 
-                WHERE chat_id = c.id 
-                ORDER BY fecha_envio DESC 
-                LIMIT 1
-            ) AS ultimo_mensaje,
+            (SELECT contenido  FROM Mensajes WHERE chat_id = c.id ORDER BY fecha_envio DESC LIMIT 1) AS ultimo_mensaje,
+            (SELECT fecha_envio FROM Mensajes WHERE chat_id = c.id ORDER BY fecha_envio DESC LIMIT 1) AS fecha_ultimo_mensaje,
 
-            (
-                SELECT fecha_envio 
-                FROM Mensajes 
-                WHERE chat_id = c.id 
-                ORDER BY fecha_envio DESC 
-                LIMIT 1
-            ) AS fecha_ultimo_mensaje,
+            -- Mensajes sin leer
+            (SELECT COUNT(*) FROM Mensajes
+             WHERE chat_id = c.id AND usuario_id IS NOT NULL
+               AND usuario_id != :uid AND leido = 0) AS no_leidos,
 
-            -- Mensajes sin leer (excluye mensajes del sistema)
-            (
-                SELECT COUNT(*)
-                FROM Mensajes
-                WHERE chat_id     = c.id
-                AND usuario_id IS NOT NULL
-                AND usuario_id   != :uid
-                AND leido = 0
-            ) AS no_leidos
+            -- Estado de transacción (NULL si no tiene)
+            t.estado AS transaccion_estado
 
         FROM Chat c
-        JOIN Productos p ON c.producto_id = p.id
+        JOIN Productos p     ON p.id = c.producto_id
         LEFT JOIN Imagenes_prod img ON img.id_producto = p.id AND img.orden = 0
-        WHERE c.usuario_comprador = :uid OR c.usuario_vendedor = :uid
-        ORDER BY fecha_ultimo_mensaje DESC
+        LEFT JOIN Usuario uc ON uc.id = c.usuario_comprador
+        LEFT JOIN Usuario uv ON uv.id = c.usuario_vendedor
+        LEFT JOIN Transacciones t ON t.id = c.transaccion_id
+        WHERE (c.usuario_comprador = :uid OR c.usuario_vendedor = :uid)
     ";
+
+    // Aplicar filtros
+    switch ($filtro) {
+        case 'no_leidos':
+            $sql .= " AND (SELECT COUNT(*) FROM Mensajes WHERE chat_id = c.id
+                          AND usuario_id IS NOT NULL AND usuario_id != :uid AND leido = 0) > 0";
+            break;
+        case 'con_transaccion':
+            $sql .= " AND c.transaccion_id IS NOT NULL";
+            break;
+        case 'sin_transaccion':
+            $sql .= " AND c.transaccion_id IS NULL";
+            break;
+        case 'abierto':
+            $sql .= " AND t.estado IN ('pendiente','aceptada','pago_pendiente','enviado')";
+            break;
+        case 'cerrado':
+            $sql .= " AND t.estado IN ('entregado','cancelada')";
+            break;
+    }
+
+    $sql .= " ORDER BY fecha_ultimo_mensaje DESC";
 
     $stmt = $this->conn->prepare($sql);
     $stmt->execute([":uid" => $userId]);

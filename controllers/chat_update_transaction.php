@@ -17,6 +17,7 @@ require_once __DIR__ . '/../models/Transaction.php';
 require_once __DIR__ . '/../models/Message.php';
 require_once __DIR__ . '/../models/Chat.php';
 require_once __DIR__ . '/../models/Product.php';
+require_once __DIR__ . '/../models/Notification.php';
 require_once __DIR__ . '/../config/mail_config.php';
 
 $db   = new Database();
@@ -26,6 +27,7 @@ $transactionModel = new Transaction($conn);
 $messageModel     = new Message($conn);
 $chatModel        = new Chat($conn);
 $productModel     = new Product($conn);
+$notifModel       = new Notification($conn);
 
 $usuarioActual = intval($_SESSION["user_id"]);
 $transaccionId = intval($_POST["transaccion_id"] ?? 0);
@@ -236,6 +238,26 @@ switch ($nuevoEstado) {
             "La transacción ha sido cancelada. El producto vuelve a estar disponible."
         );
         break;
+}
+
+// ── Notificar al otro participante sobre el cambio de estado ──
+$mensajesEstado = [
+    'aceptada'       => 'El comprador ha aceptado la transacción.',
+    'pago_pendiente' => 'El comprador indica que ha realizado el pago.',
+    'enviado'        => 'El vendedor ha marcado el pedido como enviado.',
+    'entregado'      => '¡La entrega ha sido confirmada! Transacción completada.',
+    'cancelada'      => 'La transacción ha sido cancelada.',
+];
+if (isset($mensajesEstado[$nuevoEstado])) {
+    // Notificar al que NO ejecutó la acción
+    $destinatarioNotif = $esComprador ? intval($transaccion["vendedor_id"]) : intval($transaccion["comprador_id"]);
+    $chatDataNotif     = $chatModel->getById($chatId);
+    $tituloProducto    = $chatDataNotif["producto_titulo"] ?? "un producto";
+    $notifModel->create(
+        $destinatarioNotif,
+        'mensaje',
+        $mensajesEstado[$nuevoEstado] . " ({$tituloProducto})"
+    );
 }
 
 header("Location: {$BASE}/public/views/chat.php?id={$chatId}");

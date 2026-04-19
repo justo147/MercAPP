@@ -21,6 +21,7 @@ require_once __DIR__ . '/../../models/Transaction.php';
 require_once __DIR__ . '/../../models/Product.php';
 require_once __DIR__ . '/../../models/Rating.php';
 require_once __DIR__ . '/../../models/Report.php';
+require_once __DIR__ . '/../../models/Notification.php';
 
 $db = new Database();
 $conn = $db->getConnection();
@@ -31,6 +32,7 @@ $transactionModel = new Transaction($conn);
 $productoModel    = new Product($conn);
 $ratingModel      = new Rating($conn);
 $reportModel      = new Report($conn);
+$notifModel       = new Notification($conn);
 
 if (!$chatModel->userBelongsToChat($chatId, $usuarioActual)) {
     die("No tienes acceso a este chat.");
@@ -68,6 +70,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["mensaje"])) {
     $contenido = trim($_POST["mensaje"] ?? "");
     if ($contenido !== "") {
         $mensajeModel->send($chatId, $usuarioActual, $contenido);
+
+        // Notificar al otro participante del chat
+        $chatData       = $chatModel->getById($chatId);
+        $destinatarioId = ($chatData["usuario_comprador"] == $usuarioActual)
+            ? intval($chatData["usuario_vendedor"])
+            : intval($chatData["usuario_comprador"]);
+        $nombreRemit    = htmlspecialchars($_SESSION["name"] ?? "Alguien");
+        $notifModel->create(
+            $destinatarioId,
+            'mensaje',
+            "{$nombreRemit} te ha enviado un mensaje en el chat sobre \"{$chatData['producto_titulo']}\"."
+        );
     }
     header("Location: chat.php?id=" . $chatId);
     exit;
