@@ -220,7 +220,7 @@
          *
          * @type {bootstrap.Modal}
          */
-        const modal = new bootstrap.Modal(modalEl, { backdrop: 'static', keyboard: false });
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
         modal.show();
     }
 

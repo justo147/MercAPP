@@ -786,11 +786,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initAddressAutocomplete('direccion_envio', '<?= $BASE ?>/api/normalize_address.php');
     }
 
-    // Abrir modal de valoración automáticamente si toca
-    <?php if ($mostrarModalValoracion): ?>
-    const modalEl = document.getElementById('modalValoracion');
-    if (modalEl) new bootstrap.Modal(modalEl).show();
-    <?php endif; ?>
+    // El modal de valoración lo abre rating.js automáticamente
 });
 </script>
 

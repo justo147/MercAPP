@@ -26,3 +26,9 @@ ALTER TABLE Transacciones
   ADD COLUMN fecha_pago_confirmado  DATETIME NULL AFTER fecha_aceptacion,
   ADD COLUMN fecha_envio            DATETIME NULL AFTER fecha_pago_confirmado,
   ADD COLUMN fecha_entrega          DATETIME NULL AFTER fecha_envio;
+
+-- 3. Columna transaccion_id en Chat (vincula chat con su transacción)
+ALTER TABLE Chat
+  ADD COLUMN transaccion_id INT NULL,
+  ADD FOREIGN KEY (transaccion_id) REFERENCES Transacciones(id)
+    ON DELETE CASCADE ON UPDATE CASCADE;
