@@ -85,6 +85,80 @@ class Transaction
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Transacciones del usuario con datos del producto y del otro participante.
+     * Soporta paginación y filtro por rol (compra/venta) y estado.
+     */
+    public function getByUserDetailed($usuarioId, $limit = 10, $offset = 0, $rol = '', $estado = '')
+    {
+        $where  = "(t.comprador_id = :id OR t.vendedor_id = :id)";
+        $params = [':id' => $usuarioId];
+
+        if ($rol === 'compra') {
+            $where = "t.comprador_id = :id";
+        } elseif ($rol === 'venta') {
+            $where = "t.vendedor_id = :id";
+        }
+
+        if ($estado !== '') {
+            $where .= " AND t.estado = :estado";
+            $params[':estado'] = $estado;
+        }
+
+        $sql = "SELECT
+                    t.*,
+                    p.titulo        AS producto_titulo,
+                    p.precio        AS producto_precio,
+                    img.url         AS producto_imagen,
+                    uc.nombre       AS comprador_nombre,
+                    uc.foto_perfil  AS comprador_foto,
+                    uv.nombre       AS vendedor_nombre,
+                    uv.foto_perfil  AS vendedor_foto,
+                    c.id            AS chat_id
+                FROM Transacciones t
+                JOIN Productos p            ON p.id = t.producto_id
+                LEFT JOIN Imagenes_prod img ON img.id_producto = p.id AND img.orden = 1
+                JOIN Usuario uc             ON uc.id = t.comprador_id
+                JOIN Usuario uv             ON uv.id = t.vendedor_id
+                LEFT JOIN Chat c            ON c.transaccion_id = t.id
+                WHERE {$where}
+                ORDER BY t.fecha_transaccion DESC
+                LIMIT :limit OFFSET :offset";
+
+        $stmt = $this->conn->prepare($sql);
+        foreach ($params as $k => $v) {
+            $stmt->bindValue($k, $v);
+        }
+        $stmt->bindValue(':limit',  $limit,  PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function countByUser($usuarioId, $rol = '', $estado = '')
+    {
+        $where  = "(comprador_id = :id OR vendedor_id = :id)";
+        $params = [':id' => $usuarioId];
+
+        if ($rol === 'compra') {
+            $where = "comprador_id = :id";
+        } elseif ($rol === 'venta') {
+            $where = "vendedor_id = :id";
+        }
+
+        if ($estado !== '') {
+            $where .= " AND estado = :estado";
+            $params[':estado'] = $estado;
+        }
+
+        $stmt = $this->conn->prepare("SELECT COUNT(*) FROM Transacciones WHERE {$where}");
+        foreach ($params as $k => $v) {
+            $stmt->bindValue($k, $v);
+        }
+        $stmt->execute();
+        return (int) $stmt->fetchColumn();
+    }
+
     public function getByProduct($productoId)
     {
         $sql  = "SELECT * FROM Transacciones

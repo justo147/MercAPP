@@ -69,6 +69,10 @@ require_once __DIR__ . '/../../config/bootstrap.php';
                   <span id="badge-mensajes" class="badge bg-danger ms-2"></span>
                 </a></li>
 
+              <li><a class="dropdown-item" href="my_transactions.php">
+                  <i class="bi bi-clock-history me-2"></i>Mis transacciones
+                </a></li>
+
               <li><a class="dropdown-item" href="upload_product.php">
                   <i class="bi bi-upload"></i> Subir producto
                 </a></li>
