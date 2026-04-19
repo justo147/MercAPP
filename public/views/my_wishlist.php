@@ -100,8 +100,7 @@ $estadosProducto = $conn->query("SELECT id, nombre FROM EstadoProducto ORDER BY 
 <?php include __DIR__ . '/footer.php'; ?>
 
 <script>
-const BASE = "<?= htmlspecialchars($BASE) ?>";
-
+// BASE ya está declarado por navbar.php
 async function cargarDeseos() {
   const res  = await fetch(`${BASE}/api/deseos.php`);
   const json = await res.json();
