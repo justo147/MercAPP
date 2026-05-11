@@ -166,11 +166,12 @@ function iconClass(string $current, string $step): string {
 }
 
 $etiquetaMetodo = [
-    'efectivo'      => ['bi-cash-coin',      'Efectivo al entregar'],
-    'transferencia' => ['bi-bank',           'Transferencia bancaria'],
-    'bizum'         => ['bi-phone',          'Bizum'],
-    'paypal'        => ['bi-paypal',         'PayPal'],
-    'otro'          => ['bi-three-dots',     'Otro método'],
+    'efectivo'      => ['bi-cash-coin',          'Efectivo al entregar'],
+    'transferencia' => ['bi-bank',               'Transferencia bancaria'],
+    'bizum'         => ['bi-phone',              'Bizum'],
+    'paypal'        => ['bi-paypal',             'PayPal'],
+    'stripe'        => ['bi-credit-card-2-front','Tarjeta (Stripe) — Pagado'],
+    'otro'          => ['bi-three-dots',         'Otro método'],
 ];
 ?>
 <!DOCTYPE html>
@@ -193,6 +194,7 @@ $etiquetaMetodo = [
 
     <script src="../js/theme.js" defer></script>
     <script src="../js/address_autocomplete.js" defer></script>
+    <script src="https://js.stripe.com/v3/" defer></script>
 
     <style>
         .msg-sistema { text-align:center; margin:.75rem 0; }
@@ -215,6 +217,42 @@ $etiquetaMetodo = [
         .dark-mode .address-suggestions .list-group-item {
             background:#2d2d2d; color:#e0e0e0; border-color:#444;
         }
+
+        /* ── Stripe Elements ─────────────────────────────────────── */
+        #stripe-payment-block {
+            display: none;
+            animation: fadeIn .25s ease;
+        }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
+
+        #stripe-card-element {
+            padding: .6rem .8rem;
+            border: 1px solid #dee2e6;
+            border-radius: .375rem;
+            background: #fff;
+            transition: border-color .15s;
+        }
+        #stripe-card-element.StripeElement--focus { border-color: #0d6efd; box-shadow: 0 0 0 .2rem rgba(13,110,253,.25); }
+        #stripe-card-element.StripeElement--invalid { border-color: #dc3545; }
+        .dark-mode #stripe-card-element { background:#1e1e2e; border-color:#444; color:#e0e0e0; }
+
+        .stripe-badge {
+            display: inline-flex; align-items: center; gap: .3rem;
+            font-size: .7rem; color: #6c757d; font-weight: 500;
+        }
+        .stripe-badge img { height: 18px; }
+
+        #stripe-error-msg {
+            font-size: .85rem;
+            color: #dc3545;
+        }
+
+        .mp-stripe-label {
+            background: linear-gradient(90deg,#635bff 0%,#0d6efd 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
     </style>
 </head>
 <body>
@@ -236,6 +274,30 @@ include("navbar.php");
     <?php if (isset($_GET['error']) && $_GET['error'] === 'metodo_pago'): ?>
         <div class="alert alert-danger alert-dismissible fade show">
             <i class="bi bi-exclamation-triangle me-1"></i> Debes seleccionar un método de pago.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
+    <?php
+    $stripeErrors = [
+        'stripe_no_intent'   => 'No se recibió confirmación del pago. Inténtalo de nuevo.',
+        'stripe_config'      => 'El sistema de pagos con tarjeta no está configurado correctamente.',
+        'stripe_pago_fallido'=> 'El pago con tarjeta no fue completado o no es válido.',
+        'stripe_error'       => 'Error de comunicación con Stripe. Inténtalo de nuevo.',
+    ];
+    $errCode = $_GET['error'] ?? '';
+    if (isset($stripeErrors[$errCode])):
+    ?>
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-credit-card me-1"></i> <?= htmlspecialchars($stripeErrors[$errCode]) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
+    <?php if (isset($_GET['stripe']) && $_GET['stripe'] === 'ok'): ?>
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle me-1"></i>
+            ¡Pago con tarjeta confirmado! El vendedor recibirá el aviso para preparar el envío.
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     <?php endif; ?>
@@ -329,6 +391,11 @@ include("navbar.php");
                         ?>
                         <i class="bi <?= $icPago ?> me-1 text-primary"></i>
                         <strong>Pago:</strong> <?= htmlspecialchars($lblPago) ?>
+                        <?php if ($transaccion['metodo_pago'] === 'stripe'): ?>
+                            <span class="badge bg-success ms-1" style="font-size:.65rem">
+                                <i class="bi bi-check-circle me-1"></i>Confirmado
+                            </span>
+                        <?php endif; ?>
                     </div>
                     <?php endif; ?>
                     <?php if ($transaccion['direccion_envio']): ?>
@@ -382,12 +449,21 @@ include("navbar.php");
                     : 'El comprador ha aceptado. Espera a que confirme el pago antes de enviar el producto.' ?>
             </div>
         <?php elseif ($estado === 'pago_pendiente'): ?>
+            <?php if ($transaccion['metodo_pago'] === 'stripe'): ?>
+            <div class="alert alert-success">
+                <i class="bi bi-credit-card-2-front me-1"></i>
+                <?= $esVendedor
+                    ? '<strong>Pago con tarjeta confirmado por Stripe.</strong> El dinero está asegurado. Prepara el producto para el envío.'
+                    : '<strong>Tu pago con tarjeta fue procesado correctamente.</strong> El vendedor preparará el envío.' ?>
+            </div>
+            <?php else: ?>
             <div class="alert alert-warning">
                 <i class="bi bi-hourglass-split me-1"></i>
                 <?= $esVendedor
                     ? 'El comprador indica que ha realizado el pago. Compruébalo y marca el producto como enviado.'
                     : 'Has notificado el pago. Espera a que el vendedor confirme y envíe el producto.' ?>
             </div>
+            <?php endif; ?>
         <?php elseif ($estado === 'enviado'): ?>
             <div class="alert alert-success">
                 <i class="bi bi-truck me-1"></i>
@@ -453,6 +529,11 @@ include("navbar.php");
                             </label>
                             <div class="d-grid gap-2">
                                 <?php
+                                // Obtener precio del producto para mostrar en el botón Stripe
+                                $productoParaStripe = $productoModel->getById($chat['producto_id'] ?? 0);
+                                $precioProducto     = floatval($productoParaStripe['precio'] ?? 0);
+                                $stripeDisponible   = $precioProducto >= 0.50;
+
                                 $metodos = [
                                     'efectivo'      => ['bi-cash-coin', 'Efectivo al entregar'],
                                     'transferencia' => ['bi-bank',      'Transferencia bancaria'],
@@ -471,7 +552,73 @@ include("navbar.php");
                                     </label>
                                 </div>
                                 <?php endforeach; ?>
+
+                                <!-- ── Stripe ───────────────────────────────── -->
+                                <div class="form-check border rounded p-2 border-primary-subtle"
+                                     style="background:linear-gradient(135deg,rgba(99,91,255,.04) 0%,rgba(13,110,253,.04) 100%)">
+                                    <input class="form-check-input" type="radio"
+                                           name="metodo_pago" id="mp-stripe" value="stripe"
+                                           <?= $transaccion['tipo'] !== 'intercambio' ? 'required' : '' ?>
+                                           <?= !$stripeDisponible ? 'disabled' : '' ?>>
+                                    <label class="form-check-label w-100 d-flex align-items-center justify-content-between"
+                                           for="mp-stripe">
+                                        <span>
+                                            <i class="bi bi-credit-card-2-front me-1"></i>
+                                            <span class="mp-stripe-label">Tarjeta de crédito / débito</span>
+                                        </span>
+                                        <span class="stripe-badge">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 25" height="18">
+                                                <path d="M59.64 14.28h-8.06c.19 1.93 1.6 2.55 3.2 2.55 1.64 0 2.96-.37 4.05-.95v3.32a8.33 8.33 0 0 1-4.56 1.1c-4.01 0-6.83-2.5-6.83-7.48 0-4.19 2.39-7.52 6.3-7.52 3.92 0 5.96 3.28 5.96 7.5 0 .4-.04 1.26-.06 1.48zm-5.92-5.62c-1.03 0-2.17.73-2.17 2.58h4.25c0-1.85-1.07-2.58-2.08-2.58zM40.95 20.3c-1.44 0-2.32-.6-2.9-1.04l-.02 4.63-4.12.87V6.27h3.78l.19 1.02a4.7 4.7 0 0 1 3.23-1.29c2.9 0 5.62 2.6 5.62 7.4 0 5.23-2.7 6.9-5.78 6.9zm-.94-9.54c-.85 0-1.56.31-1.98.75l.02 5.25c.42.44 1.13.72 1.96.72 1.5 0 2.54-1.65 2.54-3.36 0-1.87-1.03-3.36-2.54-3.36zM28.24 5.07c-1.44 0-2.36 1.06-2.36 2.56 0 1.51.92 2.56 2.36 2.56s2.36-1.05 2.36-2.56c0-1.5-.92-2.56-2.36-2.56zm2.07 15.19h-4.14V6.27h4.14V20.26zM18.99 20.3c-4.14 0-6.32-2.23-6.32-7.4 0-4.95 2.28-7.6 6.32-7.6 4.06 0 6.32 2.65 6.32 7.6 0 5.17-2.18 7.4-6.32 7.4zm0-11.45c-1.26 0-2.1 1.17-2.1 4.05 0 2.86.84 4.05 2.1 4.05 1.27 0 2.1-1.2 2.1-4.05 0-2.88-.83-4.05-2.1-4.05zM11.68 20.26H7.56V6.27h4.12V20.26zm0-17.39H7.56V.45h4.12v2.42zM4.9 20.26H.77V.45h4.13V20.26z" fill="#635bff"/>
+                                            </svg>
+                                            Seguro · Cifrado
+                                        </span>
+                                    </label>
+                                    <?php if (!$stripeDisponible): ?>
+                                    <div class="small text-muted mt-1">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        No disponible cuando el precio es inferior a 0,50 €.
+                                    </div>
+                                    <?php else: ?>
+                                    <div class="small text-muted mt-1">
+                                        <i class="bi bi-lock-fill me-1 text-success"></i>
+                                        Pago seguro · <?= number_format($precioProducto, 2) ?> €
+                                        · No se guarda tu tarjeta
+                                    </div>
+                                    <?php endif; ?>
+                                </div>
+
                             </div>
+
+                            <!-- Bloque Stripe Elements (se muestra al seleccionar stripe) -->
+                            <?php if ($stripeDisponible): ?>
+                            <div id="stripe-payment-block" class="mt-3 p-3 border rounded-3 border-primary-subtle">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <span class="fw-semibold small">
+                                        <i class="bi bi-credit-card me-1 text-primary"></i>
+                                        Datos de tu tarjeta
+                                    </span>
+                                    <div class="d-flex gap-1 opacity-75">
+                                        <img src="https://raw.githubusercontent.com/itsalb3rt/payment-icons/master/src/visa.svg"
+                                             height="20" alt="Visa" title="Visa">
+                                        <img src="https://raw.githubusercontent.com/itsalb3rt/payment-icons/master/src/mastercard.svg"
+                                             height="20" alt="Mastercard" title="Mastercard">
+                                        <img src="https://raw.githubusercontent.com/itsalb3rt/payment-icons/master/src/amex.svg"
+                                             height="20" alt="Amex" title="American Express">
+                                    </div>
+                                </div>
+                                <div id="stripe-card-element"></div>
+                                <div id="stripe-error-msg" class="mt-2 d-none">
+                                    <i class="bi bi-exclamation-circle me-1"></i>
+                                    <span id="stripe-error-text"></span>
+                                </div>
+                                <div class="mt-2 d-flex align-items-center gap-1 text-muted" style="font-size:.75rem">
+                                    <i class="bi bi-shield-lock-fill text-success"></i>
+                                    Conexión cifrada TLS · Procesado por Stripe
+                                </div>
+                                <input type="hidden" name="stripe_payment_intent_id" id="stripe-pi-id">
+                            </div>
+                            <?php endif; ?>
+
                         </div>
                         <?php endif; ?>
 
@@ -499,9 +646,11 @@ include("navbar.php");
                                       placeholder="Instrucciones especiales, horario de recogida..."></textarea>
                         </div>
 
-                        <button type="submit" class="btn btn-success w-100">
-                            <i class="bi bi-hand-thumbs-up me-1"></i>
-                            <?= $esIntercambio ? 'Proponer intercambio' : 'Aceptar y confirmar datos' ?>
+                        <button type="submit" id="btn-aceptar-transaccion" class="btn btn-success w-100">
+                            <i class="bi bi-hand-thumbs-up me-1" id="btn-aceptar-icon"></i>
+                            <span id="btn-aceptar-texto">
+                                <?= $esIntercambio ? 'Proponer intercambio' : 'Aceptar y confirmar datos' ?>
+                            </span>
                         </button>
                     </form>
                 </div>
@@ -889,7 +1038,7 @@ include("navbar.php");
 ></script>
 <?php endif; ?>
 
-<!-- Autocompletado de dirección + scroll automático -->
+<!-- Autocompletado de dirección + scroll automático + Stripe -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     // Scroll al final del chat
@@ -902,6 +1051,115 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // El modal de valoración lo abre rating.js automáticamente
+
+    // ── Stripe Elements ───────────────────────────────────────────────────────
+    const stripeBlock  = document.getElementById('stripe-payment-block');
+    const stripeErrorEl = document.getElementById('stripe-error-msg');
+    const stripeErrorTx = document.getElementById('stripe-error-text');
+    const btnAceptar   = document.getElementById('btn-aceptar-transaccion');
+    const btnTexto     = document.getElementById('btn-aceptar-texto');
+    const btnIcon      = document.getElementById('btn-aceptar-icon');
+    const piInput      = document.getElementById('stripe-pi-id');
+    const formAceptar  = btnAceptar ? btnAceptar.closest('form') : null;
+
+    if (!stripeBlock || !formAceptar) return; // no hay formulario de aceptación
+
+    const STRIPE_PK      = '<?= htmlspecialchars($_ENV['STRIPE_KEY'] ?? '') ?>';
+    const TRANSACCION_ID = <?= intval($transaccion['id'] ?? 0) ?>;
+
+    const stripe      = Stripe(STRIPE_PK);
+    const elements    = stripe.elements();
+    const cardElement = elements.create('card', {
+        style: {
+            base: {
+                fontFamily: 'system-ui, sans-serif',
+                fontSize: '15px',
+                color: document.body.classList.contains('dark-mode') ? '#e0e0e0' : '#212529',
+                '::placeholder': { color: '#adb5bd' },
+            },
+            invalid: { color: '#dc3545' },
+        },
+        hidePostalCode: true,
+    });
+    cardElement.mount('#stripe-card-element');
+
+    cardElement.on('change', e => {
+        if (e.error) {
+            stripeErrorTx.textContent = e.error.message;
+            stripeErrorEl.classList.remove('d-none');
+        } else {
+            stripeErrorEl.classList.add('d-none');
+        }
+    });
+
+    // Mostrar/ocultar bloque Stripe según método elegido
+    document.querySelectorAll('input[name="metodo_pago"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            if (radio.value === 'stripe' && radio.checked) {
+                stripeBlock.style.display = 'block';
+                btnTexto.textContent = `Pagar ${parseFloat('<?= $precioProducto ?? 0 ?>').toFixed(2).replace('.', ',')} € con tarjeta`;
+                btnIcon.className = 'bi bi-lock-fill me-1';
+                btnAceptar.classList.replace('btn-success', 'btn-primary');
+            } else if (radio.checked) {
+                stripeBlock.style.display = 'none';
+                btnTexto.textContent = '<?= $esIntercambio ? 'Proponer intercambio' : 'Aceptar y confirmar datos' ?>';
+                btnIcon.className = 'bi bi-hand-thumbs-up me-1';
+                btnAceptar.classList.replace('btn-primary', 'btn-success');
+            }
+        });
+    });
+
+    // Interceptar envío del formulario si el método es Stripe
+    formAceptar.addEventListener('submit', async e => {
+        const stripeRadio = document.getElementById('mp-stripe');
+        if (!stripeRadio || !stripeRadio.checked) return; // flujo normal
+
+        e.preventDefault();
+        btnAceptar.disabled = true;
+        btnTexto.textContent = 'Procesando pago…';
+        btnIcon.className = 'spinner-border spinner-border-sm me-1';
+        stripeErrorEl.classList.add('d-none');
+
+        try {
+            // 1. Crear PaymentIntent en el servidor
+            const resp = await fetch('<?= $BASE ?>/api/stripe_create_payment.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `transaccion_id=${TRANSACCION_ID}`,
+            });
+
+            if (!resp.ok) {
+                const err = await resp.json();
+                throw new Error(err.error || 'Error al iniciar el pago');
+            }
+
+            const { client_secret } = await resp.json();
+
+            // 2. Confirmar pago con Stripe.js
+            const { paymentIntent, error } = await stripe.confirmCardPayment(client_secret, {
+                payment_method: { card: cardElement },
+            });
+
+            if (error) {
+                throw new Error(error.message);
+            }
+
+            if (paymentIntent.status !== 'succeeded') {
+                throw new Error('El pago no pudo completarse. Inténtalo de nuevo.');
+            }
+
+            // 3. Guardar el ID del PaymentIntent y enviar el formulario
+            piInput.value = paymentIntent.id;
+            formAceptar.submit();
+
+        } catch (err) {
+            stripeErrorTx.textContent = err.message;
+            stripeErrorEl.classList.remove('d-none');
+            btnAceptar.disabled = false;
+            btnTexto.textContent = `Pagar ${parseFloat('<?= $precioProducto ?? 0 ?>').toFixed(2).replace('.', ',')} € con tarjeta`;
+            btnIcon.className = 'bi bi-lock-fill me-1';
+        }
+    });
 });
 </script>
 

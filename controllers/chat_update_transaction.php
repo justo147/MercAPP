@@ -19,6 +19,7 @@ require_once __DIR__ . '/../models/Chat.php';
 require_once __DIR__ . '/../models/Product.php';
 require_once __DIR__ . '/../models/Notification.php';
 require_once __DIR__ . '/../config/mail_config.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 $db   = new Database();
 $conn = $db->getConnection();
@@ -127,16 +128,17 @@ $productoId = intval($transaccion["producto_id"]);
 switch ($nuevoEstado) {
 
     case 'aceptada':
-        $metodoPago     = trim($_POST["metodo_pago"]     ?? "");
-        $direccionEnvio = trim($_POST["direccion_envio"] ?? "");
-        $notas          = trim($_POST["notas_comprador"] ?? "");
-        $productoOfrecidoId = intval($_POST["producto_ofrecido_id"] ?? 0);
+        $metodoPago     = trim($_POST["metodo_pago"]      ?? "");
+        $direccionEnvio = trim($_POST["direccion_envio"]  ?? "");
+        $notas          = trim($_POST["notas_comprador"]  ?? "");
+        $productoOfrecidoId  = intval($_POST["producto_ofrecido_id"]  ?? 0);
+        $stripePaymentIntent = trim($_POST["stripe_payment_intent_id"] ?? "");
 
         $tipoTransaccion = $transaccion['tipo'];
         $esIntercambio   = in_array($tipoTransaccion, ['intercambio', 'mixto']);
 
         // Para venta y mixto se requiere método de pago; intercambio puro no
-        $metodosValidos = ['efectivo', 'transferencia', 'bizum', 'paypal', 'otro'];
+        $metodosValidos = ['efectivo', 'transferencia', 'bizum', 'paypal', 'stripe', 'otro'];
         if (!$esIntercambio || $tipoTransaccion === 'mixto') {
             if (!in_array($metodoPago, $metodosValidos)) {
                 header("Location: {$BASE}/public/views/chat.php?id={$chatId}&error=metodo_pago");
@@ -150,6 +152,55 @@ switch ($nuevoEstado) {
             exit;
         }
 
+        // ── Flujo Stripe ─────────────────────────────────────────────────────
+        if ($metodoPago === 'stripe') {
+            if (!$stripePaymentIntent) {
+                header("Location: {$BASE}/public/views/chat.php?id={$chatId}&error=stripe_no_intent");
+                exit;
+            }
+
+            $stripeSecretKey = $_ENV['STRIPE_SECRET_KEY'] ?? '';
+            if (!$stripeSecretKey) {
+                header("Location: {$BASE}/public/views/chat.php?id={$chatId}&error=stripe_config");
+                exit;
+            }
+
+            try {
+                \Stripe\Stripe::setApiKey($stripeSecretKey);
+                $intent = \Stripe\PaymentIntent::retrieve($stripePaymentIntent);
+
+                // Verificar que el PaymentIntent corresponde a esta transacción
+                $intentTransaccionId = intval($intent->metadata->transaccion_id ?? 0);
+                if (
+                    $intent->status !== 'succeeded' ||
+                    $intentTransaccionId !== $transaccionId
+                ) {
+                    header("Location: {$BASE}/public/views/chat.php?id={$chatId}&error=stripe_pago_fallido");
+                    exit;
+                }
+            } catch (\Stripe\Exception\ApiErrorException $e) {
+                header("Location: {$BASE}/public/views/chat.php?id={$chatId}&error=stripe_error");
+                exit;
+            }
+
+            // Pago verificado: acepta + marca como pago_pendiente en un solo paso
+            $transactionModel->aceptarConStripe(
+                $transaccionId,
+                $direccionEnvio,
+                $notas,
+                $stripePaymentIntent
+            );
+
+            $msgStripe = "El comprador ha pagado con tarjeta (Stripe). El pago ha sido confirmado automáticamente.";
+            if ($direccionEnvio) $msgStripe .= " Dirección de envío: {$direccionEnvio}.";
+            $messageModel->enviarMensajeSistema($chatId, $msgStripe);
+
+            // Redirigir directamente — el estado ya es pago_pendiente
+            $nuevoEstado = 'pago_pendiente'; // para el bloque de notificaciones de abajo
+            break;
+        }
+
+        // ── Resto de métodos de pago ─────────────────────────────────────────
         $transactionModel->aceptar($transaccionId, $metodoPago ?: null, $direccionEnvio, $notas);
 
         // Guardar producto ofrecido en Intercambio_Detalle
@@ -167,7 +218,7 @@ switch ($nuevoEstado) {
         $etiqueta = isset($etiquetas[$metodoPago]) ? $etiquetas[$metodoPago] : '';
 
         $msgAceptada = "El comprador ha aceptado la transacción.";
-        if ($etiqueta)      $msgAceptada .= " Método de pago: {$etiqueta}.";
+        if ($etiqueta)       $msgAceptada .= " Método de pago: {$etiqueta}.";
         if ($direccionEnvio) $msgAceptada .= " Dirección de envío: {$direccionEnvio}.";
         if ($esIntercambio && $productoOfrecidoId > 0) {
             $msgAceptada .= " El comprador ha propuesto un producto a cambio.";

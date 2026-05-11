@@ -265,6 +265,31 @@ class Transaction
     }
 
     /**
+     * Comprador acepta con Stripe: guarda datos de envío y salta directamente a
+     * pago_pendiente (el pago ya está confirmado por Stripe).
+     */
+    public function aceptarConStripe($id, $direccionEnvio, $notasComprador, $paymentIntentId)
+    {
+        $sql = "UPDATE Transacciones
+                SET estado                    = 'pago_pendiente',
+                    metodo_pago               = 'stripe',
+                    direccion_envio           = :direccion_envio,
+                    notas_comprador           = :notas,
+                    stripe_payment_intent_id  = :pi_id,
+                    fecha_aceptacion          = NOW(),
+                    fecha_pago_confirmado     = NOW()
+                WHERE id = :id";
+
+        $stmt = $this->conn->prepare($sql);
+        return $stmt->execute([
+            ':direccion_envio' => $direccionEnvio ?: null,
+            ':notas'           => $notasComprador ?: null,
+            ':pi_id'           => $paymentIntentId,
+            ':id'              => $id,
+        ]);
+    }
+
+    /**
      * Comprador informa que ha pagado → pago_pendiente.
      */
     public function marcarPagado($id)

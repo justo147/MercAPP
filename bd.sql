@@ -144,13 +144,15 @@ CREATE TABLE Transacciones (
   precio_final DECIMAL(10,2) DEFAULT 0.00,
   dinero_extra DECIMAL(10,2) DEFAULT 0.00,
   -- Método de pago elegido por el comprador al aceptar
-  metodo_pago ENUM('efectivo','transferencia','bizum','paypal','otro') NULL,
+  metodo_pago ENUM('efectivo','transferencia','bizum','paypal','stripe','otro') NULL,
   -- Dirección de envío normalizada (vía Nominatim)
   direccion_envio VARCHAR(300) NULL,
   -- Número de seguimiento que añade el vendedor al marcar como enviado
   numero_seguimiento VARCHAR(100) NULL,
   -- Notas del comprador (instrucciones de entrega, etc.)
   notas_comprador TEXT NULL,
+  -- ID del PaymentIntent de Stripe (cuando se paga con tarjeta)
+  stripe_payment_intent_id VARCHAR(100) NULL,
   -- Timestamps de cada paso del flujo
   fecha_aceptacion DATETIME NULL,
   fecha_pago_confirmado DATETIME NULL,
