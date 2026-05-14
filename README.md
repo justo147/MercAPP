@@ -6,6 +6,7 @@
 ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql&logoColor=white)
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3.3-7952B3?logo=bootstrap&logoColor=white)
 ![PHPUnit](https://img.shields.io/badge/PHPUnit-11.x-6C9B3A?logo=php&logoColor=white)
+![Stripe](https://img.shields.io/badge/Stripe-v3-635BFF?logo=stripe&logoColor=white)
 ![License](https://img.shields.io/badge/licencia-académica-lightgrey)
 
 ---
@@ -19,12 +20,14 @@
 5. [Estructura del proyecto](#estructura-del-proyecto)
 6. [Base de datos](#base-de-datos)
 7. [Máquina de estados — Transacciones](#máquina-de-estados--transacciones)
-8. [API REST](#api-rest)
-9. [Vistas](#vistas)
-10. [Instalación local (XAMPP)](#instalación-local-xampp)
-11. [Variables de entorno](#variables-de-entorno)
-12. [Tests](#tests)
-13. [Convenciones de código](#convenciones-de-código)
+8. [Pago con tarjeta — Stripe](#pago-con-tarjeta--stripe)
+9. [API REST](#api-rest)
+10. [Vistas](#vistas)
+11. [Mejoras UX](#mejoras-ux)
+12. [Instalación local (XAMPP)](#instalación-local-xampp)
+13. [Variables de entorno](#variables-de-entorno)
+14. [Tests](#tests)
+15. [Convenciones de código](#convenciones-de-código)
 
 ---
 
@@ -53,7 +56,8 @@ Incluye un **panel de administración** completo con gestión de usuarios, produ
 
 ### Transacciones
 - Flujo guiado de 6 estados con transiciones por rol (comprador / vendedor)
-- Elección de método de pago (efectivo, transferencia, Bizum, PayPal, otro)
+- Elección de método de pago: efectivo, transferencia, Bizum, PayPal, otro o **tarjeta de crédito/débito vía Stripe**
+- Pago con tarjeta integrado mediante **Stripe.js v3** + PaymentIntent (flujo seguro PCI-compliant)
 - Dirección de envío con autocomplete Nominatim
 - Número de seguimiento de paquete
 - Email de confirmación al completar la entrega
@@ -78,6 +82,7 @@ Incluye un **panel de administración** completo con gestión de usuarios, produ
 | Tests | PHPUnit 11.x |
 | Configuración | `vlucas/phpdotenv` 5.x |
 | Geocodificación | Nominatim (OpenStreetMap) — sin API key |
+| Pagos | Stripe.js v3 + PaymentIntent API |
 | Documentación | PHPDocumentor 3.9 |
 
 ---
@@ -118,10 +123,11 @@ public/views/*.php          ← Vistas (HTML + PHP mínimo)
 ```
 MercApp/
 │
-├── api/                        # 23 endpoints JSON
+├── api/                        # 25 endpoints JSON
 ├── config/
 │   ├── bootstrap.php           # Carga .env, define $BASE
 │   ├── db.php                  # Clase Database → PDO
+│   ├── flash.php               # Helpers setFlash() / hasFlash() para mensajes de sesión
 │   └── mail_config.php         # PHPMailer SMTP
 │
 ├── controllers/
@@ -146,7 +152,7 @@ MercApp/
 │
 ├── public/
 │   ├── views/                  # 21 plantillas PHP
-│   ├── js/                     # 14 scripts JavaScript
+│   ├── js/                     # 15 scripts JavaScript (incluye ux.js)
 │   ├── css/                    # CSS compilado
 │   ├── scss/                   # Fuentes SASS
 │   └── img/ · ico/ · fonts/    # Recursos estáticos
@@ -232,6 +238,29 @@ Cualquier estado  →  cancelada  ❌  (estado final negativo)
 
 ---
 
+## Pago con tarjeta — Stripe
+
+El flujo de pago con tarjeta sigue el patrón **PaymentIntent** de Stripe para mayor seguridad (nunca se envían datos de tarjeta al servidor propio):
+
+```
+1. Comprador selecciona "tarjeta" como método de pago
+2. El frontend carga Stripe.js y monta el Card Element
+3. Al confirmar, se llama a POST /api/stripe_create_payment.php
+   → El servidor crea un PaymentIntent con el importe y devuelve client_secret
+4. El frontend llama a stripe.confirmCardPayment(client_secret, { payment_method: { card } })
+5. Si el pago es exitoso (status = "succeeded"):
+   → Se avanza el estado de la transacción a pago_pendiente automáticamente
+```
+
+| Variable `.env` | Descripción |
+|----------------|-------------|
+| `STRIPE_SECRET_KEY` | Clave secreta de Stripe (empieza por `sk_`) |
+| `STRIPE_PUBLISHABLE_KEY` | Clave pública de Stripe (empieza por `pk_`) |
+
+> Para desarrollo usa las claves de **test** del dashboard de Stripe. Las tarjetas de prueba (`4242 4242 4242 4242`, CVV cualquiera, fecha futura) no realizan cobros reales.
+
+---
+
 ## API REST
 
 Todos los endpoints devuelven `Content-Type: application/json` y requieren sesión activa salvo indicación.
@@ -262,6 +291,8 @@ Todos los endpoints devuelven `Content-Type: application/json` y requieren sesi�
 |----------|--------|-------------|
 | `api/mis_transacciones.php` | GET | Historial completo de transacciones |
 | `api/chat_unread_count.php` | GET | Número de mensajes no leídos |
+| `api/chat_mark_all_read.php` | POST | Marca todos los mensajes no leídos como leídos |
+| `api/stripe_create_payment.php` | POST | Crea un PaymentIntent de Stripe y devuelve el `client_secret` |
 
 ### Notificaciones
 
@@ -319,6 +350,45 @@ Todos los endpoints devuelven `Content-Type: application/json` y requieren sesi�
 | `admin_dashboard.php` | Panel de administración completo |
 | `docs.php` | Documentación técnica (PHPDoc, JSDoc, Tests, API) |
 | `help.php` | Preguntas frecuentes y ayuda |
+
+---
+
+## Mejoras UX
+
+Conjunto de mejoras de experiencia de usuario implementadas sobre el diseño base:
+
+### Sistema de feedback unificado (`public/js/ux.js` + `public/js/navbar.js`)
+- **Toast notifications**: `mostrarToast(mensaje, tipo)` disponible globalmente — soporta `success`, `error`, `warning`, `info`. Reemplaza todos los `alert()` y `confirm()` nativos del navegador.
+- **Mensajes flash de sesión**: `setFlash(tipo, mensaje)` en PHP (`config/flash.php`) — los mensajes persisten a través de redirects y se emiten como toasts al cargar la siguiente página.
+- **Confirmación de acciones destructivas**: modales Bootstrap en lugar de `confirm()` nativo en chat, wishlist y panel de administración.
+
+### Estados de carga
+- **Botón de carga**: `data-loading-text="..."` en cualquier botón de submit activa automáticamente un spinner y deshabilita el botón durante el envío del formulario, evitando dobles envíos.
+- **Skeleton loaders**: tarjetas placeholder (`placeholder-glow`) en el home, perfil de usuario y panel de administración mientras se cargan los datos vía AJAX.
+- **Spinner en botones de seguir**: los botones "Seguir/Dejar de seguir" muestran un spinner giratorio hasta recibir respuesta del servidor.
+
+### Protección de datos
+- **Aviso de cambios no guardados**: `data-unsaved-warning` en formularios activa un aviso `beforeunload` si el usuario intenta salir con cambios sin guardar.
+- **Autoguardado de borrador**: los formularios de publicar y editar producto guardan automáticamente los campos cada 5 s en `localStorage` y los restauran al volver a la página.
+- **Contadores de caracteres**: campos `titulo` (máx. 100) y `descripcion` (máx. 2000) muestran contador en tiempo real con aviso en rojo al acercarse al límite.
+
+### Búsqueda y filtros (home)
+- **Chips de filtros activos**: cada filtro aplicado genera una píldora con botón ✕ para quitarlo individualmente o limpiar todos a la vez.
+- **Contador de resultados**: texto dinámico "N productos encontrados" con `aria-live="polite"` para lectores de pantalla.
+- **Empty state diferenciado**: mensaje y CTA distintos según haya filtros aplicados o no.
+- **Spinner de scroll infinito**: indicador visible mientras se cargan más productos.
+- **Reintentar en error**: botón "Reintentar" cuando falla la carga de productos.
+
+### Detección offline
+- Banner rojo fijo en la parte superior cuando el navegador pierde la conexión a Internet; desaparece automáticamente al recuperarla.
+
+### Registro
+- **Toggle de contraseña**: botón ojo en los campos de contraseña para mostrar/ocultar el texto.
+- **Indicador de fortaleza**: barra de progreso de 5 niveles (débil → muy fuerte) en tiempo real.
+- **Validación de confirmación**: feedback inmediato con ✓/✗ mientras el usuario escribe en "Confirmar contraseña".
+
+### Chat
+- **Marcar todo como leído**: botón en la lista de chats que marca todos los mensajes no leídos de una sola acción, con actualización inmediata del badge de la navbar.
 
 ---
 
@@ -381,6 +451,12 @@ EMAIL_API_KEY=xxxx xxxx xxxx xxxx
 #   Sitekey: 10000000-ffff-ffff-ffff-000000000001
 #   Secret:  0x0000000000000000000000000000000000000000
 HCAPTCHA_SECRET=0x0000000000000000000000000000000000000000
+
+# Stripe — pagos con tarjeta
+# Obtén tus claves en: https://dashboard.stripe.com/apikeys
+# Usa claves "test" (sk_test_... / pk_test_...) para desarrollo
+STRIPE_SECRET_KEY=sk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+STRIPE_PUBLISHABLE_KEY=pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 > ⚠️ **Nunca subas el `.env` con credenciales reales.** Ya está incluido en `.gitignore`.

@@ -171,6 +171,11 @@ session_start();
           apiRow('GET', '/api/mis_transacciones.php',
               'Historial de transacciones del usuario con paginación.',
               '<code>page</code>, <code>limit</code>, <code>rol</code>, <code>estado</code>');
+          apiRow('POST', '/api/chat_mark_all_read.php',
+              'Marca como leídos todos los mensajes no leídos del usuario en todos sus chats.', '—');
+          apiRow('POST', '/api/stripe_create_payment.php',
+              'Crea un PaymentIntent de Stripe y devuelve el <code>client_secret</code> para confirmar el pago en el cliente.',
+              '<code>transaccion_id</code>');
           ?>
         </tbody>
       </table>
@@ -245,7 +250,7 @@ session_start();
               <tr><th>Estado actual</th><th>→ Siguiente</th><th>Actor</th><th>Campos extra</th></tr>
             </thead>
             <tbody>
-              <tr><td><code>pendiente</code></td>     <td><code>aceptada</code></td>      <td>Comprador</td><td><code>metodo_pago</code>, <code>direccion_envio</code></td></tr>
+              <tr><td><code>pendiente</code></td>     <td><code>aceptada</code></td>      <td>Comprador</td><td><code>metodo_pago</code> (efectivo | transferencia | bizum | paypal | tarjeta | otro), <code>direccion_envio</code></td></tr>
               <tr><td><code>aceptada</code></td>      <td><code>pago_pendiente</code></td><td>Comprador</td><td>—</td></tr>
               <tr><td><code>pago_pendiente</code></td><td><code>enviado</code></td>        <td>Vendedor</td><td><code>numero_seguimiento</code> (opcional)</td></tr>
               <tr><td><code>enviado</code></td>       <td><code>entregado</code></td>      <td>Comprador</td><td>— (envía email de confirmación)</td></tr>
@@ -254,6 +259,43 @@ session_start();
           </table>
         </div>
       </div>
+    </div>
+
+    <!-- Pagos Stripe -->
+    <h2 class="h5 section-title mb-3">
+      <i class="bi bi-credit-card text-success me-1"></i>Pago con tarjeta — Stripe
+    </h2>
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <p class="mb-2">El flujo usa <strong>PaymentIntent</strong> de Stripe para no transmitir datos de tarjeta al servidor propio (PCI-compliant):</p>
+        <ol class="mb-2">
+          <li>Comprador selecciona <em>tarjeta</em> como método de pago.</li>
+          <li>El frontend carga <code>Stripe.js v3</code> y monta el Card Element.</li>
+          <li>Al confirmar, se llama a <code>POST /api/stripe_create_payment.php</code> con <code>transaccion_id</code>.</li>
+          <li>El servidor crea un PaymentIntent con el importe del producto y devuelve <code>{"client_secret":"..."}</code>.</li>
+          <li>El frontend llama a <code>stripe.confirmCardPayment(client_secret)</code>.</li>
+          <li>Si el pago tiene <code>status = "succeeded"</code>, la transacción avanza automáticamente a <code>pago_pendiente</code>.</li>
+        </ol>
+        <p class="mb-0 small text-muted">Variables de entorno requeridas: <code>STRIPE_SECRET_KEY</code> y <code>STRIPE_PUBLISHABLE_KEY</code>.</p>
+      </div>
+    </div>
+
+    <!-- Utilidades UX del cliente -->
+    <h2 class="h5 section-title mb-3">
+      <i class="bi bi-stars text-warning me-1"></i>Utilidades UX — <code>public/js/ux.js</code>
+    </h2>
+    <div class="table-responsive mb-4">
+      <table class="table table-bordered table-hover align-middle">
+        <thead class="table-light"><tr><th>Función / Atributo</th><th>Descripción</th></tr></thead>
+        <tbody>
+          <tr><td class="endpoint-path">mostrarToast(msg, tipo)</td><td>Muestra un toast Bootstrap accesible. Tipos: <code>success</code>, <code>error</code>, <code>warning</code>, <code>info</code>.</td></tr>
+          <tr><td class="endpoint-path">data-loading-text="…"</td><td>Atributo en botón de submit: activa spinner y deshabilita el botón durante el envío del formulario.</td></tr>
+          <tr><td class="endpoint-path">data-unsaved-warning</td><td>Atributo en <code>&lt;form&gt;</code>: activa aviso <code>beforeunload</code> si hay cambios sin guardar.</td></tr>
+          <tr><td class="endpoint-path">data-counter="id"</td><td>Atributo en <code>&lt;input&gt;</code> / <code>&lt;textarea&gt;</code>: muestra contador de caracteres en tiempo real.</td></tr>
+          <tr><td class="endpoint-path">Banner offline</td><td>Detecta pérdida de conexión (<code>navigator.onLine</code>) y muestra/oculta un banner rojo automáticamente.</td></tr>
+          <tr><td class="endpoint-path">config/flash.php → setFlash()</td><td>PHP: almacena mensaje en sesión para emitirlo como toast en la siguiente página tras un redirect.</td></tr>
+        </tbody>
+      </table>
     </div>
 
     <!-- Ejemplo JSON -->
