@@ -336,7 +336,10 @@ $tipoBadge = [
         btn.addEventListener("mouseleave", actualizarBoton);
 
         btn.addEventListener("click", () => {
-            btn.disabled = true;
+            const origHtml = btn.innerHTML;
+            btn.disabled  = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+
             const url = sigue
                 ? `${BASE}/controllers/unfollow.php`
                 : `${BASE}/controllers/follow.php`;
@@ -352,10 +355,20 @@ $tipoBadge = [
                     sigue = !sigue;
                     btn.dataset.sigue = sigue ? "1" : "0";
                     actualizarBoton();
+                    if (typeof mostrarToast === 'function')
+                        mostrarToast(sigue ? "Ahora sigues a este vendedor." : "Has dejado de seguir a este vendedor.", "success");
+                } else {
+                    btn.innerHTML = origHtml;
+                    if (typeof mostrarToast === 'function')
+                        mostrarToast("No se pudo actualizar el seguimiento.", "error");
                 }
             })
-            .catch(console.error)
-            .finally(() => btn.disabled = false);
+            .catch(() => {
+                btn.innerHTML = origHtml;
+                if (typeof mostrarToast === 'function')
+                    mostrarToast("Error de conexión. Inténtalo de nuevo.", "error");
+            })
+            .finally(() => { btn.disabled = false; });
         });
     });
 </script>

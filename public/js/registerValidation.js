@@ -105,6 +105,14 @@ async function enviarFormulario() {
     const formData = new FormData(formRegister);
     const emailUser = emailInput.value.trim();
     const contenedorRespuesta = document.getElementById("respuesta");
+    const btnSubmit = formRegister.querySelector('[type="submit"]');
+
+    // Loading state
+    const origHtml = btnSubmit?.innerHTML;
+    if (btnSubmit) {
+        btnSubmit.disabled  = true;
+        btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Registrando…';
+    }
 
     try {
         const res = await fetch("register.php", {
@@ -113,25 +121,28 @@ async function enviarFormulario() {
         });
 
         const respuestaRaw = await res.text();
-        // Usamos una expresión regular para limpiar CUALQUIER espacio, salto de línea o tabulación
-        const respuesta = respuestaRaw.replace(/\s+/g, ''); 
-
-        console.log("Respuesta procesada:", respuesta);
+        const respuesta = respuestaRaw.replace(/\s+/g, '');
 
         if (respuesta.includes("REGISTRO_EXITOSO")) {
-            // 1. Limpieza total inmediata del div que ves en tus capturas
-            contenedorRespuesta.innerHTML = "";
+            contenedorRespuesta.innerHTML     = "";
             contenedorRespuesta.style.display = "none";
-            
-            // 2. Ejecutar Modal (BOM)
             abrirModalExito(emailUser);
         } else {
-            // Solo si hay error mostramos el texto
             contenedorRespuesta.style.display = "block";
-            contenedorRespuesta.innerHTML = respuestaRaw;
+            contenedorRespuesta.innerHTML     = respuestaRaw;
+            if (btnSubmit) {
+                btnSubmit.disabled  = false;
+                btnSubmit.innerHTML = origHtml;
+            }
         }
     } catch (error) {
         console.error("Error:", error);
+        contenedorRespuesta.style.display = "block";
+        contenedorRespuesta.innerHTML = '<p class="text-danger small">Error de conexión. Inténtalo de nuevo.</p>';
+        if (btnSubmit) {
+            btnSubmit.disabled  = false;
+            btnSubmit.innerHTML = origHtml;
+        }
     }
 }
 
@@ -163,8 +174,12 @@ function abrirModalExito(correo) {
         
         console.log("BOM: Modal mostrada en viewport alto " + window.innerHeight);
     } else {
-        // Alerta de respaldo si el HTML no tiene los IDs correctos
-        alert("¡Registro correcto! Revisa tu email: " + correo);
+        // Fallback si el HTML no tiene los IDs correctos
+        const contenedorRespuesta = document.getElementById("respuesta");
+        if (contenedorRespuesta) {
+            contenedorRespuesta.style.display = "block";
+            contenedorRespuesta.innerHTML = `<p class="text-success">¡Registro correcto! Revisa tu email: ${correo}</p>`;
+        }
     }
 }
 
@@ -209,3 +224,82 @@ function clearError() {
     document.querySelectorAll('.invalid-feedback').forEach(e => e.remove());
     document.querySelectorAll('.is-invalid').forEach(i => i.classList.remove('is-invalid'));
 }
+
+
+/* ============================================================
+   TOGGLE VISIBILIDAD DE CONTRASEÑA
+============================================================ */
+
+function setupPasswordToggle(btnId, inputId, iconId) {
+    const btn   = document.getElementById(btnId);
+    const input = document.getElementById(inputId);
+    const icon  = document.getElementById(iconId);
+    if (!btn || !input) return;
+    btn.addEventListener('click', () => {
+        const visible = input.type === 'text';
+        input.type    = visible ? 'password' : 'text';
+        icon.className = visible ? 'bi bi-eye' : 'bi bi-eye-slash';
+        btn.setAttribute('aria-label', visible ? 'Mostrar contraseña' : 'Ocultar contraseña');
+    });
+}
+
+setupPasswordToggle('toggle-pass',    'password',    'icon-pass');
+setupPasswordToggle('toggle-confirm', 'confirmPass', 'icon-confirm');
+
+
+/* ============================================================
+   INDICADOR DE FUERZA DE CONTRASEÑA
+============================================================ */
+
+function calcularFuerza(pwd) {
+    let score = 0;
+    if (pwd.length >= 8)                    score++;
+    if (pwd.length >= 12)                   score++;
+    if (/[A-Z]/.test(pwd))                  score++;
+    if (/[0-9]/.test(pwd))                  score++;
+    if (/[^A-Za-z0-9]/.test(pwd))          score++;
+    return score; // 0-5
+}
+
+pass1.addEventListener('input', () => {
+    const pwd   = pass1.value;
+    const wrap  = document.getElementById('strength-wrap');
+    const bar   = document.getElementById('strength-bar');
+    const label = document.getElementById('strength-label');
+
+    if (!pwd) { wrap.style.display = 'none'; return; }
+    wrap.style.display = 'block';
+
+    const score = calcularFuerza(pwd);
+    const niveles = [
+        { pct: 20,  cls: 'bg-danger',  txt: 'Muy débil'  },
+        { pct: 40,  cls: 'bg-danger',  txt: 'Débil'      },
+        { pct: 60,  cls: 'bg-warning', txt: 'Regular'    },
+        { pct: 80,  cls: 'bg-info',    txt: 'Buena'      },
+        { pct: 100, cls: 'bg-success', txt: 'Muy fuerte' },
+    ];
+    const nivel = niveles[Math.min(score, 4)];
+    bar.style.width = nivel.pct + '%';
+    bar.className   = 'progress-bar ' + nivel.cls;
+    label.textContent = nivel.txt;
+    label.className   = 'small text-muted';
+});
+
+
+/* ============================================================
+   VALIDACIÓN EN TIEMPO REAL DE CONFIRMACIÓN
+============================================================ */
+
+pass2.addEventListener('input', () => {
+    const feedback = document.getElementById('confirm-feedback');
+    if (!feedback) return;
+    if (!pass2.value) { feedback.style.display = 'none'; return; }
+    feedback.style.display = 'block';
+    if (pass1.value === pass2.value) {
+        feedback.textContent  = '✓ Las contraseñas coinciden';
+        feedback.className    = 'small mt-1 text-success';
+    } else {
+        feedback.textContent  = '✗ Las contraseñas no coinciden';
+        feedback.className    = 'small mt-1 text-danger';
+    }
+});

@@ -285,9 +285,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Click: seguir o dejar de seguir
     btnFollow.addEventListener("click", () => {
-
         const seguidor = btnFollow.dataset.seguidor;
         const seguido  = btnFollow.dataset.seguido;
+
+        const origHtml   = btnFollow.innerHTML;
+        btnFollow.disabled  = true;
+        btnFollow.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
 
         const url = sigue
             ? "<?=$BASE?>/controllers/unfollow.php"
@@ -300,21 +303,24 @@ document.addEventListener("DOMContentLoaded", () => {
         })
         .then(res => res.json())
         .then(data => {
-
             if (!data.success) {
-                console.error("Error:", data);
-                alert("Error al actualizar seguimiento");
+                btnFollow.innerHTML = origHtml;
+                if (typeof mostrarToast === 'function')
+                    mostrarToast("Error al actualizar el seguimiento.", "error");
                 return;
             }
-
             sigue = !sigue;
             btnFollow.dataset.sigue = sigue ? "1" : "0";
-
             actualizarBoton();
+            if (typeof mostrarToast === 'function')
+                mostrarToast(sigue ? "Ahora sigues a este usuario." : "Has dejado de seguir a este usuario.", "success");
         })
-        .catch(err => {
-            console.error("Fetch error:", err);
-        });
+        .catch(() => {
+            btnFollow.innerHTML = origHtml;
+            if (typeof mostrarToast === 'function')
+                mostrarToast("Error de conexión. Inténtalo de nuevo.", "error");
+        })
+        .finally(() => { btnFollow.disabled = false; });
     });
 
     /* ============================================================

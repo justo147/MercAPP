@@ -163,7 +163,8 @@ async function cargarDeseos() {
     cont.innerHTML = `
       <div class="text-center py-5 text-muted">
         <i class="bi bi-stars fs-1 d-block mb-3 opacity-25"></i>
-        <p>Todavía no tienes deseos. ¡Añade uno arriba!</p>
+        <p class="fw-semibold mb-1">Tu lista de deseos está vacía.</p>
+        <p class="small mb-0">Describe lo que buscas en el formulario de arriba y te avisaremos cuando alguien lo publique.</p>
       </div>`;
     return;
   }
@@ -205,7 +206,7 @@ async function cargarDeseos() {
                 <i class="bi bi-search me-1"></i>${d.coincidencias} coincidencia${d.coincidencias > 1 ? 's' : ''}
               </button>` : `
               <span class="small text-muted">Sin resultados aún</span>`}
-            <button class="btn btn-sm btn-outline-danger btn-del" data-id="${d.id}" title="Eliminar">
+            <button class="btn btn-sm btn-outline-danger btn-del" data-id="${d.id}" aria-label="Eliminar deseo">
               <i class="bi bi-trash"></i>
             </button>
           </div>
@@ -267,12 +268,16 @@ async function toggleMatches(btn) {
 
 /* ── eliminar deseo ─────────────────────────────────────────── */
 async function eliminarDeseo(id) {
-  if (!confirm('¿Eliminar este deseo?')) return;
   const fd = new FormData();
   fd.append('accion', 'delete');
   fd.append('id', id);
-  await fetch(`${BASE}/api/deseos.php`, { method: 'POST', body: fd });
-  cargarDeseos();
+  try {
+    await fetch(`${BASE}/api/deseos.php`, { method: 'POST', body: fd });
+    mostrarToast('Deseo eliminado.', 'info');
+    cargarDeseos();
+  } catch {
+    mostrarToast('No se pudo eliminar. Inténtalo de nuevo.', 'error');
+  }
 }
 
 /* ── añadir deseo ───────────────────────────────────────────── */
@@ -294,34 +299,24 @@ document.getElementById('form-deseo').addEventListener('submit', async e => {
     const json = await res.json();
 
     if (!json.ok) {
-      resultEl.innerHTML = `<div class="alert alert-danger">${esc(json.error ?? 'Error al guardar')}</div>`;
+      mostrarToast(json.error ?? 'Error al guardar el deseo.', 'error');
       return;
     }
 
     // Reset formulario
     e.target.reset();
+    resultEl.innerHTML = '';
 
-    // Mostrar resultado inmediato
+    // Feedback via toast
     if (json.coincidencias > 0) {
-      resultEl.innerHTML = `
-        <div class="alert alert-success d-flex align-items-center gap-2">
-          <i class="bi bi-check-circle-fill fs-5"></i>
-          <div>
-            Deseo añadido. <strong>¡Hay ${json.coincidencias} producto(s) en el catálogo que ya coinciden!</strong>
-            Puedes verlos en tu lista.
-          </div>
-        </div>`;
+      mostrarToast(`¡Deseo añadido! Hay ${json.coincidencias} producto(s) en el catálogo que ya coinciden.`, 'success');
     } else {
-      resultEl.innerHTML = `
-        <div class="alert alert-info d-flex align-items-center gap-2">
-          <i class="bi bi-bell fs-5"></i>
-          <div>Deseo añadido. Te avisaremos cuando aparezca algo que encaje.</div>
-        </div>`;
+      mostrarToast('Deseo añadido. Te avisaremos cuando aparezca algo que encaje.', 'info');
     }
 
     cargarDeseos();
   } catch {
-    resultEl.innerHTML = '<div class="alert alert-danger">Error de conexión.</div>';
+    mostrarToast('Error de conexión. Inténtalo de nuevo.', 'error');
   } finally {
     btn.disabled  = false;
     btn.innerHTML = '<i class="bi bi-plus-lg me-1"></i>Añadir deseo';

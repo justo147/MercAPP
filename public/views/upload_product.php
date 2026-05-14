@@ -47,31 +47,38 @@ require_once __DIR__ . '/../../controllers/handlers/upload_product_handler.php';
 
                     <div class="card-body">
 
-                        <!-- Mensajes -->
                         <?php if (!empty($success)): ?>
-                            <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
+                            <script>document.addEventListener('DOMContentLoaded', () => mostrarToast('<?= htmlspecialchars($success, ENT_QUOTES) ?>', 'success'));</script>
                         <?php endif; ?>
-
                         <?php if (!empty($error)): ?>
-                            <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+                            <script>document.addEventListener('DOMContentLoaded', () => mostrarToast('<?= htmlspecialchars($error, ENT_QUOTES) ?>', 'error'));</script>
                         <?php endif; ?>
 
                         <!-- Formulario -->
-                        <form method="POST" enctype="multipart/form-data">
+                        <form method="POST" enctype="multipart/form-data" data-unsaved-warning novalidate>
 
                             <div class="mb-3">
                                 <label for="titulo" class="form-label">Título del producto</label>
-                                <input type="text" id="titulo" name="titulo" class="form-control" required>
+                                <input type="text" id="titulo" name="titulo" class="form-control" required
+                                       maxlength="100" data-counter="titulo-counter">
+                                <div class="d-flex justify-content-between mt-1">
+                                    <div class="invalid-feedback">El título es obligatorio.</div>
+                                    <small class="text-muted ms-auto" id="titulo-counter">0 / 100</small>
+                                </div>
                             </div>
 
                             <div class="mb-3">
                                 <label for="descripcion" class="form-label">Descripción</label>
-                                <textarea id="descripcion" name="descripcion" class="form-control" rows="4"></textarea>
+                                <textarea id="descripcion" name="descripcion" class="form-control" rows="4"
+                                          maxlength="2000" data-counter="desc-counter"></textarea>
+                                <div class="d-flex justify-content-end mt-1">
+                                    <small class="text-muted" id="desc-counter">0 / 2000</small>
+                                </div>
                             </div>
 
                             <div class="mb-3">
                                 <label for="precio" class="form-label">Precio (€)</label>
-                                <input type="number" id="precio" step="0.01" name="precio" class="form-control">
+                                <input type="number" id="precio" step="0.01" min="0" name="precio" class="form-control">
                             </div>
 
                             <div class="mb-3">
@@ -134,7 +141,10 @@ require_once __DIR__ . '/../../controllers/handlers/upload_product_handler.php';
                             </div>
 
                             <div class="d-grid">
-                                <button type="submit" class="btn btn-success">Publicar producto</button>
+                                <button type="submit" class="btn btn-success"
+                                        data-loading-text="Publicando…">
+                                    <i class="bi bi-upload me-1"></i> Publicar producto
+                                </button>
                             </div>
 
                         </form>
@@ -153,6 +163,82 @@ require_once __DIR__ . '/../../controllers/handlers/upload_product_handler.php';
     document.addEventListener('DOMContentLoaded', () => {
         if (typeof initAddressAutocomplete === 'function') {
             initAddressAutocomplete('ubicacion', '<?= $BASE ?>/api/normalize_address.php', 'lat', 'lon');
+        }
+
+        // Contadores de caracteres
+        document.querySelectorAll('[data-counter]').forEach(input => {
+            const counterId = input.dataset.counter;
+            const counter   = document.getElementById(counterId);
+            if (!counter) return;
+            const max = input.maxLength || 0;
+            const update = () => {
+                const len = input.value.length;
+                counter.textContent = `${len} / ${max}`;
+                counter.classList.toggle('text-danger', max > 0 && len >= max * 0.9);
+            };
+            input.addEventListener('input', update);
+            update();
+        });
+
+        // Validación cliente con Bootstrap
+        const form = document.querySelector('form[novalidate]');
+        if (form) {
+            form.addEventListener('submit', e => {
+                if (!form.checkValidity()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    mostrarToast('Por favor, completa los campos obligatorios.', 'warning');
+                } else {
+                    localStorage.removeItem('draft_upload');
+                }
+                form.classList.add('was-validated');
+            }, true);
+        }
+
+        // ── Autoguardado de borrador ──────────────────────────
+        const DRAFT_KEY = 'draft_upload';
+        const CAMPOS = ['titulo', 'descripcion', 'precio', 'categoria_id',
+                        'estado_producto_id', 'tipo_transaccion', 'ubicacion'];
+
+        function guardarBorrador() {
+            const draft = {};
+            CAMPOS.forEach(name => {
+                const el = form?.querySelector(`[name="${name}"]`);
+                if (el) draft[name] = el.value;
+            });
+            localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+        }
+
+        function restaurarBorrador() {
+            const raw = localStorage.getItem(DRAFT_KEY);
+            if (!raw) return;
+            try {
+                const draft = JSON.parse(raw);
+                const tieneDatos = Object.values(draft).some(v => v && v.trim());
+                if (!tieneDatos) return;
+
+                CAMPOS.forEach(name => {
+                    const el = form?.querySelector(`[name="${name}"]`);
+                    if (el && draft[name]) el.value = draft[name];
+                });
+
+                // Actualizar contadores
+                form?.querySelectorAll('[data-counter]').forEach(input => input.dispatchEvent(new Event('input')));
+
+                mostrarToast('Se ha restaurado un borrador guardado anteriormente.', 'info');
+            } catch { localStorage.removeItem(DRAFT_KEY); }
+        }
+
+        if (form) {
+            // Restaurar al cargar (solo si el form está vacío)
+            const tituloEl = form.querySelector('[name="titulo"]');
+            if (tituloEl && !tituloEl.value) restaurarBorrador();
+
+            // Guardar cada 5 segundos si hay cambios
+            let dirtyDraft = false;
+            form.addEventListener('input',  () => { dirtyDraft = true; });
+            form.addEventListener('change', () => { dirtyDraft = true; });
+            setInterval(() => { if (dirtyDraft) { guardarBorrador(); dirtyDraft = false; } }, 5000);
         }
     });
     </script>

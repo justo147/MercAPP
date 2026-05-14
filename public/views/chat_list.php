@@ -46,14 +46,22 @@ $badgeEstado = [
 
     <div class="container py-4" style="max-width: 720px;">
 
-        <div class="d-flex align-items-center justify-content-between mb-3">
+        <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
             <h4 class="fw-bold mb-0">
                 <i class="bi bi-chat-dots me-2 text-primary"></i>Mis chats
             </h4>
             <?php $totalNoLeidos = array_sum(array_column($chats, 'no_leidos')); ?>
-            <?php if ($totalNoLeidos > 0): ?>
-                <span class="badge bg-danger rounded-pill"><?= $totalNoLeidos ?> sin leer</span>
-            <?php endif; ?>
+            <div class="d-flex align-items-center gap-2">
+                <?php if ($totalNoLeidos > 0): ?>
+                    <span class="badge bg-danger rounded-pill" id="badge-total-noLeidos">
+                        <?= $totalNoLeidos ?> sin leer
+                    </span>
+                    <button class="btn btn-sm btn-outline-secondary" id="btn-marcar-leidos"
+                            title="Marcar todos como leídos" aria-label="Marcar todos los chats como leídos">
+                        <i class="bi bi-envelope-open me-1"></i>Marcar todo como leído
+                    </button>
+                <?php endif; ?>
+            </div>
         </div>
 
         <!-- Filtros -->
@@ -180,6 +188,45 @@ $badgeEstado = [
     <footer>
         <?php include __DIR__ . '/footer.php'; ?>
     </footer>
+
+<script>
+document.getElementById('btn-marcar-leidos')?.addEventListener('click', function () {
+    const btn = this;
+    const origHtml = btn.innerHTML;
+    btn.disabled  = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Marcando…';
+
+    fetch(`${BASE}/api/chat_mark_all_read.php`, { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+            if (data.ok) {
+                // Quitar borders de no-leído y badges en la lista
+                document.querySelectorAll('.border-start.border-primary').forEach(el => {
+                    el.classList.remove('border-start', 'border-primary', 'border-3');
+                });
+                document.querySelectorAll('.badge.bg-danger.rounded-pill').forEach(el => el.remove());
+                document.getElementById('badge-total-noLeidos')?.remove();
+                btn.remove();
+                if (typeof mostrarToast === 'function')
+                    mostrarToast('Todos los chats marcados como leídos.', 'success');
+                // Actualizar badge del navbar
+                const badgeMensajes = document.getElementById('badge-mensajes');
+                if (badgeMensajes) badgeMensajes.style.display = 'none';
+            } else {
+                btn.disabled  = false;
+                btn.innerHTML = origHtml;
+                if (typeof mostrarToast === 'function')
+                    mostrarToast('No se pudo completar la acción.', 'error');
+            }
+        })
+        .catch(() => {
+            btn.disabled  = false;
+            btn.innerHTML = origHtml;
+            if (typeof mostrarToast === 'function')
+                mostrarToast('Error de conexión.', 'error');
+        });
+});
+</script>
 
 </body>
 </html>

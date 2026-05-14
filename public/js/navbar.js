@@ -86,21 +86,45 @@ function mostrarToast(mensaje, tipo = "info") {
         document.body.appendChild(contenedor);
     }
 
-    const colores = { mensaje:"primary", valoracion:"warning", coincidencia:"success", moderacion:"danger" };
-    const color   = colores[tipo] ?? "secondary";
+    // Notificaciones del sistema → color específico
+    // Tipos genéricos de UX → color semántico
+    const colores = {
+        mensaje:      "primary",
+        valoracion:   "warning",
+        coincidencia: "success",
+        moderacion:   "danger",
+        success:      "success",
+        error:        "danger",
+        warning:      "warning",
+        info:         "primary",
+    };
+    const iconos = {
+        success:  "bi-check-circle-fill",
+        error:    "bi-exclamation-triangle-fill",
+        warning:  "bi-exclamation-circle-fill",
+        info:     "bi-info-circle-fill",
+        mensaje:  "bi-envelope-fill",
+        valoracion: "bi-star-fill",
+        coincidencia: "bi-stars",
+        moderacion: "bi-shield-exclamation",
+    };
+    const delay = { error: 8000, warning: 6000 };
+    const color = colores[tipo] ?? "secondary";
+    const icon  = iconos[tipo] ? `<i class="bi ${iconos[tipo]} me-2 flex-shrink-0"></i>` : '';
 
     const div = document.createElement("div");
     div.className = `toast align-items-center text-bg-${color} border-0`;
-    div.setAttribute("role", "alert");
+    div.setAttribute("role", tipo === "error" ? "alert" : "status");
+    div.setAttribute("aria-live", tipo === "error" ? "assertive" : "polite");
     div.innerHTML = `
         <div class="d-flex">
-            <div class="toast-body small">${mensaje}</div>
+            <div class="toast-body small d-flex align-items-center">${icon}${mensaje}</div>
             <button type="button" class="btn-close btn-close-white me-2 m-auto"
-                    data-bs-dismiss="toast"></button>
+                    data-bs-dismiss="toast" aria-label="Cerrar"></button>
         </div>`;
     contenedor.appendChild(div);
 
-    const t = new bootstrap.Toast(div, { delay: 5000 });
+    const t = new bootstrap.Toast(div, { delay: delay[tipo] ?? 5000 });
     t.show();
     div.addEventListener("hidden.bs.toast", () => div.remove());
 }

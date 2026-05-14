@@ -117,7 +117,10 @@ async function cargarEstadisticas() {
 
 function setText(id, value) {
     const el = document.getElementById(id);
-    if (el) el.textContent = value ?? "0";
+    if (!el) return;
+    el.textContent = value ?? "0";
+    el.classList.remove("placeholder-glow");
+    el.querySelectorAll(".placeholder").forEach(p => p.remove());
 }
 
 // ── USUARIOS ─────────────────────────────────────────────────
@@ -199,43 +202,60 @@ function crearFilaUsuario(u) {
     return tr;
 }
 
-window.cambiarEstadoUsuario = async function (id, nuevoEstado) {
-    if (!confirm(`¿Marcar usuario #${id} como "${nuevoEstado}"?`)) return;
-    try {
-        const res  = await fetch(`${BASE}/api/admin_update_status.php`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id, estado: nuevoEstado })
-        });
-        const json = await res.json();
-        if (json.success) {
-            cargarUsuarios();
-            cargarEstadisticas();
-        } else {
-            alert("Error: " + json.error);
+window.cambiarEstadoUsuario = function (id, nuevoEstado) {
+    const etiquetas = { activo: "activar", suspendido: "suspender", eliminado: "eliminar" };
+    adminConfirm({
+        titulo:   `¿${etiquetas[nuevoEstado] ?? nuevoEstado} usuario #${id}?`,
+        mensaje:  `El usuario pasará al estado "${nuevoEstado}".`,
+        btnTexto: "Confirmar",
+        btnClass: nuevoEstado === "eliminado" ? "btn-danger" : nuevoEstado === "suspendido" ? "btn-warning" : "btn-success",
+        onConfirm: async () => {
+            try {
+                const res  = await fetch(`${BASE}/api/admin_update_status.php`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id, estado: nuevoEstado })
+                });
+                const json = await res.json();
+                if (json.success) {
+                    cargarUsuarios();
+                    cargarEstadisticas();
+                    adminToast(`Usuario #${id} marcado como ${nuevoEstado}.`, "success");
+                } else {
+                    adminToast("Error: " + json.error);
+                }
+            } catch {
+                adminToast("Error de conexión.");
+            }
         }
-    } catch (err) {
-        alert("Error de conexión.");
-    }
+    });
 };
 
-window.cambiarRol = async function (id, nuevoRol) {
-    if (!confirm(`¿Hacer administrador al usuario #${id}? Esta acción es reversible desde la base de datos.`)) return;
-    try {
-        const res  = await fetch(`${BASE}/api/admin_change_role.php`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id, rol: nuevoRol })
-        });
-        const json = await res.json();
-        if (json.success) {
-            cargarUsuarios();
-        } else {
-            alert("Error: " + json.error);
+window.cambiarRol = function (id, nuevoRol) {
+    adminConfirm({
+        titulo:   `¿Hacer administrador al usuario #${id}?`,
+        mensaje:  "Esta acción es reversible desde la base de datos.",
+        btnTexto: "Hacer admin",
+        btnClass: "btn-primary",
+        onConfirm: async () => {
+            try {
+                const res  = await fetch(`${BASE}/api/admin_change_role.php`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id, rol: nuevoRol })
+                });
+                const json = await res.json();
+                if (json.success) {
+                    cargarUsuarios();
+                    adminToast(`Usuario #${id} es ahora administrador.`, "success");
+                } else {
+                    adminToast("Error: " + json.error);
+                }
+            } catch {
+                adminToast("Error de conexión.");
+            }
         }
-    } catch (err) {
-        alert("Error de conexión.");
-    }
+    });
 };
 
 // ── PRODUCTOS ─────────────────────────────────────────────────
@@ -320,25 +340,36 @@ function crearFilaProducto(p) {
     return tr;
 }
 
-window.accionProducto = async function (id, action) {
-    const msgs = { activar: "¿Activar este producto?", pausar: "¿Pausar este producto?", eliminar: `¿Eliminar permanentemente el producto #${id}? Esta acción no se puede deshacer.` };
-    if (!confirm(msgs[action])) return;
-    try {
-        const res  = await fetch(`${BASE}/api/admin_update_product.php`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id, action })
-        });
-        const json = await res.json();
-        if (json.success) {
-            cargarProductos();
-            cargarEstadisticas();
-        } else {
-            alert("Error: " + json.error);
+window.accionProducto = function (id, action) {
+    const config = {
+        activar:  { titulo: "¿Activar producto?",  mensaje: `El producto #${id} volverá a ser visible.`,             btnTexto: "Activar",  btnClass: "btn-success" },
+        pausar:   { titulo: "¿Pausar producto?",   mensaje: `El producto #${id} dejará de ser visible temporalmente.`,btnTexto: "Pausar",   btnClass: "btn-warning" },
+        eliminar: { titulo: "¿Eliminar producto?", mensaje: `El producto #${id} se eliminará de forma permanente.`,   btnTexto: "Eliminar", btnClass: "btn-danger"  },
+    };
+    const cfg = config[action] || { titulo: "¿Confirmar?", mensaje: "", btnTexto: "Confirmar", btnClass: "btn-primary" };
+
+    adminConfirm({
+        ...cfg,
+        onConfirm: async () => {
+            try {
+                const res  = await fetch(`${BASE}/api/admin_update_product.php`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id, action })
+                });
+                const json = await res.json();
+                if (json.success) {
+                    cargarProductos();
+                    cargarEstadisticas();
+                    adminToast(`Producto #${id}: acción "${action}" completada.`, "success");
+                } else {
+                    adminToast("Error: " + json.error);
+                }
+            } catch {
+                adminToast("Error de conexión.");
+            }
         }
-    } catch (err) {
-        alert("Error de conexión.");
-    }
+    });
 };
 
 // ── REPORTES ──────────────────────────────────────────────────
@@ -425,25 +456,36 @@ function crearFilaReporte(r) {
     return tr;
 }
 
-window.resolverReporte = async function (id, estado) {
-    const msgs = { revisado: "¿Marcar este reporte como revisado?", rechazado: "¿Rechazar este reporte?", pendiente: "¿Reabrir este reporte como pendiente?" };
-    if (!confirm(msgs[estado])) return;
-    try {
-        const res  = await fetch(`${BASE}/api/admin_update_report.php`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id, estado })
-        });
-        const json = await res.json();
-        if (json.success) {
-            cargarReportes();
-            cargarEstadisticas();
-        } else {
-            alert("Error: " + json.error);
+window.resolverReporte = function (id, estado) {
+    const config = {
+        revisado:  { titulo: "¿Marcar como revisado?", mensaje: "El reporte quedará marcado como revisado.",  btnTexto: "Marcar revisado", btnClass: "btn-primary"   },
+        rechazado: { titulo: "¿Rechazar reporte?",     mensaje: "El reporte quedará descartado.",            btnTexto: "Rechazar",        btnClass: "btn-secondary" },
+        pendiente: { titulo: "¿Reabrir reporte?",      mensaje: "El reporte volverá al estado pendiente.",   btnTexto: "Reabrir",         btnClass: "btn-warning"   },
+    };
+    const cfg = config[estado] || { titulo: "¿Confirmar?", mensaje: "", btnTexto: "Confirmar", btnClass: "btn-primary" };
+
+    adminConfirm({
+        ...cfg,
+        onConfirm: async () => {
+            try {
+                const res  = await fetch(`${BASE}/api/admin_update_report.php`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id, estado })
+                });
+                const json = await res.json();
+                if (json.success) {
+                    cargarReportes();
+                    cargarEstadisticas();
+                    adminToast(`Reporte #${id} actualizado.`, "success");
+                } else {
+                    adminToast("Error: " + json.error);
+                }
+            } catch {
+                adminToast("Error de conexión.");
+            }
         }
-    } catch (err) {
-        alert("Error de conexión.");
-    }
+    });
 };
 
 // ── PAGINACIÓN ────────────────────────────────────────────────
@@ -497,6 +539,51 @@ window.irPagina = function (page, seccion) {
         cargarReportes();
     }
 };
+
+// ── Modal de confirmación (reemplaza confirm() nativo) ────────
+function adminConfirm({ titulo, mensaje, btnTexto = "Confirmar", btnClass = "btn-danger", onConfirm }) {
+    const existente = document.getElementById("admin-confirm-modal");
+    if (existente) existente.remove();
+
+    const div = document.createElement("div");
+    div.id        = "admin-confirm-modal";
+    div.className = "modal fade";
+    div.setAttribute("tabindex", "-1");
+    div.setAttribute("aria-modal", "true");
+    div.setAttribute("role", "dialog");
+    div.innerHTML = `
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h6 class="modal-title fw-bold">${esc(titulo)}</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body pt-1">${esc(mensaje)}</div>
+                <div class="modal-footer border-0 pt-0 gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-sm ${btnClass}" id="admin-confirm-ok">${esc(btnTexto)}</button>
+                </div>
+            </div>
+        </div>`;
+    document.body.appendChild(div);
+
+    const modal = new bootstrap.Modal(div);
+    modal.show();
+
+    div.querySelector("#admin-confirm-ok").addEventListener("click", () => {
+        modal.hide();
+        onConfirm();
+    });
+    div.addEventListener("hidden.bs.modal", () => div.remove());
+}
+
+function adminToast(msg, tipo = "error") {
+    if (typeof mostrarToast === "function") {
+        mostrarToast(msg, tipo);
+    } else {
+        console.error(msg);
+    }
+}
 
 // ── Utilidades ────────────────────────────────────────────────
 function esc(str) {

@@ -174,27 +174,30 @@ async function cargarFiltros() {
  * @async
  * @returns {Promise<void>}
  */
+/** Total acumulado de productos mostrados (para el contador) */
+let totalResultados = 0;
+
 async function loadMoreProducts() {
     if (loading || noMore) return;
 
     loading = true;
 
-    let skeletonTimeout = null;
     const isFirstLoad = offset === 0;
+    let skeletonTimeout = null;
 
     if (isFirstLoad) {
-        skeletonTimeout = setTimeout(() => {
-            showSkeleton();
-        }, 150);
+        skeletonTimeout = setTimeout(() => showSkeleton(), 150);
+        totalResultados = 0;
+        document.getElementById("empty-state").style.display = "none";
+        document.getElementById("error").style.display        = "none";
+    } else {
+        document.getElementById("scroll-spinner").style.display = "block";
     }
 
     try {
         let endpoint = `${BASE}/api/getProductsPaginated.php`;
 
-        const params = new URLSearchParams({
-            limit,
-            offset
-        });
+        const params = new URLSearchParams({ limit, offset });
 
         const usingFilters =
             searchQuery ||
@@ -206,32 +209,41 @@ async function loadMoreProducts() {
 
         if (usingFilters) {
             endpoint = `${BASE}/api/search_products.php`;
-
-            params.set("q", searchQuery);
-            params.set("categoria", searchCategoria);
-            params.set("estado_producto", searchEstado);
+            params.set("q",                searchQuery);
+            params.set("categoria",        searchCategoria);
+            params.set("estado_producto",  searchEstado);
             params.set("tipo_transaccion", searchTransaccion);
-            params.set("orden", searchOrden);
+            params.set("orden",            searchOrden);
 
             if (searchLat && searchLon && searchOrden === "distancia") {
-                params.set("lat", searchLat);
-                params.set("lon", searchLon);
+                params.set("lat",          searchLat);
+                params.set("lon",          searchLon);
                 params.set("distancia_km", searchDistancia);
             }
         }
 
         const res = await fetch(`${endpoint}?${params.toString()}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
 
         if (!json.success) throw new Error("Error en API");
 
         const products = json.data;
-
         renderProducts(products);
+        totalResultados += products.length;
+
+        // Actualizar contador
+        actualizarContador(json.total ?? null);
 
         if (products.length < limit) {
             noMore = true;
             observer.disconnect();
+        }
+
+        // Empty state: primera carga sin resultados
+        if (isFirstLoad && products.length === 0) {
+            document.getElementById("empty-state").style.display = "block";
+            actualizarContador(0);
         }
 
         offset += limit;
@@ -242,9 +254,23 @@ async function loadMoreProducts() {
 
     } finally {
         loading = false;
-
+        document.getElementById("scroll-spinner").style.display = "none";
         if (skeletonTimeout) clearTimeout(skeletonTimeout);
         if (isFirstLoad) hideSkeleton();
+    }
+}
+
+function actualizarContador(total) {
+    const el = document.getElementById("resultado-contador");
+    if (!el) return;
+    if (total === null || total === undefined) {
+        el.textContent = totalResultados > 0 ? `${totalResultados} productos` : "";
+    } else {
+        el.textContent = total === 0
+            ? "Sin resultados"
+            : total === 1
+                ? "1 producto encontrado"
+                : `${total} productos encontrados`;
     }
 }
 
@@ -324,14 +350,78 @@ function syncURL() {
  * Reinicia los parámetros de búsqueda y vuelve a cargar los productos desde cero.
  */
 function resetAndSearch() {
-    offset = 0;
-    noMore = false;
+    offset      = 0;
+    noMore      = false;
+    totalResultados = 0;
 
     document.getElementById("product-list").innerHTML = "";
+    document.getElementById("empty-state").style.display = "none";
+    document.getElementById("error").style.display = "none";
     observer.observe(sentinel);
 
+    actualizarChips();
     syncURL();
     loadMoreProducts();
+}
+
+/* Etiquetas legibles para los selects de filtro */
+function labelFiltro(selectId, value) {
+    if (!value) return null;
+    const sel = document.getElementById(selectId);
+    if (!sel) return value;
+    const opt = sel.querySelector(`option[value="${CSS.escape(value)}"]`);
+    return opt ? opt.textContent.trim() : value;
+}
+
+function actualizarChips() {
+    const wrap = document.getElementById("filtros-activos");
+    if (!wrap) return;
+
+    const chips = [];
+
+    if (searchQuery)
+        chips.push({ label: `Búsqueda: "${searchQuery}"`, clear: () => { searchQuery = ""; const n = document.getElementById("navbar-search"); if (n) n.value = ""; } });
+    if (searchCategoria)
+        chips.push({ label: labelFiltro("filtro-categoria", searchCategoria), clear: () => { searchCategoria = ""; document.getElementById("filtro-categoria").value = ""; } });
+    if (searchEstado)
+        chips.push({ label: labelFiltro("filtro-estado", searchEstado), clear: () => { searchEstado = ""; document.getElementById("filtro-estado").value = ""; } });
+    if (searchTransaccion)
+        chips.push({ label: labelFiltro("filtro-transaccion", searchTransaccion), clear: () => { searchTransaccion = ""; document.getElementById("filtro-transaccion").value = ""; } });
+    if (searchOrden && searchOrden !== "fecha_desc")
+        chips.push({ label: labelFiltro("filtro-orden", searchOrden), clear: () => { searchOrden = "fecha_desc"; document.getElementById("filtro-orden").value = "fecha_desc"; } });
+
+    if (chips.length === 0) {
+        wrap.style.display = "none";
+        wrap.innerHTML = "";
+        return;
+    }
+
+    wrap.style.display = "flex";
+    wrap.innerHTML = chips.map((c, i) =>
+        `<button class="btn btn-sm btn-primary rounded-pill py-0 px-2 chip-filtro" data-idx="${i}" style="font-size:.8rem;">
+            ${c.label} <i class="bi bi-x ms-1"></i>
+        </button>`
+    ).join("") +
+    `<button class="btn btn-sm btn-outline-secondary rounded-pill py-0 px-2" id="btn-limpiar-todos" style="font-size:.8rem;">
+        Limpiar todos
+    </button>`;
+
+    wrap.querySelectorAll(".chip-filtro").forEach(btn => {
+        btn.addEventListener("click", () => {
+            chips[parseInt(btn.dataset.idx)].clear();
+            resetAndSearch();
+        });
+    });
+    wrap.querySelector("#btn-limpiar-todos")?.addEventListener("click", () => {
+        searchQuery = ""; searchCategoria = ""; searchEstado = "";
+        searchTransaccion = ""; searchOrden = "fecha_desc";
+        ["filtro-categoria","filtro-estado","filtro-transaccion"].forEach(id => {
+            const s = document.getElementById(id); if (s) s.value = "";
+        });
+        const ord = document.getElementById("filtro-orden"); if (ord) ord.value = "fecha_desc";
+        const nav = document.getElementById("navbar-search"); if (nav) nav.value = "";
+        resetAndSearch();
+    });
 }
 
 /* ============================================================
@@ -433,8 +523,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     document.getElementById("btn-geolocalizar")?.addEventListener("click", () => {
         if (!navigator.geolocation) {
-            alert("Tu navegador no soporta geolocalización.");
+            if (typeof mostrarToast === 'function')
+                mostrarToast("Tu navegador no soporta geolocalización.", "warning");
             return;
+        }
+        const btnGeo = document.getElementById("btn-geolocalizar");
+        if (btnGeo) {
+            btnGeo.disabled  = true;
+            btnGeo.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Detectando…';
         }
         navigator.geolocation.getCurrentPosition(
             pos => {
@@ -442,12 +538,42 @@ document.addEventListener("DOMContentLoaded", async () => {
                 searchLon = pos.coords.longitude;
                 const label = document.getElementById("proximidad-coords-label");
                 if (label) label.textContent = `Lat ${searchLat.toFixed(4)}, Lon ${searchLon.toFixed(4)}`;
+                if (btnGeo) {
+                    btnGeo.disabled  = false;
+                    btnGeo.innerHTML = '<i class="bi bi-crosshair"></i> Ubicación detectada';
+                }
                 resetAndSearch();
             },
-            () => alert("No se pudo obtener tu ubicación. Asegúrate de dar permiso al navegador.")
+            () => {
+                if (btnGeo) {
+                    btnGeo.disabled  = false;
+                    btnGeo.innerHTML = '<i class="bi bi-crosshair"></i> Usar mi ubicación';
+                }
+                if (typeof mostrarToast === 'function')
+                    mostrarToast("No se pudo obtener tu ubicación. Comprueba los permisos del navegador.", "error");
+            }
         );
     });
 
+    // Botón "Limpiar filtros" del empty state
+    document.getElementById("btn-limpiar-filtros")?.addEventListener("click", () => {
+        searchQuery = ""; searchCategoria = ""; searchEstado = "";
+        searchTransaccion = ""; searchOrden = "fecha_desc";
+        const selCat   = document.getElementById("filtro-categoria");   if (selCat)   selCat.value   = "";
+        const selEst   = document.getElementById("filtro-estado");      if (selEst)   selEst.value   = "";
+        const selTipo  = document.getElementById("filtro-transaccion"); if (selTipo)  selTipo.value  = "";
+        const selOrden = document.getElementById("filtro-orden");       if (selOrden) selOrden.value = "fecha_desc";
+        const navInput = document.getElementById("navbar-search");      if (navInput) navInput.value  = "";
+        resetAndSearch();
+    });
+
+    // Botón retry del error state
+    document.getElementById("btn-retry")?.addEventListener("click", () => {
+        document.getElementById("error").style.display = "none";
+        loadMoreProducts();
+    });
+
+    actualizarChips();
     loadMoreProducts();
 });
 

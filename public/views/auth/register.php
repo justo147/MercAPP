@@ -67,17 +67,35 @@ require_once __DIR__ . '/../../../controllers/handlers/register_handlers.php';
         </div>
 
         <!-- Campo Contraseña -->
-        <div class="mb-3 sinFondo">
+        <div class="mb-1 sinFondo">
           <label for="password" class="form-label">Contraseña</label>
-          <input type="password" class="form-control border border-primary rounded" id="password" name="password"
-            required>
+          <div class="input-group">
+            <input type="password" class="form-control border border-primary rounded-start" id="password" name="password" required>
+            <button type="button" class="btn btn-outline-secondary" id="toggle-pass"
+                    aria-label="Mostrar u ocultar contraseña" tabindex="-1">
+              <i class="bi bi-eye" id="icon-pass"></i>
+            </button>
+          </div>
+          <!-- Indicador de fuerza -->
+          <div class="mt-2" id="strength-wrap" style="display:none;">
+            <div class="progress" style="height:4px;">
+              <div id="strength-bar" class="progress-bar" role="progressbar" style="width:0%;"></div>
+            </div>
+            <small id="strength-label" class="text-muted"></small>
+          </div>
         </div>
 
         <!-- Campo Confirmar Contraseña -->
-        <div class="mb-3 sinFondo">
+        <div class="mb-3 mt-3 sinFondo">
           <label for="confirmPass" class="form-label">Confirmar contraseña</label>
-          <input type="password" class="form-control border border-primary rounded" id="confirmPass" name="confirmPass"
-            required>
+          <div class="input-group">
+            <input type="password" class="form-control border border-primary rounded-start" id="confirmPass" name="confirmPass" required>
+            <button type="button" class="btn btn-outline-secondary" id="toggle-confirm"
+                    aria-label="Mostrar u ocultar confirmación" tabindex="-1">
+              <i class="bi bi-eye" id="icon-confirm"></i>
+            </button>
+          </div>
+          <div id="confirm-feedback" class="small mt-1" style="display:none;"></div>
         </div>
 
         <!-- hCaptcha — clave de prueba: siempre pasa en desarrollo -->

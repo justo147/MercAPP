@@ -72,13 +72,15 @@ if (!isset($_SESSION["user_id"]) || $_SESSION["role"] !== 'admin') {
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <p class="text-muted small mb-1">Usuarios totales</p>
-                                <div class="stat-number text-primary" id="stat-usuarios-total">—</div>
+                                <div class="stat-number text-primary placeholder-glow" id="stat-usuarios-total">
+                                    <span class="placeholder col-6 rounded"></span>
+                                </div>
                             </div>
                             <i class="bi bi-people-fill fs-2 text-primary opacity-25"></i>
                         </div>
-                        <div class="mt-2 small text-muted">
-                            <span class="text-success me-2"><i class="bi bi-check-circle"></i> <span id="stat-usuarios-activos">—</span> activos</span>
-                            <span class="text-warning"><i class="bi bi-pause-circle"></i> <span id="stat-usuarios-suspendidos">—</span> suspendidos</span>
+                        <div class="mt-2 small text-muted placeholder-glow">
+                            <span class="text-success me-2"><i class="bi bi-check-circle"></i> <span id="stat-usuarios-activos"><span class="placeholder col-3 rounded"></span></span> activos</span>
+                            <span class="text-warning"><i class="bi bi-pause-circle"></i> <span id="stat-usuarios-suspendidos"><span class="placeholder col-3 rounded"></span></span> suspendidos</span>
                         </div>
                     </div>
                 </div>
@@ -90,13 +92,15 @@ if (!isset($_SESSION["user_id"]) || $_SESSION["role"] !== 'admin') {
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <p class="text-muted small mb-1">Productos totales</p>
-                                <div class="stat-number text-success" id="stat-productos-total">—</div>
+                                <div class="stat-number text-success placeholder-glow" id="stat-productos-total">
+                                    <span class="placeholder col-6 rounded"></span>
+                                </div>
                             </div>
                             <i class="bi bi-box-seam fs-2 text-success opacity-25"></i>
                         </div>
-                        <div class="mt-2 small text-muted">
-                            <span class="text-success me-2"><i class="bi bi-circle-fill" style="font-size:.5rem"></i> <span id="stat-productos-activos">—</span> activos</span>
-                            <span class="text-secondary"><i class="bi bi-circle-fill" style="font-size:.5rem"></i> <span id="stat-productos-vendidos">—</span> vendidos</span>
+                        <div class="mt-2 small text-muted placeholder-glow">
+                            <span class="text-success me-2"><i class="bi bi-circle-fill" style="font-size:.5rem"></i> <span id="stat-productos-activos"><span class="placeholder col-3 rounded"></span></span> activos</span>
+                            <span class="text-secondary"><i class="bi bi-circle-fill" style="font-size:.5rem"></i> <span id="stat-productos-vendidos"><span class="placeholder col-3 rounded"></span></span> vendidos</span>
                         </div>
                     </div>
                 </div>
@@ -108,29 +112,33 @@ if (!isset($_SESSION["user_id"]) || $_SESSION["role"] !== 'admin') {
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <p class="text-muted small mb-1">Reportes pendientes</p>
-                                <div class="stat-number text-danger" id="stat-reportes-pendientes">—</div>
+                                <div class="stat-number text-danger placeholder-glow" id="stat-reportes-pendientes">
+                                    <span class="placeholder col-6 rounded"></span>
+                                </div>
                             </div>
                             <i class="bi bi-flag-fill fs-2 text-danger opacity-25"></i>
                         </div>
-                        <div class="mt-2 small text-muted">
-                            Total: <span id="stat-reportes-total">—</span> reportes registrados
+                        <div class="mt-2 small text-muted placeholder-glow">
+                            Total: <span id="stat-reportes-total"><span class="placeholder col-3 rounded"></span></span> reportes registrados
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- Admins -->
+            <!-- Productos pausados / eliminados -->
             <div class="col-6 col-md-3">
                 <div class="card stat-card shadow-sm h-100" style="border-color:#6f42c1">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <p class="text-muted small mb-1">Productos pausados</p>
-                                <div class="stat-number" style="color:#6f42c1" id="stat-productos-pausados">—</div>
+                                <div class="stat-number placeholder-glow" style="color:#6f42c1" id="stat-productos-pausados">
+                                    <span class="placeholder col-6 rounded"></span>
+                                </div>
                             </div>
                             <i class="bi bi-pause-circle fs-2 opacity-25" style="color:#6f42c1"></i>
                         </div>
-                        <div class="mt-2 small text-muted">
-                            Eliminados: <span id="stat-usuarios-eliminados">—</span> usuarios
+                        <div class="mt-2 small text-muted placeholder-glow">
+                            Eliminados: <span id="stat-usuarios-eliminados"><span class="placeholder col-3 rounded"></span></span> usuarios
                         </div>
                     </div>
                 </div>
@@ -140,14 +148,30 @@ if (!isset($_SESSION["user_id"]) || $_SESSION["role"] !== 'admin') {
         <!-- Exportar datos -->
         <div class="d-flex gap-2 mb-3 justify-content-end flex-wrap">
             <a href="<?= $BASE ?>/api/admin_export_usuarios.php"
-               class="btn btn-sm btn-outline-primary">
+               class="btn btn-sm btn-outline-primary export-btn"
+               data-loading-text="Generando CSV…">
                 <i class="bi bi-download me-1"></i>Exportar usuarios CSV
             </a>
             <a href="<?= $BASE ?>/api/admin_export_transacciones.php"
-               class="btn btn-sm btn-outline-success">
+               class="btn btn-sm btn-outline-success export-btn"
+               data-loading-text="Generando CSV…">
                 <i class="bi bi-download me-1"></i>Exportar transacciones CSV
             </a>
         </div>
+        <script>
+        document.querySelectorAll('.export-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const orig = this.innerHTML;
+                const txt  = this.dataset.loadingText || 'Descargando…';
+                this.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span>${txt}`;
+                this.classList.add('disabled');
+                setTimeout(() => {
+                    this.innerHTML = orig;
+                    this.classList.remove('disabled');
+                }, 4000);
+            });
+        });
+        </script>
 
         <!-- Navegación de tabs -->
         <ul class="nav admin-nav mb-3 flex-nowrap overflow-auto" id="admin-tabs">

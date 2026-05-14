@@ -121,7 +121,7 @@ require_once __DIR__ . '/../../config/bootstrap.php';
             </ul>
           </div>
 
-          <button id="themeToggle" class="btn btn-outline-light rounded-circle">🌙</button>
+          <button id="themeToggle" class="btn btn-outline-light rounded-circle" aria-label="Cambiar tema">🌙</button>
         </div>
 
         <?php if (!empty($showSearch) && $showSearch === true): ?>
@@ -146,3 +146,15 @@ require_once __DIR__ . '/../../config/bootstrap.php';
 </script>
 <script src="../js/theme.js"></script>
 <script src="<?=$BASE?>/public/js/navbar.js"></script>
+<script src="<?=$BASE?>/public/js/ux.js" defer></script>
+<?php
+// Flash messages de sesión → toasts
+if (!empty($_SESSION['_flash'])) {
+    foreach ($_SESSION['_flash'] as $flash) {
+        $msg  = htmlspecialchars($flash['mensaje'], ENT_QUOTES);
+        $tipo = htmlspecialchars($flash['tipo'],    ENT_QUOTES);
+        echo "<script>document.addEventListener('DOMContentLoaded',()=>mostrarToast('{$msg}','{$tipo}'));<\/script>\n";
+    }
+    unset($_SESSION['_flash']);
+}
+?>

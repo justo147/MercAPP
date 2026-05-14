@@ -58,7 +58,31 @@ document.addEventListener("DOMContentLoaded", () => {
    * y búsqueda. Renderiza tarjetas, carruseles y controles de paginación.
    * @returns {void}
    */
+  function mostrarSkeletonPerfil(n = 6) {
+    contenedor.innerHTML = Array.from({ length: n }, () => `
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card h-100 border rounded-3 shadow-sm">
+          <div class="placeholder-glow">
+            <div class="placeholder w-100" style="height:200px;"></div>
+          </div>
+          <div class="card-body">
+            <div class="placeholder-glow mb-2">
+              <span class="placeholder col-8 rounded"></span>
+            </div>
+            <div class="placeholder-glow mb-2">
+              <span class="placeholder col-4 rounded me-1"></span>
+              <span class="placeholder col-3 rounded"></span>
+            </div>
+            <div class="placeholder-glow">
+              <span class="placeholder col-6 rounded"></span>
+            </div>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+
   function cargarProductos() {
+    mostrarSkeletonPerfil(limit);
 
     const url = new URL(`${BASE}/api/productos_usuario.php`, window.location.origin);
     url.searchParams.set("id", userId);
@@ -74,7 +98,13 @@ document.addEventListener("DOMContentLoaded", () => {
       .then(data => {
 
         if (!data.success) {
-          contenedor.innerHTML = `<p class="text-danger">${data.error || "Error cargando productos"}</p>`;
+          contenedor.innerHTML = `
+            <div class="col-12">
+              <div class="alert alert-danger d-flex align-items-center gap-2">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                ${data.error || "Error cargando productos"}
+              </div>
+            </div>`;
           paginacion.innerHTML = "";
           return;
         }

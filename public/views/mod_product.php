@@ -83,13 +83,11 @@ if (!isset($_GET["id"]) || !is_numeric($_GET["id"])) {
 
                     <div class="card-body">
 
-                        <!-- Mensajes -->
                         <?php if (!empty($success)): ?>
-                            <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
+                            <script>document.addEventListener('DOMContentLoaded', () => mostrarToast('<?= htmlspecialchars($success, ENT_QUOTES) ?>', 'success'));</script>
                         <?php endif; ?>
-
                         <?php if (!empty($error)): ?>
-                            <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+                            <script>document.addEventListener('DOMContentLoaded', () => mostrarToast('<?= htmlspecialchars($error, ENT_QUOTES) ?>', 'error'));</script>
                         <?php endif; ?>
 
                         <?php if (!empty($fatalError)): ?>
@@ -102,19 +100,28 @@ if (!isset($_GET["id"]) || !is_numeric($_GET["id"])) {
                         <?php else: ?>
 
                         <!-- Formulario -->
-                        <form method="POST" enctype="multipart/form-data">
+                        <form method="POST" enctype="multipart/form-data" data-unsaved-warning novalidate>
 
                             <input type="hidden" name="id" value="<?= $producto["id"] ?>">
 
                             <div class="mb-3">
                                 <label class="form-label">Título</label>
-                                <input type="text" name="titulo" class="form-control"
-                                    value="<?= htmlspecialchars($producto["titulo"]) ?>" required>
+                                <input type="text" name="titulo" id="titulo" class="form-control"
+                                    value="<?= htmlspecialchars($producto["titulo"]) ?>"
+                                    required maxlength="100" data-counter="titulo-counter">
+                                <div class="d-flex justify-content-between mt-1">
+                                    <div class="invalid-feedback">El título es obligatorio.</div>
+                                    <small class="text-muted ms-auto" id="titulo-counter">0 / 100</small>
+                                </div>
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label">Descripción</label>
-                                <textarea name="descripcion" class="form-control" rows="4"><?= htmlspecialchars($producto["descripcion"]) ?></textarea>
+                                <textarea name="descripcion" id="descripcion" class="form-control" rows="4"
+                                          maxlength="2000" data-counter="desc-counter"><?= htmlspecialchars($producto["descripcion"]) ?></textarea>
+                                <div class="d-flex justify-content-end mt-1">
+                                    <small class="text-muted" id="desc-counter">0 / 2000</small>
+                                </div>
                             </div>
 
                             <div class="mb-3">
@@ -199,7 +206,10 @@ if (!isset($_GET["id"]) || !is_numeric($_GET["id"])) {
 
 
                             <div class="d-grid">
-                                <button type="submit" class="btn btn-warning">Guardar cambios</button>
+                                <button type="submit" class="btn btn-warning"
+                                        data-loading-text="Guardando…">
+                                    <i class="bi bi-floppy me-1"></i> Guardar cambios
+                                </button>
                             </div>
 
                         </form>
@@ -215,7 +225,83 @@ if (!isset($_GET["id"]) || !is_numeric($_GET["id"])) {
 
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="../js/modProduct.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Contadores de caracteres
+        document.querySelectorAll('[data-counter]').forEach(input => {
+            const counterId = input.dataset.counter;
+            const counter   = document.getElementById(counterId);
+            if (!counter) return;
+            const max = input.maxLength || 0;
+            const update = () => {
+                const len = input.value.length;
+                counter.textContent = `${len} / ${max}`;
+                counter.classList.toggle('text-danger', max > 0 && len >= max * 0.9);
+            };
+            input.addEventListener('input', update);
+            update();
+        });
 
+        // Validación cliente
+        const form = document.querySelector('form[novalidate]');
+        if (form) {
+            form.addEventListener('submit', e => {
+                if (!form.checkValidity()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    mostrarToast('Por favor, completa los campos obligatorios.', 'warning');
+                } else {
+                    const prodId = form.querySelector('[name="id"]')?.value;
+                    if (prodId) localStorage.removeItem(`draft_mod_${prodId}`);
+                }
+                form.classList.add('was-validated');
+            }, true);
+        }
+
+        // ── Autoguardado de borrador ──────────────────────────
+        const prodId   = form?.querySelector('[name="id"]')?.value;
+        const DRAFT_KEY = prodId ? `draft_mod_${prodId}` : null;
+        const CAMPOS = ['titulo', 'descripcion', 'precio', 'categoria_id',
+                        'estado_producto_id', 'tipo_transaccion', 'ubicacion'];
+
+        if (form && DRAFT_KEY) {
+            let dirtyDraft = false;
+
+            function guardarBorrador() {
+                const draft = {};
+                CAMPOS.forEach(name => {
+                    const el = form.querySelector(`[name="${name}"]`);
+                    if (el) draft[name] = el.value;
+                });
+                localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+            }
+
+            // Restaurar solo si hay cambios no guardados (comparar con valores actuales)
+            const raw = localStorage.getItem(DRAFT_KEY);
+            if (raw) {
+                try {
+                    const draft = JSON.parse(raw);
+                    const diferente = CAMPOS.some(name => {
+                        const el = form.querySelector(`[name="${name}"]`);
+                        return el && draft[name] !== undefined && draft[name] !== el.value;
+                    });
+                    if (diferente) {
+                        mostrarToast('Hay cambios sin guardar de una sesión anterior. Restaurando…', 'info');
+                        CAMPOS.forEach(name => {
+                            const el = form.querySelector(`[name="${name}"]`);
+                            if (el && draft[name] !== undefined) el.value = draft[name];
+                        });
+                        form.querySelectorAll('[data-counter]').forEach(inp => inp.dispatchEvent(new Event('input')));
+                    }
+                } catch { localStorage.removeItem(DRAFT_KEY); }
+            }
+
+            form.addEventListener('input',  () => { dirtyDraft = true; });
+            form.addEventListener('change', () => { dirtyDraft = true; });
+            setInterval(() => { if (dirtyDraft) { guardarBorrador(); dirtyDraft = false; } }, 5000);
+        }
+    });
+    </script>
 
 </body>
 

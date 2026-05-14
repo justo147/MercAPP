@@ -243,11 +243,25 @@ function cargar() {
         .then(r => r.json())
         .then(res => {
             if (!res.data || res.data.length === 0) {
-                lista.innerHTML = `
-                    <div class="text-center py-5 text-muted">
-                        <i class="bi bi-inbox fs-1 d-block mb-3 opacity-25"></i>
-                        <p class="mb-0">No tienes transacciones con estos filtros.</p>
-                    </div>`;
+                const hayFiltros = estado.rol || estado.estadoFiltro;
+                lista.innerHTML = hayFiltros
+                    ? `<div class="text-center py-5 text-muted">
+                           <i class="bi bi-funnel fs-1 d-block mb-3 opacity-25"></i>
+                           <p class="mb-1 fw-semibold">Ninguna transacción coincide con estos filtros.</p>
+                           <p class="small mb-3">Prueba a cambiar o quitar los filtros para ver más resultados.</p>
+                           <button class="btn btn-outline-secondary btn-sm"
+                                   onclick="document.getElementById('filtro-rol').querySelector('[data-val=\\'\\']').click();document.getElementById('filtro-estado').value='';cargar()">
+                               <i class="bi bi-x-circle me-1"></i>Quitar filtros
+                           </button>
+                       </div>`
+                    : `<div class="text-center py-5 text-muted">
+                           <i class="bi bi-bag fs-1 d-block mb-3 opacity-25"></i>
+                           <p class="mb-1 fw-semibold">Todavía no tienes transacciones.</p>
+                           <p class="small mb-3">Cuando compres o vendas algo, aquí podrás seguir el estado de tus pedidos.</p>
+                           <a href="${BASE}/public/views/home.php" class="btn btn-primary btn-sm">
+                               <i class="bi bi-search me-1"></i>Explorar productos
+                           </a>
+                       </div>`;
                 document.getElementById('tx-paginacion').innerHTML = '';
                 return;
             }
@@ -256,7 +270,12 @@ function cargar() {
             renderPaginacion(res.total, res.page, res.limit, res.pages);
         })
         .catch(() => {
-            lista.innerHTML = '<div class="alert alert-danger">Error al cargar las transacciones.</div>';
+            lista.innerHTML = `
+                <div class="alert alert-danger d-flex align-items-center gap-2">
+                    <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
+                    <span>Error al cargar las transacciones.
+                    <button class="btn btn-sm btn-outline-danger ms-2" onclick="cargar()">Reintentar</button></span>
+                </div>`;
         });
 }
 

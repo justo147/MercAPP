@@ -264,43 +264,34 @@ include("navbar.php");
 
 <div class="container py-4" style="max-width:800px;">
 
-    <?php if (isset($_GET['reporte']) && $_GET['reporte'] === 'ok'): ?>
-        <div class="alert alert-success alert-dismissible fade show">
-            <i class="bi bi-check-circle me-1"></i> Reporte enviado. Lo revisaremos próximamente.
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif; ?>
-
-    <?php if (isset($_GET['error']) && $_GET['error'] === 'metodo_pago'): ?>
-        <div class="alert alert-danger alert-dismissible fade show">
-            <i class="bi bi-exclamation-triangle me-1"></i> Debes seleccionar un método de pago.
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif; ?>
-
     <?php
+    // Mensajes de feedback via toast (reemplaza alertas inline)
+    $chatToasts = [];
+    if (isset($_GET['reporte']) && $_GET['reporte'] === 'ok') {
+        $chatToasts[] = ['success', 'Reporte enviado. Lo revisaremos próximamente.'];
+    }
+    if (isset($_GET['error']) && $_GET['error'] === 'metodo_pago') {
+        $chatToasts[] = ['error', 'Debes seleccionar un método de pago.'];
+    }
     $stripeErrors = [
-        'stripe_no_intent'   => 'No se recibió confirmación del pago. Inténtalo de nuevo.',
-        'stripe_config'      => 'El sistema de pagos con tarjeta no está configurado correctamente.',
-        'stripe_pago_fallido'=> 'El pago con tarjeta no fue completado o no es válido.',
-        'stripe_error'       => 'Error de comunicación con Stripe. Inténtalo de nuevo.',
+        'stripe_no_intent'    => 'No se recibió confirmación del pago. Inténtalo de nuevo.',
+        'stripe_config'       => 'El sistema de pagos con tarjeta no está configurado correctamente.',
+        'stripe_pago_fallido' => 'El pago con tarjeta no fue completado o no es válido.',
+        'stripe_error'        => 'Error de comunicación con Stripe. Inténtalo de nuevo.',
     ];
     $errCode = $_GET['error'] ?? '';
-    if (isset($stripeErrors[$errCode])):
+    if (isset($stripeErrors[$errCode])) {
+        $chatToasts[] = ['error', $stripeErrors[$errCode]];
+    }
+    if (isset($_GET['stripe']) && $_GET['stripe'] === 'ok') {
+        $chatToasts[] = ['success', '¡Pago con tarjeta confirmado! El vendedor recibirá el aviso para preparar el envío.'];
+    }
+    foreach ($chatToasts as [$tipo, $msg]):
+        $msg  = htmlspecialchars($msg,  ENT_QUOTES);
+        $tipo = htmlspecialchars($tipo, ENT_QUOTES);
     ?>
-        <div class="alert alert-danger alert-dismissible fade show">
-            <i class="bi bi-credit-card me-1"></i> <?= htmlspecialchars($stripeErrors[$errCode]) ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif; ?>
-
-    <?php if (isset($_GET['stripe']) && $_GET['stripe'] === 'ok'): ?>
-        <div class="alert alert-success alert-dismissible fade show">
-            <i class="bi bi-check-circle me-1"></i>
-            ¡Pago con tarjeta confirmado! El vendedor recibirá el aviso para preparar el envío.
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif; ?>
+        <script>document.addEventListener('DOMContentLoaded', () => mostrarToast('<?= $msg ?>', '<?= $tipo ?>'));</script>
+    <?php endforeach; ?>
 
     <!-- Cabecera -->
     <div class="d-flex justify-content-between align-items-start mb-3">
@@ -769,24 +760,24 @@ include("navbar.php");
 
             <!-- CONFIRMAR ENTREGA (comprador, desde enviado) -->
             <?php if ($estado === 'enviado' && $esComprador): ?>
-            <form action="<?= $BASE ?>/controllers/chat_update_transaction.php" method="POST" class="mb-2">
+            <form id="form-entregado" action="<?= $BASE ?>/controllers/chat_update_transaction.php" method="POST" class="mb-2" data-no-loading>
                 <input type="hidden" name="transaccion_id" value="<?= intval($transaccion['id']) ?>">
                 <input type="hidden" name="chat_id"        value="<?= $chatId ?>">
                 <input type="hidden" name="estado"         value="entregado">
-                <button type="submit" class="btn btn-success w-100 mb-2"
-                        onclick="return confirm('¿Confirmas que has recibido el producto correctamente?')">
+                <button type="button" class="btn btn-success w-100 mb-2"
+                        data-bs-toggle="modal" data-bs-target="#modalConfirmarEntrega">
                     <i class="bi bi-check-circle me-1"></i> Confirmar recepción del producto
                 </button>
             </form>
             <?php endif; ?>
 
             <!-- CANCELAR (cualquiera) -->
-            <form action="<?= $BASE ?>/controllers/chat_update_transaction.php" method="POST" class="mb-3">
+            <form id="form-cancelar" action="<?= $BASE ?>/controllers/chat_update_transaction.php" method="POST" class="mb-3" data-no-loading>
                 <input type="hidden" name="transaccion_id" value="<?= intval($transaccion['id']) ?>">
                 <input type="hidden" name="chat_id"        value="<?= $chatId ?>">
                 <input type="hidden" name="estado"         value="cancelada">
-                <button type="submit" class="btn btn-outline-danger w-100"
-                        onclick="return confirm('¿Seguro que quieres cancelar la transacción?')">
+                <button type="button" class="btn btn-outline-danger w-100"
+                        data-bs-toggle="modal" data-bs-target="#modalCancelarTransaccion">
                     <i class="bi bi-x-circle me-1"></i> Cancelar transacción
                 </button>
             </form>
@@ -1162,6 +1153,56 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>
+
+<!-- Modal: Confirmar recepción del producto -->
+<div class="modal fade" id="modalConfirmarEntrega" tabindex="-1" aria-labelledby="modalEntregaLabel" aria-modal="true" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="modalEntregaLabel">
+                    <i class="bi bi-check-circle text-success me-2"></i>Confirmar recepción
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-1">¿Confirmas que has recibido el producto <strong><?= htmlspecialchars($chat['producto_titulo'] ?? '') ?></strong> correctamente?</p>
+                <p class="text-muted small mb-0">Esta acción marcará la transacción como <strong>entregada</strong> y no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Volver</button>
+                <button type="button" class="btn btn-success"
+                        onclick="document.getElementById('form-entregado').submit()">
+                    <i class="bi bi-check-circle me-1"></i>Sí, he recibido el producto
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Cancelar transacción -->
+<div class="modal fade" id="modalCancelarTransaccion" tabindex="-1" aria-labelledby="modalCancelarLabel" aria-modal="true" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-danger">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-danger" id="modalCancelarLabel">
+                    <i class="bi bi-x-circle me-2"></i>Cancelar transacción
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-1">¿Seguro que quieres cancelar la transacción de <strong><?= htmlspecialchars($chat['producto_titulo'] ?? '') ?></strong>?</p>
+                <p class="text-muted small mb-0">Esta acción no se puede deshacer. El producto volverá a estar disponible.</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Volver</button>
+                <button type="button" class="btn btn-danger"
+                        onclick="document.getElementById('form-cancelar').submit()">
+                    <i class="bi bi-x-circle me-1"></i>Cancelar transacción
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>
