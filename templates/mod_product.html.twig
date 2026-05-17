@@ -1,0 +1,207 @@
+{% extends 'base.html.twig' %}
+{% block title %}Editar producto — MercApp{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+
+    <div class="page-header">
+      <h1><i class="bi bi-pencil-square me-2 text-primary"></i>Editar producto</h1>
+    </div>
+
+    <div class="card no-hover">
+      <div class="card-body p-4">
+
+        {% if fatalError %}
+        <div class="alert alert-danger d-flex align-items-center gap-2">
+          <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
+          <span>{{ fatalError|e }}</span>
+        </div>
+        <a href="{{ BASE }}/public/views/profile.php?id={{ session.user_id }}"
+           class="btn btn-outline-primary mt-2">
+          <i class="bi bi-arrow-left me-1"></i> Volver a mi perfil
+        </a>
+        {% else %}
+
+        <form method="POST" enctype="multipart/form-data" data-unsaved-warning novalidate>
+          <input type="hidden" name="id" value="{{ producto.id }}">
+
+          <div class="mb-3">
+            <label class="form-label">Título <span class="text-danger">*</span></label>
+            <input type="text" name="titulo" id="titulo" class="form-control"
+                   value="{{ producto.titulo|e }}" required
+                   maxlength="100" data-counter="titulo-counter">
+            <div class="d-flex justify-content-between mt-1">
+              <div class="invalid-feedback">El título es obligatorio.</div>
+              <small class="text-muted ms-auto" id="titulo-counter">0 / 100</small>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Descripción</label>
+            <textarea name="descripcion" id="descripcion" class="form-control" rows="4"
+                      maxlength="2000" data-counter="desc-counter">{{ producto.descripcion|e }}</textarea>
+            <div class="d-flex justify-content-end mt-1">
+              <small class="text-muted" id="desc-counter">0 / 2000</small>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <label class="form-label">Precio (€)</label>
+              <div class="input-group">
+                <input type="number" step="0.01" name="precio" class="form-control"
+                       value="{{ producto.precio|e }}">
+                <span class="input-group-text">€</span>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label">Tipo <span class="text-danger">*</span></label>
+              <select name="tipo_transaccion" class="form-select" required>
+                <option value="venta"       {{ producto.tipo_transaccion == 'venta'       ? 'selected' : '' }}>Venta</option>
+                <option value="intercambio" {{ producto.tipo_transaccion == 'intercambio' ? 'selected' : '' }}>Intercambio</option>
+                <option value="mixto"       {{ producto.tipo_transaccion == 'mixto'       ? 'selected' : '' }}>Venta / Intercambio</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <label class="form-label">Categoría <span class="text-danger">*</span></label>
+              <select name="categoria_id" class="form-select" required>
+                <option value="">Selecciona…</option>
+                {% for cat in categorias %}
+                <option value="{{ cat.id }}" {{ cat.id == producto.categoria_id ? 'selected' : '' }}>
+                  {{ cat.nombre|e }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label">Estado <span class="text-danger">*</span></label>
+              <select name="estado_producto_id" class="form-select" required>
+                <option value="">Selecciona…</option>
+                {% for estado in estados_producto %}
+                <option value="{{ estado.id }}" {{ estado.id == producto.estado_producto_id ? 'selected' : '' }}>
+                  {{ estado.nombre|e }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Ubicación</label>
+            <input type="text" name="ubicacion" class="form-control"
+                   value="{{ producto.ubicacion|e }}" placeholder="Ciudad, dirección…">
+          </div>
+
+          <!-- Current images -->
+          {% if producto.imagenes %}
+          <div class="mb-3">
+            <label class="form-label">Imágenes actuales</label>
+            <div class="row g-3">
+              {% for img in producto.imagenes %}
+              <div class="col-4 text-center">
+                <img src="{{ BASE }}/{{ img.url|e }}"
+                     class="img-fluid rounded mb-2"
+                     style="height:120px;object-fit:cover;border:1px solid var(--c-border);"
+                     onerror="this.onerror=null;this.src='{{ BASE }}/public/img/default.jpg'">
+                <div class="form-check justify-content-center">
+                  <input class="form-check-input" type="checkbox"
+                         name="delete_images[]" value="{{ img.url|e }}"
+                         id="del_{{ loop.index }}">
+                  <label class="form-check-label small text-danger" for="del_{{ loop.index }}">Eliminar</label>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- New images -->
+          <div class="mb-4">
+            <label for="imagenesInput" class="form-label">Añadir nuevas imágenes</label>
+            <input type="file" name="imagenes[]" id="imagenesInput" class="form-control" multiple accept="image/*">
+            <div id="previewGrid" class="row g-3 mt-3"></div>
+            <input type="hidden" name="orden_imagenes" id="ordenImagenes">
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100 btn-lg"
+                  data-loading-text="Guardando…">
+            <i class="bi bi-floppy me-1"></i> Guardar cambios
+          </button>
+
+        </form>
+        {% endif %}
+
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script src="{{ asset('js/modProduct.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('[data-counter]').forEach(input => {
+    const counter = document.getElementById(input.dataset.counter);
+    if (!counter) return;
+    const max = input.maxLength || 0;
+    const update = () => {
+      const len = input.value.length;
+      counter.textContent = `${len} / ${max}`;
+      counter.classList.toggle('text-danger', max > 0 && len >= max * .9);
+    };
+    input.addEventListener('input', update);
+    update();
+  });
+
+  const form = document.querySelector('form[novalidate]');
+  if (!form) return;
+
+  form.addEventListener('submit', e => {
+    if (!form.checkValidity()) {
+      e.preventDefault(); e.stopPropagation();
+      mostrarToast('Por favor, completa los campos obligatorios.', 'warning');
+    } else {
+      const prodId = form.querySelector('[name="id"]')?.value;
+      if (prodId) localStorage.removeItem(`draft_mod_${prodId}`);
+    }
+    form.classList.add('was-validated');
+  }, true);
+
+  const prodId   = form.querySelector('[name="id"]')?.value;
+  const DRAFT_KEY = prodId ? `draft_mod_${prodId}` : null;
+  const CAMPOS = ['titulo','descripcion','precio','categoria_id','estado_producto_id','tipo_transaccion','ubicacion'];
+
+  if (DRAFT_KEY) {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (raw) {
+      try {
+        const draft = JSON.parse(raw);
+        const diferente = CAMPOS.some(n => { const el = form.querySelector(`[name="${n}"]`); return el && draft[n] !== undefined && draft[n] !== el.value; });
+        if (diferente) {
+          mostrarToast('Hay cambios sin guardar. Restaurando…', 'info');
+          CAMPOS.forEach(n => { const el = form.querySelector(`[name="${n}"]`); if (el && draft[n] !== undefined) el.value = draft[n]; });
+          form.querySelectorAll('[data-counter]').forEach(i => i.dispatchEvent(new Event('input')));
+        }
+      } catch { localStorage.removeItem(DRAFT_KEY); }
+    }
+    let dirty = false;
+    form.addEventListener('input',  () => dirty = true);
+    form.addEventListener('change', () => dirty = true);
+    setInterval(() => {
+      if (!dirty) return;
+      const d = {};
+      CAMPOS.forEach(n => { const el = form.querySelector(`[name="${n}"]`); if (el) d[n] = el.value; });
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(d));
+      dirty = false;
+    }, 5000);
+  }
+});
+</script>
+{% endblock %}

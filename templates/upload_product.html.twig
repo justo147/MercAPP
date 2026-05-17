@@ -1,0 +1,175 @@
+{% extends 'base.html.twig' %}
+{% block title %}Subir producto — MercApp{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+
+    <div class="page-header">
+      <h1><i class="bi bi-plus-circle me-2 text-primary"></i>Subir nuevo producto</h1>
+      <p>Publica tu producto en segundos y llega a miles de compradores</p>
+    </div>
+
+    <div class="card no-hover">
+      <div class="card-body p-4">
+
+        <form method="POST" enctype="multipart/form-data" data-unsaved-warning novalidate>
+
+          <div class="mb-3">
+            <label for="titulo" class="form-label">Título <span class="text-danger">*</span></label>
+            <input type="text" id="titulo" name="titulo" class="form-control"
+                   placeholder="Ej: iPhone 13 Pro Max 256GB" required
+                   maxlength="100" data-counter="titulo-counter">
+            <div class="d-flex justify-content-between mt-1">
+              <div class="invalid-feedback">El título es obligatorio.</div>
+              <small class="text-muted ms-auto" id="titulo-counter">0 / 100</small>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="descripcion" class="form-label">Descripción</label>
+            <textarea id="descripcion" name="descripcion" class="form-control" rows="4"
+                      placeholder="Describe el estado, características, motivo de venta…"
+                      maxlength="2000" data-counter="desc-counter"></textarea>
+            <div class="d-flex justify-content-end mt-1">
+              <small class="text-muted" id="desc-counter">0 / 2000</small>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <label for="precio" class="form-label">Precio (€)</label>
+              <div class="input-group">
+                <input type="number" id="precio" step="0.01" min="0" name="precio"
+                       class="form-control" placeholder="0.00">
+                <span class="input-group-text">€</span>
+              </div>
+              <div class="form-text">Deja en 0 o vacío si es gratis.</div>
+            </div>
+            <div class="col-sm-6">
+              <label for="tipo_transaccion" class="form-label">Tipo <span class="text-danger">*</span></label>
+              <select id="tipo_transaccion" name="tipo_transaccion" class="form-select" required>
+                <option value="venta">Venta</option>
+                <option value="intercambio">Intercambio</option>
+                <option value="mixto">Venta / Intercambio</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <label for="categoria" class="form-label">Categoría <span class="text-danger">*</span></label>
+              <select id="categoria" name="categoria_id" class="form-select" required>
+                <option value="">Selecciona…</option>
+                {% for cat in categorias %}
+                <option value="{{ cat.id }}">{{ cat.nombre|e }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-sm-6">
+              <label for="estado_producto" class="form-label">Estado <span class="text-danger">*</span></label>
+              <select id="estado_producto" name="estado_producto_id" class="form-select" required>
+                <option value="">Selecciona…</option>
+                {% for estado in estados_producto %}
+                <option value="{{ estado.id }}">{{ estado.nombre|e }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="ubicacion" class="form-label">
+              Ubicación
+              <small class="text-muted fw-normal">— empieza a escribir para ver sugerencias</small>
+            </label>
+            <input type="text" id="ubicacion" name="ubicacion" class="form-control"
+                   placeholder="Ej: Sevilla, Calle Mayor 5 Madrid…"
+                   autocomplete="off"
+                   value="{{ post_ubicacion ?? '' }}">
+            <input type="hidden" id="lat" name="lat" value="{{ post_lat ?? '' }}">
+            <input type="hidden" id="lon" name="lon" value="{{ post_lon ?? '' }}">
+            <div class="form-text"><i class="bi bi-geo-alt me-1"></i>Normalización via OpenStreetMap.</div>
+          </div>
+
+          <div class="mb-4">
+            <label for="imagenesInput" class="form-label">Imágenes</label>
+            <input type="file" name="imagenes[]" id="imagenesInput" class="form-control" multiple accept="image/*">
+            <div class="form-text">Arrastra para reordenar. Formatos: JPG, PNG, WEBP.</div>
+            <div id="previewGrid" class="row g-3 mt-3"></div>
+            <input type="hidden" name="orden_imagenes" id="ordenImagenes">
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100 btn-lg"
+                  data-loading-text="Publicando…">
+            <i class="bi bi-upload me-1"></i> Publicar producto
+          </button>
+
+        </form>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script src="{{ asset('js/uploadProduct.js') }}"></script>
+<script src="{{ asset('js/address_autocomplete.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  if (typeof initAddressAutocomplete === 'function') {
+    initAddressAutocomplete('ubicacion', `${BASE}/api/normalize_address.php`, 'lat', 'lon');
+  }
+
+  document.querySelectorAll('[data-counter]').forEach(input => {
+    const counter = document.getElementById(input.dataset.counter);
+    if (!counter) return;
+    const max = input.maxLength || 0;
+    const update = () => {
+      const len = input.value.length;
+      counter.textContent = `${len} / ${max}`;
+      counter.classList.toggle('text-danger', max > 0 && len >= max * .9);
+    };
+    input.addEventListener('input', update);
+    update();
+  });
+
+  const form = document.querySelector('form[novalidate]');
+  if (form) {
+    form.addEventListener('submit', e => {
+      if (!form.checkValidity()) {
+        e.preventDefault(); e.stopPropagation();
+        mostrarToast('Por favor, completa los campos obligatorios.', 'warning');
+      } else { localStorage.removeItem('draft_upload'); }
+      form.classList.add('was-validated');
+    }, true);
+
+    const DRAFT_KEY = 'draft_upload';
+    const CAMPOS = ['titulo','descripcion','precio','categoria_id','estado_producto_id','tipo_transaccion','ubicacion'];
+    const tituloEl = form.querySelector('[name="titulo"]');
+    if (tituloEl && !tituloEl.value) {
+      try {
+        const draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}');
+        if (Object.values(draft).some(v => v)) {
+          CAMPOS.forEach(n => { const el = form.querySelector(`[name="${n}"]`); if (el && draft[n]) el.value = draft[n]; });
+          form.querySelectorAll('[data-counter]').forEach(i => i.dispatchEvent(new Event('input')));
+          mostrarToast('Borrador restaurado.', 'info');
+        }
+      } catch {}
+    }
+    let dirty = false;
+    form.addEventListener('input', () => dirty = true);
+    form.addEventListener('change', () => dirty = true);
+    setInterval(() => {
+      if (!dirty) return;
+      const d = {};
+      CAMPOS.forEach(n => { const el = form.querySelector(`[name="${n}"]`); if (el) d[n] = el.value; });
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(d));
+      dirty = false;
+    }, 5000);
+  }
+});
+</script>
+{% endblock %}

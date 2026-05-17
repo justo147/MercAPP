@@ -1,0 +1,27 @@
+{% extends 'base_auth.html.twig' %}
+{% block title %}Verificación pendiente — MercApp{% endblock %}
+{% block content %}
+<div class="auth-card fade-in show text-center">
+  <div style="width:72px;height:72px;border-radius:50%;background:var(--c-primary-light);
+              display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;">
+    <i class="bi bi-envelope-check" style="font-size:2rem;color:var(--c-primary);"></i>
+  </div>
+  <h1 class="auth-title">Revisa tu correo</h1>
+  <p class="auth-subtitle">Hemos enviado un enlace de verificación a</p>
+
+  {% if pending_email %}
+  <div class="alert alert-info mb-3 py-2" style="font-size:.9rem;">
+    <strong>{{ pending_email }}</strong>
+  </div>
+  {% endif %}
+
+  <p style="color:var(--c-muted);font-size:.88rem;margin-bottom:1.5rem;">
+    Revisa también la carpeta de spam si no lo encuentras.<br>
+    El enlace caduca en 24 horas.
+  </p>
+
+  <a href="{{ BASE }}/public/views/auth/login.php" class="btn btn-outline-primary w-100">
+    <i class="bi bi-arrow-left me-1"></i> Volver al login
+  </a>
+</div>
+{% endblock %}

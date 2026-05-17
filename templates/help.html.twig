@@ -1,0 +1,68 @@
+{% extends 'base.html.twig' %}
+{% block title %}Ayuda — MercApp{% endblock %}
+
+{% block head_extra %}
+<style>
+.faq-item { border:1px solid var(--c-border); border-radius:var(--r-md); margin-bottom:.75rem; overflow:hidden; }
+.faq-question { padding:1rem 1.25rem; cursor:pointer; font-weight:600; display:flex; justify-content:space-between; align-items:center; background:var(--c-surface); color:var(--c-text); transition:background .15s; }
+.faq-question:hover { background:var(--c-bg); }
+.faq-answer { display:none; padding:1rem 1.25rem; background:var(--c-bg); color:var(--c-muted); border-top:1px solid var(--c-border); }
+.faq-item.open .faq-answer { display:block; }
+.faq-item.open .faq-arrow { transform:rotate(180deg); }
+.faq-arrow { transition:transform .2s; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="max-width:760px;margin:0 auto;">
+
+  <div class="text-center mb-5">
+    <h2 class="fw-bold"><i class="bi bi-question-circle me-2 text-primary"></i>Centro de Ayuda</h2>
+    <p class="text-muted">Encuentra información útil y respuestas a las preguntas más frecuentes.</p>
+  </div>
+
+  <!-- Vídeo -->
+  <div class="card mb-5">
+    <div class="card-header fw-semibold"><i class="bi bi-play-circle me-1 text-primary"></i>Cómo funciona la plataforma</div>
+    <div class="card-body text-center py-4">
+      <video style="max-width:100%;border-radius:var(--r-md);" controls>
+        <source src="{{ asset('video/MercApp.mp4') }}" type="video/mp4">
+        <track kind="captions" srclang="es" label="Español" default>
+        Tu navegador no soporta el elemento de vídeo.
+      </video>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <h4 class="fw-bold mb-3"><i class="bi bi-chat-left-quote me-2 text-primary"></i>Preguntas frecuentes</h4>
+
+  {% set faqs = [
+    ['¿Cómo puedo subir un producto?', 'Ve al menú "Subir producto", añade fotos, descripción y precio. Luego guarda los cambios.'],
+    ['¿Cómo contacto con un vendedor?', 'En la página del producto encontrarás un botón para enviar un mensaje directo al vendedor.'],
+    ['¿Puedo editar un producto ya publicado?', 'Sí, desde "Mis productos" en tu perfil puedes editar título, precio, fotos y descripción en cualquier momento.'],
+    ['¿Cómo funciona el sistema de transacciones?', 'El vendedor inicia la transacción, el comprador elige método de pago y dirección. El estado avanza por: Pendiente → Aceptada → Pago → Enviado → Entregado.'],
+    ['¿Qué métodos de pago están disponibles?', 'Efectivo al entregar, transferencia bancaria, Bizum, PayPal, tarjeta de crédito/débito (vía Stripe) y otros.'],
+    ['¿Cómo elimino mi cuenta?', 'En "Detalles de la cuenta" encontrarás las opciones para gestionar o eliminar tu perfil.'],
+    ['¿Qué hago si tengo un problema con un vendedor?', 'Desde la página del chat del producto encontrarás el botón "Reportar" para notificar a nuestro equipo.'],
+  ] %}
+
+  {% for faq in faqs %}
+  <div class="faq-item">
+    <div class="faq-question">
+      {{ faq[0] }}
+      <i class="bi bi-chevron-down faq-arrow text-muted"></i>
+    </div>
+    <div class="faq-answer">{{ faq[1] }}</div>
+  </div>
+  {% endfor %}
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.querySelectorAll('.faq-question').forEach(q => {
+  q.addEventListener('click', () => q.closest('.faq-item').classList.toggle('open'));
+});
+</script>
+{% endblock %}

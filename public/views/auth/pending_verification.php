@@ -1,53 +1,7 @@
 <?php
-/**
- * Página de aviso para usuarios que acaban de registrarse
- * e indicación de que deben verificar su correo electrónico.
- * Se obtiene el correo pendiente desde la sesión.
- */
 session_start();
-$email = $_SESSION['pending_email'] ?? null;
-?>
-<!DOCTYPE html>
-<html lang="es">
+require_once __DIR__ . '/../../../config/twig.php';
 
-<head>
-  <meta charset="UTF-8">
-  <title>Confirmación pendiente</title>
-
-  <link rel="stylesheet" href="../../css/reset.css">
-
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <link rel="stylesheet" href="../../public/css/style-guide.css">
-</head>
-
-<body class="d-flex flex-column align-items-center justify-content-center min-vh-100 bg-light">
-  <main>
-    <!-- Tarjeta central con mensaje de confirmación -->
-    <div class="card shadow p-4 rounded-3" style="max-width: 480px; width: 100%;">
-      <h1 class="text-center mb-3">Confirma tu correo</h1>
-
-      <!-- Mensaje principal -->
-      <div class="alert alert-info text-center">
-        <?php if ($email): ?>
-          Hemos enviado un enlace de confirmación a <strong><?= htmlspecialchars($email) ?></strong>.
-        <?php else: ?>
-          Hemos enviado un enlace de confirmación a tu correo electrónico.
-        <?php endif; ?>
-        <br>Revisa tu bandeja de entrada y sigue las instrucciones.
-      </div>
-
-      <!-- Mensaje adicional -->
-      <p class="text-center text-muted">
-        Si no ves el correo, revisa la carpeta de spam o espera unos minutos.
-      </p>
-
-      <!-- Botón para volver al login -->
-      <div class="text-center mt-3">
-        <a href="login.php" class="btn btn-primary">Ir a iniciar sesión</a>
-      </div>
-    </div>
-  </main>
-</body>
-
-</html>
+echo $twig->render('auth/pending_verification.html.twig', [
+    'pending_email' => $_SESSION['pending_email'] ?? null,
+]);

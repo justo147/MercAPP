@@ -1,0 +1,231 @@
+{% extends 'base.html.twig' %}
+{% block title %}Panel de Administración — MercApp{% endblock %}
+
+{% block head_extra %}
+<style>
+.stat-card { border-left:4px solid var(--c-border); transition:transform .15s; }
+.stat-card:hover { transform:translateY(-2px); }
+.stat-card.usuarios  { border-color:var(--c-primary); }
+.stat-card.productos { border-color:var(--c-success); }
+.stat-card.reportes  { border-color:var(--c-danger); }
+.stat-number { font-size:2rem; font-weight:700; line-height:1; }
+.admin-nav .nav-link { color:var(--c-muted); font-weight:500; padding:.6rem 1rem; border-radius:var(--r-md); }
+.admin-nav .nav-link.active { background:var(--c-primary); color:#fff; }
+.admin-nav .nav-link i { margin-right:.4rem; }
+.table th { white-space:nowrap; }
+.product-thumb { width:40px; height:40px; object-fit:cover; border-radius:var(--r-sm); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center mb-4">
+  <i class="bi bi-shield-lock fs-3 text-primary me-2"></i>
+  <div>
+    <h4 class="mb-0 fw-bold">Panel de Administración</h4>
+    <small class="text-muted">MercApp · Control total de la plataforma</small>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4" id="stats-row">
+  <div class="col-6 col-md-3">
+    <div class="card stat-card usuarios h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <p class="text-muted small mb-1">Usuarios totales</p>
+            <div class="stat-number placeholder-glow" style="color:var(--c-primary);" id="stat-usuarios-total">
+              <span class="placeholder col-6 rounded"></span>
+            </div>
+          </div>
+          <i class="bi bi-people-fill fs-2 opacity-25" style="color:var(--c-primary);"></i>
+        </div>
+        <div class="mt-2 small text-muted placeholder-glow">
+          <span class="text-success me-2"><i class="bi bi-check-circle"></i> <span id="stat-usuarios-activos"><span class="placeholder col-3 rounded"></span></span> activos</span>
+          <span class="text-warning"><i class="bi bi-pause-circle"></i> <span id="stat-usuarios-suspendidos"><span class="placeholder col-3 rounded"></span></span> suspendidos</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card stat-card productos h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <p class="text-muted small mb-1">Productos totales</p>
+            <div class="stat-number placeholder-glow" style="color:var(--c-success);" id="stat-productos-total">
+              <span class="placeholder col-6 rounded"></span>
+            </div>
+          </div>
+          <i class="bi bi-box-seam fs-2 opacity-25" style="color:var(--c-success);"></i>
+        </div>
+        <div class="mt-2 small text-muted placeholder-glow">
+          <span class="text-success me-2"><span id="stat-productos-activos"><span class="placeholder col-3 rounded"></span></span> activos</span>
+          <span class="text-muted"><span id="stat-productos-vendidos"><span class="placeholder col-3 rounded"></span></span> vendidos</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card stat-card reportes h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <p class="text-muted small mb-1">Reportes pendientes</p>
+            <div class="stat-number placeholder-glow" style="color:var(--c-danger);" id="stat-reportes-pendientes">
+              <span class="placeholder col-6 rounded"></span>
+            </div>
+          </div>
+          <i class="bi bi-flag-fill fs-2 opacity-25" style="color:var(--c-danger);"></i>
+        </div>
+        <div class="mt-2 small text-muted placeholder-glow">
+          Total: <span id="stat-reportes-total"><span class="placeholder col-3 rounded"></span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card stat-card h-100" style="border-color:#6f42c1;">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <p class="text-muted small mb-1">Productos pausados</p>
+            <div class="stat-number placeholder-glow" style="color:#6f42c1;" id="stat-productos-pausados">
+              <span class="placeholder col-6 rounded"></span>
+            </div>
+          </div>
+          <i class="bi bi-pause-circle fs-2 opacity-25" style="color:#6f42c1;"></i>
+        </div>
+        <div class="mt-2 small text-muted placeholder-glow">
+          Eliminados: <span id="stat-usuarios-eliminados"><span class="placeholder col-3 rounded"></span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Exports -->
+<div class="d-flex gap-2 mb-3 justify-content-end flex-wrap">
+  <a href="{{ BASE }}/api/admin_export_usuarios.php" class="btn btn-sm btn-outline-primary export-btn" data-loading-text="Generando CSV…">
+    <i class="bi bi-download me-1"></i>Exportar usuarios CSV
+  </a>
+  <a href="{{ BASE }}/api/admin_export_transacciones.php" class="btn btn-sm btn-outline-success export-btn" data-loading-text="Generando CSV…">
+    <i class="bi bi-download me-1"></i>Exportar transacciones CSV
+  </a>
+</div>
+
+<!-- Tabs -->
+<ul class="nav admin-nav mb-3 flex-nowrap overflow-auto" id="admin-tabs">
+  <li class="nav-item"><button class="nav-link active" data-tab="usuarios" onclick="cambiarTab('usuarios')"><i class="bi bi-people"></i>Usuarios</button></li>
+  <li class="nav-item ms-1"><button class="nav-link" data-tab="productos" onclick="cambiarTab('productos')"><i class="bi bi-box-seam"></i>Productos</button></li>
+  <li class="nav-item ms-1">
+    <button class="nav-link position-relative" data-tab="reportes" onclick="cambiarTab('reportes')">
+      <i class="bi bi-flag"></i>Reportes
+      <span id="badge-reportes" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none"></span>
+    </button>
+  </li>
+</ul>
+
+<!-- Tab: Usuarios -->
+<div id="tab-usuarios">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-3 gap-2">
+    <h5 class="mb-0 fw-semibold"><i class="bi bi-people me-1 text-primary"></i>Gestión de Usuarios</h5>
+    <div class="input-group" style="max-width:380px;">
+      <input type="text" id="search-user" class="form-control" placeholder="Buscar por email o nombre…">
+      <button class="btn btn-primary" id="btn-search-user"><i class="bi bi-search"></i></button>
+    </div>
+  </div>
+  <div class="card mb-3">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr><th>ID</th><th>Usuario</th><th>Email</th><th>Registro</th><th>Rol</th><th>Estado</th><th class="text-center">Acciones</th></tr>
+          </thead>
+          <tbody id="tabla-usuarios">
+            <tr><td colspan="7" class="text-center py-5 text-muted"><div class="spinner-border text-primary spinner-border-sm me-2"></div>Cargando…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div id="paginacion-usuarios" class="d-flex justify-content-center"></div>
+</div>
+
+<!-- Tab: Productos -->
+<div id="tab-productos" class="d-none">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-3 gap-2">
+    <h5 class="mb-0 fw-semibold"><i class="bi bi-box-seam me-1 text-success"></i>Gestión de Productos</h5>
+    <div class="d-flex gap-2 flex-wrap">
+      <select id="filter-estado-producto" class="form-select form-select-sm" style="width:auto;">
+        <option value="">Todos los estados</option>
+        <option value="activo">Activos</option>
+        <option value="pausado">Pausados</option>
+        <option value="vendido">Vendidos</option>
+      </select>
+      <div class="input-group input-group-sm" style="max-width:280px;">
+        <input type="text" id="search-product" class="form-control" placeholder="Título, vendedor…">
+        <button class="btn btn-success" id="btn-search-product"><i class="bi bi-search"></i></button>
+      </div>
+    </div>
+  </div>
+  <div class="card mb-3">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr><th>ID</th><th>Imagen</th><th>Título</th><th>Vendedor</th><th>Categoría</th><th>Precio</th><th>Estado</th><th>Fecha</th><th class="text-center">Acciones</th></tr>
+          </thead>
+          <tbody id="tabla-productos">
+            <tr><td colspan="9" class="text-center py-5 text-muted"><div class="spinner-border text-success spinner-border-sm me-2"></div>Cargando…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div id="paginacion-productos" class="d-flex justify-content-center"></div>
+</div>
+
+<!-- Tab: Reportes -->
+<div id="tab-reportes" class="d-none">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-3 gap-2">
+    <h5 class="mb-0 fw-semibold"><i class="bi bi-flag me-1 text-danger"></i>Gestión de Reportes</h5>
+    <select id="filter-estado-reporte" class="form-select form-select-sm" style="width:auto;">
+      <option value="">Todos</option>
+      <option value="pendiente">Pendientes</option>
+      <option value="revisado">Revisados</option>
+      <option value="rechazado">Rechazados</option>
+    </select>
+  </div>
+  <div class="card mb-3">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr><th>ID</th><th>Producto</th><th>Reportado por</th><th>Propietario</th><th>Motivo</th><th>Fecha</th><th>Estado</th><th class="text-center">Acciones</th></tr>
+          </thead>
+          <tbody id="tabla-reportes">
+            <tr><td colspan="8" class="text-center py-5 text-muted"><div class="spinner-border text-danger spinner-border-sm me-2"></div>Cargando…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div id="paginacion-reportes" class="d-flex justify-content-center"></div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ asset('js/admin.js') }}" defer></script>
+<script>
+document.querySelectorAll('.export-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const orig = this.innerHTML, txt = this.dataset.loadingText || 'Descargando…';
+    this.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span>${txt}`;
+    this.classList.add('disabled');
+    setTimeout(() => { this.innerHTML = orig; this.classList.remove('disabled'); }, 4000);
+  });
+});
+</script>
+{% endblock %}

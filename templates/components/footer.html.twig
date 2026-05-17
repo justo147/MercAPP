@@ -1,0 +1,71 @@
+<footer class="app-footer">
+  <div class="container">
+    <div class="row gy-4">
+
+      <div class="col-12 col-md-4">
+        <div class="footer-brand mb-2">
+          <img src="{{ asset('img/logo_sinfondo.png') }}" alt="MercApp" width="36" height="36"
+               style="display:inline-block;vertical-align:middle;margin-right:.4rem;">
+          MercApp
+        </div>
+        <p style="color:var(--c-muted);font-size:.85rem;margin:0;">
+          El marketplace de tu comunidad escolar.<br>Compra fácil, vende seguro.
+        </p>
+      </div>
+
+      <div class="col-6 col-md-2">
+        <h6>Explorar</h6>
+        <ul>
+          <li><a href="{{ BASE }}/public/views/home.php">Inicio</a></li>
+          <li><a href="{{ BASE }}/public/views/home.php">Categorías</a></li>
+          <li><a href="{{ BASE }}/public/views/upload_product.php">Vender</a></li>
+        </ul>
+      </div>
+
+      <div class="col-6 col-md-2">
+        <h6>Cuenta</h6>
+        <ul>
+          <li><a href="{{ BASE }}/public/views/profile.php?id={{ session.user_id }}">Mi perfil</a></li>
+          <li><a href="{{ BASE }}/public/views/my_favorites.php">Favoritos</a></li>
+          <li><a href="{{ BASE }}/public/views/my_transactions.php">Transacciones</a></li>
+        </ul>
+      </div>
+
+      <div class="col-6 col-md-2">
+        <h6>Ayuda</h6>
+        <ul>
+          <li><a href="{{ BASE }}/public/views/help.php">Centro de ayuda</a></li>
+          <li><a href="{{ BASE }}/public/views/help.php#preguntas-frecuentes">FAQ</a></li>
+          <li><a href="{{ BASE }}/public/views/docs.php">Documentación</a></li>
+        </ul>
+      </div>
+
+      <div class="col-6 col-md-2">
+        <h6>Síguenos</h6>
+        <div class="social-links">
+          <a href="https://www.facebook.com/profile.php?id=61587328942929" target="_blank"
+             rel="noopener" class="social-btn" aria-label="Facebook">
+            <i class="bi bi-facebook"></i>
+          </a>
+          <a href="https://www.instagram.com/merc_appoficial/" target="_blank"
+             rel="noopener" class="social-btn" aria-label="Instagram">
+            <i class="bi bi-instagram"></i>
+          </a>
+          <a href="https://x.com/MercaAppOficial" target="_blank"
+             rel="noopener" class="social-btn" aria-label="Twitter/X">
+            <i class="bi bi-twitter-x"></i>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="footer-bottom d-flex flex-column flex-sm-row align-items-center justify-content-between gap-2">
+      <p>© {{ year }} MercApp — Todos los derechos reservados</p>
+      <div class="d-flex gap-3">
+        <a href="#" style="color:var(--c-muted);font-size:.83rem;">Privacidad</a>
+        <a href="#" style="color:var(--c-muted);font-size:.83rem;">Términos</a>
+      </div>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,108 @@
+{% extends 'base_auth.html.twig' %}
+
+{% block title %}Crear cuenta — MercApp{% endblock %}
+
+{% block head_extra %}
+<script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+{% endblock %}
+
+{% block content %}
+<div class="auth-card fade-in show" style="max-width:460px;">
+
+  <div class="text-center mb-4">
+    <img src="{{ asset('img/logo_sinfondo.png') }}" alt="MercApp"
+         style="width:56px;height:56px;object-fit:contain;margin:0 auto 1rem;">
+    <h1 class="auth-title">Crear cuenta</h1>
+    <p class="auth-subtitle">Únete a MercApp en segundos</p>
+  </div>
+
+  <form id="formRegistro" method="post" novalidate>
+
+    <div class="mb-3">
+      <label for="name" class="form-label">Nombre completo</label>
+      <input type="text" id="name" name="name" class="form-control"
+             placeholder="Tu nombre" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="email" class="form-label">Correo electrónico</label>
+      <input type="email" id="email" name="email" class="form-control"
+             placeholder="tu@correo.com" required>
+    </div>
+
+    <div class="mb-2">
+      <label for="password" class="form-label">Contraseña</label>
+      <div class="input-group">
+        <input type="password" id="password" name="password" class="form-control"
+               placeholder="Mínimo 8 caracteres" required>
+        <button type="button" class="btn btn-outline-secondary" id="toggle-pass"
+                aria-label="Mostrar contraseña" tabindex="-1">
+          <i class="bi bi-eye" id="icon-pass"></i>
+        </button>
+      </div>
+      <div class="mt-2" id="strength-wrap" style="display:none;">
+        <div class="progress" style="height:4px;">
+          <div id="strength-bar" class="progress-bar" role="progressbar" style="width:0%;"></div>
+        </div>
+        <small id="strength-label" class="text-muted"></small>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label for="confirmPass" class="form-label">Confirmar contraseña</label>
+      <div class="input-group">
+        <input type="password" id="confirmPass" name="confirmPass" class="form-control"
+               placeholder="Repite la contraseña" required>
+        <button type="button" class="btn btn-outline-secondary" id="toggle-confirm"
+                aria-label="Mostrar confirmación" tabindex="-1">
+          <i class="bi bi-eye" id="icon-confirm"></i>
+        </button>
+      </div>
+      <div id="confirm-feedback" class="small mt-1" style="display:none;"></div>
+    </div>
+
+    <div class="mb-3 d-flex justify-content-center">
+      <div class="h-captcha"
+           data-sitekey="10000000-ffff-ffff-ffff-000000000001"
+           data-theme="light"></div>
+    </div>
+
+    <button type="submit" name="register" class="btn btn-primary w-100 btn-lg">
+      Crear cuenta
+    </button>
+  </form>
+
+  <div id="respuesta" class="mt-3"></div>
+
+  <p class="text-center mt-4 mb-0" style="font-size:.88rem;color:var(--c-muted);">
+    ¿Ya tienes cuenta?
+    <a href="{{ BASE }}/public/views/auth/login.php" class="fw-semibold">Inicia sesión</a>
+  </p>
+</div>
+
+<!-- Success modal overlay -->
+<div id="modalOverlay"
+     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:998;backdrop-filter:blur(4px);">
+</div>
+<div id="modalSuccess"
+     style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+            z-index:999;background:var(--c-surface);padding:2.5rem 2rem;border-radius:var(--r-xl);
+            width:90%;max-width:400px;text-align:center;box-shadow:var(--shadow-lg);">
+  <div style="width:64px;height:64px;border-radius:50%;background:var(--c-primary-light);
+              display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+    <i class="bi bi-check-lg" style="color:var(--c-primary);font-size:2rem;"></i>
+  </div>
+  <h2 style="color:var(--c-primary);margin-bottom:.5rem;">¡Registro exitoso!</h2>
+  <p style="color:var(--c-muted);margin-bottom:.5rem;">Hemos enviado un enlace de verificación a:</p>
+  <p><strong id="userEmail" style="color:var(--c-text);"></strong></p>
+  <p style="color:var(--c-muted);font-size:.88rem;">Revisa tu correo (y el spam) para activar tu cuenta.</p>
+  <button onclick="window.location.href='{{ BASE }}/public/views/auth/login.php'"
+          class="btn btn-primary mt-2 px-4">
+    Ir al login
+  </button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ asset('js/registerValidation.js') }}" defer></script>
+{% endblock %}

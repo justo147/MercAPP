@@ -1,0 +1,924 @@
+{% extends 'base.html.twig' %}
+{% block title %}Chat — {{ chat.producto_titulo|default('Producto')|e }}{% endblock %}
+
+{% block head_extra %}
+<style>
+/* ── Chat panel ─────────────────────────────────────── */
+.chat-panel { display:flex; flex-direction:column; height:min(580px, 70vh); }
+.chat-messages { flex:1; overflow-y:auto; padding:1rem; scroll-behavior:smooth; }
+.chat-input-area { border-top:1px solid var(--c-border); padding:.75rem; background:var(--c-surface); border-radius:0 0 var(--r-lg) var(--r-lg); }
+
+/* ── Bubbles ─────────────────────────────────────────── */
+.msg-sistema { text-align:center; margin:.5rem 0; }
+.msg-sistema .bubble { display:inline-block; background:var(--c-bg); color:var(--c-muted); border-radius:20px; padding:.25rem .85rem; font-size:.78rem; font-style:italic; border:1px solid var(--c-border); }
+.bubble-out { background:var(--c-primary); color:#fff; border-radius:18px 18px 4px 18px; }
+.bubble-in  { background:var(--c-surface); color:var(--c-text); border-radius:18px 18px 18px 4px; border:1px solid var(--c-border); }
+
+/* ── Transaction panel ───────────────────────────────── */
+.tx-panel { position:sticky; top:72px; }
+.tx-timeline { display:flex; flex-direction:column; }
+.tx-step { display:flex; align-items:flex-start; gap:.7rem; position:relative; padding-bottom:.9rem; }
+.tx-step:last-child { padding-bottom:0; }
+.tx-step:not(:last-child)::after { content:''; position:absolute; left:15px; top:33px; width:2px; bottom:0; background:var(--c-border); z-index:0; }
+.tx-step.step-done:not(:last-child)::after { background:#198754; }
+.tx-step-dot { width:32px; height:32px; min-width:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.85rem; z-index:1; position:relative; }
+.dot-muted   { background:var(--c-border); color:var(--c-muted); }
+.dot-current { background:var(--c-primary); color:#fff; box-shadow:0 0 0 4px rgba(3,128,101,.18); }
+.dot-done    { background:#198754; color:#fff; }
+.dot-cancel  { background:#dc3545; color:#fff; }
+.tx-step-info { padding-top:.3rem; }
+.tx-step-name { font-size:.83rem; font-weight:600; line-height:1.2; }
+.tx-step-sub  { font-size:.73rem; color:var(--c-muted); margin-top:.1rem; }
+
+/* ── Action card ─────────────────────────────────────── */
+.action-card { border:2px solid var(--c-primary) !important; }
+
+/* ── Payment method options ──────────────────────────── */
+.mp-option { cursor:pointer; border:1.5px solid var(--c-border); border-radius:var(--r-md); padding:.55rem .8rem; transition:border-color .15s,background .15s; display:flex; align-items:center; gap:.6rem; margin-bottom:.35rem; }
+.mp-option:hover { border-color:var(--c-primary); }
+.mp-option input { margin:0; flex-shrink:0; }
+.mp-option.mp-stripe-opt { border-color:rgba(99,91,255,.35); background:rgba(99,91,255,.03); }
+.mp-stripe-label { background:linear-gradient(90deg,#635bff,#0d6efd); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-weight:700; }
+
+/* ── Stripe card element ─────────────────────────────── */
+#stripe-payment-block { display:none; animation:fadeIn .25s ease; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:none} }
+#stripe-card-element { padding:.6rem .8rem; border:1.5px solid var(--c-border); border-radius:var(--r-md); background:var(--c-surface); transition:border-color .15s; }
+#stripe-card-element.StripeElement--focus  { border-color:var(--c-primary); box-shadow:0 0 0 3px rgba(3,128,101,.12); }
+#stripe-card-element.StripeElement--invalid { border-color:#dc3545; }
+
+/* ── Address autocomplete ────────────────────────────── */
+.address-suggestions { background:var(--c-surface); border:1px solid var(--c-border); border-radius:var(--r-md); }
+.address-suggestions .list-group-item { background:var(--c-surface); color:var(--c-text); border-color:var(--c-border); }
+
+/* ── Exchange card ───────────────────────────────────── */
+.exchange-products { border:1px solid rgba(3,128,101,.25); background:rgba(3,128,101,.04); border-radius:var(--r-md); }
+/* ── Utility ─────────────────────────────────────────── */
+.min-w-0 { min-width:0; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% set txAction = BASE ~ '/controllers/chat_update_transaction.php' %}
+{% if transaccion %}{% set estado = transaccion.estado %}{% else %}{% set estado = '' %}{% endif %}
+{% set esFinalizado = estado in ['entregado','cancelada'] %}
+
+<div style="max-width:1080px;margin:0 auto;">
+
+  {# ── Page header ──────────────────────────────────── #}
+  <div class="d-flex align-items-start justify-content-between gap-2 mb-3">
+    <div class="d-flex align-items-center gap-3 min-w-0">
+      {% set imgProd = chat.producto_imagen ? BASE ~ '/' ~ chat.producto_imagen : BASE ~ '/public/img/default.jpg' %}
+      <img src="{{ imgProd|e }}" alt="Producto"
+           style="width:52px;height:52px;object-fit:cover;border-radius:var(--r-md);flex-shrink:0;"
+           onerror="this.onerror=null;this.src='{{ BASE }}/public/img/default.jpg'">
+      <div class="min-w-0">
+        <h5 class="mb-0 fw-bold text-truncate" style="color:var(--c-text);">{{ chat.producto_titulo|default('Producto')|e }}</h5>
+        <div class="d-flex align-items-center flex-wrap gap-2 mt-1">
+          <a href="{{ BASE }}/public/views/detail_product.php?id={{ chat.producto_id }}" class="small">
+            <i class="bi bi-box-arrow-up-right me-1"></i>Ver producto
+          </a>
+          {% if transaccion %}
+          <span class="badge {{ transaccion.tipo == 'intercambio' ? 'bg-info' : (transaccion.tipo == 'mixto' ? 'bg-warning text-dark' : 'bg-secondary') }}" style="font-size:.7rem;">
+            <i class="bi {{ transaccion.tipo == 'intercambio' ? 'bi-arrow-left-right' : (transaccion.tipo == 'mixto' ? 'bi-shuffle' : 'bi-tag') }} me-1"></i>
+            {{ transaccion.tipo == 'intercambio' ? 'Intercambio' : (transaccion.tipo == 'mixto' ? 'Mixto' : 'Venta') }}
+          </span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="d-flex gap-2 flex-shrink-0">
+      <a href="{{ BASE }}/public/views/chat_list.php" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i><span class="d-none d-sm-inline">Mis chats</span>
+      </a>
+      {% if chat.producto_id %}
+      <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalReporte">
+        <i class="bi bi-flag me-1"></i><span class="d-none d-sm-inline">Reportar</span>
+      </button>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ── Two-column layout ────────────────────────────── #}
+  <div class="row g-3 align-items-start">
+
+    {# ── LEFT: Chat messages ────────────────────────── #}
+    <div class="col-lg-7">
+      <div class="card chat-panel">
+        <div class="card-header py-2 px-3 border-bottom" style="background:var(--c-surface);">
+          <span class="small fw-semibold" style="color:var(--c-muted);">
+            <i class="bi bi-chat-dots me-1"></i>Mensajes
+          </span>
+        </div>
+
+        <div class="chat-messages" id="chat-box">
+          {% if mensajes is empty %}
+          <p class="text-center py-5" style="color:var(--c-muted);">
+            <i class="bi bi-chat-dots d-block" style="font-size:2.5rem;opacity:.35;margin-bottom:.75rem;"></i>
+            <span class="small">Sé el primero en escribir algo.</span>
+          </p>
+          {% endif %}
+
+          {% for msg in mensajes %}
+            {% if msg.usuario_id is null %}
+            <div class="msg-sistema">
+              <span class="bubble"><i class="bi bi-info-circle me-1"></i>{{ msg.contenido_clean|e }}</span>
+            </div>
+            {% else %}
+            {% set esMio = (msg.usuario_id == usuarioActual) %}
+            <div class="mb-2 d-flex {{ esMio ? 'justify-content-end' : 'justify-content-start' }}">
+              <div style="max-width:80%;">
+                <div class="small mb-1 {{ esMio ? 'text-end' : '' }}" style="color:var(--c-muted);">
+                  {{ msg.sender_name|default('')|e }} · {{ msg.fecha_envio|e }}
+                </div>
+                <div class="px-3 py-2 {{ esMio ? 'bubble-out' : 'bubble-in' }}">{{ msg.contenido_html|raw }}</div>
+                {% if esMio %}
+                <div class="small mt-1 text-end" style="color:var(--c-muted);">
+                  {{ msg.leido ? '✓✓ Leído' : '✓ Enviado' }}
+                </div>
+                {% endif %}
+              </div>
+            </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <div class="chat-input-area">
+          {% if esFinalizado %}
+          <p class="text-center small mb-0" style="color:var(--c-muted);">
+            <i class="bi bi-lock me-1"></i>Chat cerrado — la transacción ha finalizado.
+          </p>
+          {% else %}
+          <form method="POST" class="d-flex gap-2">
+            <textarea name="mensaje" class="form-control form-control-sm" rows="2"
+                      placeholder="Escribe un mensaje…" style="resize:none;"></textarea>
+            <button class="btn btn-primary align-self-end px-3" aria-label="Enviar">
+              <i class="bi bi-send"></i>
+            </button>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    {# ── RIGHT: Transaction panel ────────────────────── #}
+    <div class="col-lg-5">
+      <div class="tx-panel">
+
+        {% if transaccion %}
+
+          {# Timeline #}
+          <div class="card mb-3">
+            <div class="card-body p-3">
+              {% set pasos = {
+                'pendiente':      ['bi-hourglass-split', 'Pendiente',  'Esperando aceptación'],
+                'aceptada':       ['bi-hand-thumbs-up',  'Aceptada',   'Datos de pago listos'],
+                'pago_pendiente': ['bi-credit-card',      'Pago',       'Verificando el pago'],
+                'enviado':        ['bi-truck',            'Enviado',    'En camino'],
+                'entregado':      ['bi-check-circle',     'Entregado',  'Transacción completada']
+              } %}
+              <div class="tx-timeline">
+                {% for key, meta in pasos %}
+                  {% set isCurrent = (key == estado and estado != 'cancelada') %}
+                  {% set isDone    = (stepIndex[key] is not null and stepIndex[estado] is not null and stepIndex[estado] > stepIndex[key] and estado != 'cancelada') %}
+                  <div class="tx-step {{ isDone ? 'step-done' : '' }}">
+                    <div class="tx-step-dot {{ isCurrent ? 'dot-current' : (isDone ? 'dot-done' : (estado == 'cancelada' ? 'dot-muted' : 'dot-muted')) }}">
+                      {% if isDone %}<i class="bi bi-check-lg"></i>
+                      {% elseif isCurrent %}<i class="bi {{ meta[0] }}"></i>
+                      {% elseif estado == 'cancelada' %}<i class="bi {{ meta[0] }}"></i>
+                      {% else %}<i class="bi {{ meta[0] }}"></i>
+                      {% endif %}
+                    </div>
+                    <div class="tx-step-info">
+                      <div class="tx-step-name {{ isCurrent ? 'text-primary' : (isDone ? 'text-success' : '') }}" style="{{ not isCurrent and not isDone ? 'color:var(--c-muted);' : '' }}">
+                        {{ meta[1] }}
+                      </div>
+                      {% if isCurrent %}<div class="tx-step-sub">{{ meta[2] }}</div>{% endif %}
+                    </div>
+                  </div>
+                {% endfor %}
+                {% if estado == 'cancelada' %}
+                <div class="tx-step">
+                  <div class="tx-step-dot dot-cancel"><i class="bi bi-x-lg"></i></div>
+                  <div class="tx-step-info">
+                    <div class="tx-step-name text-danger">Cancelada</div>
+                    <div class="tx-step-sub">La transacción fue cancelada</div>
+                  </div>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          {# Summary strip (after acceptance) #}
+          {% if estado in ['aceptada','pago_pendiente','enviado','entregado'] %}
+          <div class="card mb-3" style="background:var(--c-surface);">
+            <div class="card-body py-2 px-3" style="font-size:.82rem;">
+              {% if transaccion.metodo_pago %}
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="bi {{ etiquetaMetodo[transaccion.metodo_pago][0]|default('bi-question') }} text-primary" style="font-size:.95rem;"></i>
+                <span><strong>Pago:</strong> {{ etiquetaMetodo[transaccion.metodo_pago][1]|default(transaccion.metodo_pago)|e }}</span>
+                {% if transaccion.metodo_pago == 'stripe' %}
+                <span class="badge bg-success ms-auto" style="font-size:.65rem;"><i class="bi bi-check-circle me-1"></i>Confirmado</span>
+                {% endif %}
+              </div>
+              {% endif %}
+              {% if transaccion.direccion_envio %}
+              <div class="d-flex align-items-start gap-2 mb-1">
+                <i class="bi bi-geo-alt text-primary mt-1 flex-shrink-0" style="font-size:.85rem;"></i>
+                <span><strong>Envío:</strong> {{ transaccion.direccion_envio|e }}</span>
+              </div>
+              {% endif %}
+              {% if transaccion.numero_seguimiento %}
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="bi bi-box-seam text-primary" style="font-size:.85rem;"></i>
+                <span><strong>Seguimiento:</strong> <code>{{ transaccion.numero_seguimiento|e }}</code></span>
+              </div>
+              {% endif %}
+              {% if transaccion.notas_comprador %}
+              <div class="d-flex align-items-start gap-2">
+                <i class="bi bi-chat-left-text flex-shrink-0 mt-1" style="font-size:.85rem;color:var(--c-muted);"></i>
+                <span style="color:var(--c-muted);"><strong>Notas:</strong> {{ transaccion.notas_comprador|e }}</span>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
+
+          {# Exchange products detail #}
+          {% if esIntercambio and intercambioDetalle and estado in ['aceptada','pago_pendiente','enviado','entregado'] %}
+          <div class="exchange-products p-2 mb-3">
+            <div class="fw-semibold mb-2" style="font-size:.82rem;">
+              <i class="bi bi-arrow-left-right me-1 text-primary"></i>Productos del intercambio
+            </div>
+            <div class="d-flex align-items-center gap-2 mb-1 p-2 rounded" style="background:var(--c-bg);">
+              {% if chat.producto_imagen %}
+              <img src="{{ BASE }}/{{ chat.producto_imagen|e }}" style="width:36px;height:36px;border-radius:var(--r-sm);object-fit:cover;"
+                   onerror="this.src='{{ BASE }}/public/img/default.jpg'">
+              {% endif %}
+              <div class="flex-grow-1 min-w-0">
+                <div class="fw-semibold text-truncate" style="font-size:.8rem;">{{ chat.producto_titulo|e }}</div>
+                <div style="font-size:.72rem;color:var(--c-muted);">Del vendedor</div>
+              </div>
+            </div>
+            <div class="text-center py-1" style="color:var(--c-muted);font-size:.8rem;"><i class="bi bi-arrow-down-up"></i></div>
+            {% for det in intercambioDetalle %}
+            <div class="d-flex align-items-center gap-2 p-2 rounded" style="background:var(--c-bg);">
+              {% if det.imagen %}
+              <img src="{{ BASE }}/{{ det.imagen|e }}" style="width:36px;height:36px;border-radius:var(--r-sm);object-fit:cover;"
+                   onerror="this.src='{{ BASE }}/public/img/default.jpg'">
+              {% endif %}
+              <div class="flex-grow-1 min-w-0">
+                <div class="fw-semibold text-truncate" style="font-size:.8rem;">{{ det.titulo|default('Producto eliminado')|e }}</div>
+                <div style="font-size:.72rem;color:var(--c-muted);">Del comprador{% if det.precio %} · {{ det.precio|number_format(2) }} €{% endif %}</div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          {# ── ACTION AREA ── only the current state's action ── #}
+          {% if not esFinalizado %}
+
+            {# PENDIENTE → comprador acepta #}
+            {% if estado == 'pendiente' and esComprador %}
+            <div class="card action-card mb-3">
+              <div class="card-header border-0 pb-0 pt-3 px-3">
+                <span class="fw-bold">
+                  <i class="bi bi-hand-thumbs-up me-1 text-primary"></i>
+                  {{ esIntercambio ? 'Proponer intercambio' : 'Aceptar transacción' }}
+                </span>
+              </div>
+              <div class="card-body px-3 pb-3 pt-2">
+                <form action="{{ txAction }}" method="POST" id="form-aceptar">
+                  <input type="hidden" name="transaccion_id" value="{{ transaccion.id }}">
+                  <input type="hidden" name="chat_id"        value="{{ chatId }}">
+                  <input type="hidden" name="estado"         value="aceptada">
+
+                  {# Product to offer (exchange / mixed) #}
+                  {% if esIntercambio %}
+                  <div class="mb-3">
+                    <label class="form-label fw-semibold" style="font-size:.83rem;">
+                      <i class="bi bi-arrow-left-right me-1"></i>Tu producto a cambio <span class="text-danger">*</span>
+                    </label>
+                    <select name="producto_ofrecido_id" id="sel-producto-ofrecido" class="form-select form-select-sm" required>
+                      <option value="">Cargando tus productos…</option>
+                    </select>
+                    <div id="preview-producto-ofrecido" class="mt-2 d-none d-flex align-items-center gap-2 p-2 rounded" style="background:var(--c-surface);">
+                      <img id="img-producto-ofrecido" src="" alt="" style="width:38px;height:38px;object-fit:cover;border-radius:var(--r-sm);">
+                      <span id="titulo-producto-ofrecido" class="fw-semibold" style="font-size:.82rem;"></span>
+                    </div>
+                  </div>
+                  {% endif %}
+
+                  {# Payment method (venta or mixto) #}
+                  {% if transaccion.tipo != 'intercambio' %}
+                  <div class="mb-3">
+                    <label class="form-label fw-semibold" style="font-size:.83rem;">
+                      Método de pago <span class="text-danger">*</span>
+                    </label>
+                    {% set metodos = {
+                      'efectivo':      ['bi-cash-coin',  'Efectivo al entregar'],
+                      'transferencia': ['bi-bank',       'Transferencia bancaria'],
+                      'bizum':         ['bi-phone',      'Bizum'],
+                      'paypal':        ['bi-paypal',     'PayPal'],
+                      'otro':          ['bi-three-dots', 'Otro método']
+                    } %}
+                    {% for val, m in metodos %}
+                    <label class="mp-option" style="font-size:.83rem;">
+                      <input type="radio" name="metodo_pago" value="{{ val }}" class="form-check-input" required>
+                      <i class="bi {{ m[0] }}" style="color:var(--c-muted);font-size:1rem;"></i>
+                      {{ m[1] }}
+                    </label>
+                    {% endfor %}
+                    <label class="mp-option mp-stripe-opt {{ not stripeDisponible ? 'opacity-50' : '' }}" style="font-size:.83rem;">
+                      <input type="radio" name="metodo_pago" value="stripe" id="mp-stripe" class="form-check-input"
+                             required {{ not stripeDisponible ? 'disabled' : '' }}>
+                      <i class="bi bi-credit-card-2-front" style="color:#635bff;font-size:1rem;"></i>
+                      <span class="mp-stripe-label">Tarjeta · Stripe</span>
+                      <span class="ms-auto" style="color:var(--c-muted);font-size:.75rem;">
+                        🔒 {{ stripeDisponible ? precioProducto|number_format(2) ~ ' €' : 'Min. 0,50 €' }}
+                      </span>
+                    </label>
+
+                    {% if stripeDisponible %}
+                    <div id="stripe-payment-block" class="mt-2 p-3 rounded" style="border:1.5px solid rgba(99,91,255,.3);">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-semibold" style="font-size:.82rem;"><i class="bi bi-credit-card me-1"></i>Datos de tarjeta</span>
+                        <small style="color:var(--c-muted);">Visa · MC · Amex</small>
+                      </div>
+                      <div id="stripe-card-element"></div>
+                      <div id="stripe-error-msg" class="mt-2 d-none text-danger" style="font-size:.8rem;">
+                        <i class="bi bi-exclamation-circle me-1"></i><span id="stripe-error-text"></span>
+                      </div>
+                      <div class="mt-2" style="font-size:.72rem;color:var(--c-muted);">
+                        <i class="bi bi-shield-lock-fill text-success me-1"></i>Cifrado TLS · Procesado por Stripe
+                      </div>
+                      <input type="hidden" name="stripe_payment_intent_id" id="stripe-pi-id">
+                    </div>
+                    {% endif %}
+                  </div>
+                  {% endif %}
+
+                  <div class="mb-3">
+                    <label for="direccion_envio" class="form-label fw-semibold" style="font-size:.83rem;">
+                      <i class="bi bi-geo-alt me-1"></i>Dirección de envío
+                      <span style="color:var(--c-muted);font-weight:400;">(opcional)</span>
+                    </label>
+                    <input type="text" id="direccion_envio" name="direccion_envio"
+                           class="form-control form-control-sm" placeholder="Escribe tu dirección…" autocomplete="off">
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="notas_comprador" class="form-label fw-semibold" style="font-size:.83rem;">
+                      Notas <span style="color:var(--c-muted);font-weight:400;">(opcional)</span>
+                    </label>
+                    <textarea id="notas_comprador" name="notas_comprador"
+                              class="form-control form-control-sm" rows="2"
+                              maxlength="300" placeholder="Instrucciones especiales…"></textarea>
+                  </div>
+
+                  <button type="submit" id="btn-aceptar-transaccion" class="btn btn-success btn-sm w-100">
+                    <i class="bi bi-hand-thumbs-up me-1" id="btn-aceptar-icon"></i>
+                    <span id="btn-aceptar-texto">{{ esIntercambio ? 'Proponer intercambio' : 'Aceptar y confirmar' }}</span>
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            {# PENDIENTE → vendedor espera #}
+            {% elseif estado == 'pendiente' and esVendedor %}
+            <div class="card mb-3" style="border-color:#ffc107;">
+              <div class="card-body text-center py-4">
+                <i class="bi bi-hourglass-split d-block" style="font-size:2rem;color:#ffc107;margin-bottom:.6rem;"></i>
+                <p class="small mb-0" style="color:var(--c-muted);">
+                  Esperando a que el comprador
+                  {{ esIntercambio ? 'proponga un producto a cambio' : 'acepte y elija cómo pagar' }}.
+                </p>
+              </div>
+            </div>
+
+            {# ACEPTADA → comprador confirma pago #}
+            {% elseif estado == 'aceptada' and esComprador %}
+            <div class="card action-card mb-3">
+              <div class="card-body text-center py-3 px-3">
+                <i class="bi bi-credit-card d-block text-primary" style="font-size:2rem;margin-bottom:.6rem;"></i>
+                <p class="small mb-3">
+                  Paga con <strong>{{ etiquetaMetodo[transaccion.metodo_pago][1]|default(transaccion.metodo_pago)|e }}</strong>
+                  y pulsa el botón cuando lo hayas hecho.
+                </p>
+                <form action="{{ txAction }}" method="POST">
+                  <input type="hidden" name="transaccion_id" value="{{ transaccion.id }}">
+                  <input type="hidden" name="chat_id"        value="{{ chatId }}">
+                  <input type="hidden" name="estado"         value="pago_pendiente">
+                  <button type="submit" class="btn btn-primary btn-sm w-100">
+                    <i class="bi bi-check-circle me-1"></i>Ya he realizado el pago
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            {# ACEPTADA → vendedor espera pago #}
+            {% elseif estado == 'aceptada' and esVendedor %}
+            <div class="card mb-3" style="border-color:#ffc107;">
+              <div class="card-body text-center py-4">
+                <i class="bi bi-hourglass-split d-block" style="font-size:2rem;color:#ffc107;margin-bottom:.6rem;"></i>
+                <p class="small mb-0" style="color:var(--c-muted);">
+                  El comprador va a pagar por
+                  <strong>{{ etiquetaMetodo[transaccion.metodo_pago][1]|default(transaccion.metodo_pago)|e }}</strong>.
+                  Espera su confirmación.
+                </p>
+              </div>
+            </div>
+
+            {# PAGO_PENDIENTE → vendedor marca como enviado #}
+            {% elseif estado == 'pago_pendiente' and esVendedor %}
+            <div class="card action-card mb-3">
+              <div class="card-header border-0 pb-0 pt-3 px-3">
+                <span class="fw-bold">
+                  {% if transaccion.metodo_pago == 'stripe' %}
+                  <i class="bi bi-check-circle me-1 text-success"></i>Pago confirmado
+                  {% else %}
+                  <i class="bi bi-truck me-1 text-primary"></i>Confirmar y enviar
+                  {% endif %}
+                </span>
+              </div>
+              <div class="card-body px-3 pb-3 pt-2">
+                {% if transaccion.metodo_pago == 'stripe' %}
+                <p class="small text-success mb-3">
+                  <i class="bi bi-shield-check me-1"></i>El pago con tarjeta fue verificado por Stripe. Ya puedes enviar.
+                </p>
+                {% else %}
+                <p class="small mb-3" style="color:var(--c-muted);">
+                  Comprueba que has recibido el pago antes de enviar el producto.
+                </p>
+                {% endif %}
+                <form action="{{ txAction }}" method="POST">
+                  <input type="hidden" name="transaccion_id" value="{{ transaccion.id }}">
+                  <input type="hidden" name="chat_id"        value="{{ chatId }}">
+                  <input type="hidden" name="estado"         value="enviado">
+                  <div class="mb-3">
+                    <label for="numero_seguimiento" class="form-label fw-semibold" style="font-size:.83rem;">
+                      Nº de seguimiento <span style="color:var(--c-muted);font-weight:400;">(opcional)</span>
+                    </label>
+                    <input type="text" id="numero_seguimiento" name="numero_seguimiento"
+                           class="form-control form-control-sm" placeholder="Ej: ES123456789ES">
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-sm w-100">
+                    <i class="bi bi-truck me-1"></i>Confirmar envío
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            {# PAGO_PENDIENTE → comprador espera envío #}
+            {% elseif estado == 'pago_pendiente' and esComprador %}
+            <div class="card mb-3" style="border-color:#0dcaf0;">
+              <div class="card-body text-center py-4">
+                {% if transaccion.metodo_pago == 'stripe' %}
+                <i class="bi bi-credit-card-2-front d-block text-success" style="font-size:2rem;margin-bottom:.6rem;"></i>
+                <p class="small mb-0" style="color:var(--c-muted);">Tu pago con tarjeta fue procesado. El vendedor preparará el envío en breve.</p>
+                {% else %}
+                <i class="bi bi-hourglass-split d-block" style="font-size:2rem;color:#0dcaf0;margin-bottom:.6rem;"></i>
+                <p class="small mb-0" style="color:var(--c-muted);">Has notificado el pago. El vendedor lo verificará y preparará el envío.</p>
+                {% endif %}
+              </div>
+            </div>
+
+            {# ENVIADO → comprador confirma recepción #}
+            {% elseif estado == 'enviado' and esComprador %}
+            <div class="card action-card mb-3">
+              <div class="card-body text-center py-3 px-3">
+                <i class="bi bi-truck d-block text-success" style="font-size:2rem;margin-bottom:.6rem;"></i>
+                {% if transaccion.numero_seguimiento %}
+                <p class="small mb-2">
+                  <i class="bi bi-box-seam me-1"></i>Seguimiento:
+                  <code class="text-primary">{{ transaccion.numero_seguimiento|e }}</code>
+                </p>
+                {% endif %}
+                <p class="small mb-3" style="color:var(--c-muted);">El producto está en camino. Confírmalo cuando lo recibas.</p>
+                <form id="form-entregado" action="{{ txAction }}" method="POST" data-no-loading>
+                  <input type="hidden" name="transaccion_id" value="{{ transaccion.id }}">
+                  <input type="hidden" name="chat_id"        value="{{ chatId }}">
+                  <input type="hidden" name="estado"         value="entregado">
+                  <button type="button" class="btn btn-success btn-sm w-100"
+                          data-bs-toggle="modal" data-bs-target="#modalConfirmarEntrega">
+                    <i class="bi bi-check-circle me-1"></i>He recibido el producto
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            {# ENVIADO → vendedor espera confirmación #}
+            {% elseif estado == 'enviado' and esVendedor %}
+            <div class="card mb-3" style="border-color:#198754;">
+              <div class="card-body text-center py-4">
+                <i class="bi bi-truck d-block text-success" style="font-size:2rem;margin-bottom:.6rem;"></i>
+                {% if transaccion.numero_seguimiento %}
+                <p class="small mb-2">Nº seguimiento: <code>{{ transaccion.numero_seguimiento|e }}</code></p>
+                {% endif %}
+                <p class="small mb-0" style="color:var(--c-muted);">Esperando confirmación de recepción del comprador.</p>
+              </div>
+            </div>
+            {% endif %}
+
+            {# Cancel — always shown for non-terminal states #}
+            <form id="form-cancelar" action="{{ txAction }}" method="POST" data-no-loading>
+              <input type="hidden" name="transaccion_id" value="{{ transaccion.id }}">
+              <input type="hidden" name="chat_id"        value="{{ chatId }}">
+              <input type="hidden" name="estado"         value="cancelada">
+              <button type="button" class="btn btn-outline-danger btn-sm w-100"
+                      data-bs-toggle="modal" data-bs-target="#modalCancelarTransaccion">
+                <i class="bi bi-x-circle me-1"></i>Cancelar transacción
+              </button>
+            </form>
+
+          {% else %}
+            {# Terminal states #}
+            {% if estado == 'entregado' %}
+            <div class="card border-success mb-3">
+              <div class="card-body text-center py-4">
+                <i class="bi bi-check-circle-fill d-block text-success" style="font-size:2.5rem;margin-bottom:.6rem;"></i>
+                <p class="fw-semibold mb-1">¡Transacción completada!</p>
+                <p class="small mb-0" style="color:var(--c-muted);">Gracias por usar MercApp.</p>
+              </div>
+            </div>
+            {% elseif estado == 'cancelada' %}
+            <div class="card border-danger mb-3">
+              <div class="card-body text-center py-4">
+                <i class="bi bi-x-circle-fill d-block text-danger" style="font-size:2.5rem;margin-bottom:.6rem;"></i>
+                <p class="fw-semibold mb-1">Transacción cancelada</p>
+                <p class="small mb-0" style="color:var(--c-muted);">El producto vuelve a estar disponible.</p>
+              </div>
+            </div>
+            {% endif %}
+          {% endif %}
+
+        {% elseif esVendedor %}
+          {# Seller — no transaction started yet #}
+          <div class="card mb-3">
+            <div class="card-body text-center py-4">
+              <i class="bi bi-bag-check d-block" style="font-size:2rem;color:var(--c-muted);opacity:.5;margin-bottom:.6rem;"></i>
+              <p class="small mb-3" style="color:var(--c-muted);">Cuando estés listo, inicia la transacción.</p>
+              <form action="{{ BASE }}/controllers/chat_start_transaction.php" method="POST">
+                <input type="hidden" name="chat_id" value="{{ chatId }}">
+                <button class="btn btn-success btn-sm w-100">
+                  <i class="bi bi-bag-check me-1"></i>Iniciar transacción
+                </button>
+              </form>
+            </div>
+          </div>
+
+        {% else %}
+          {# Buyer — waiting for seller to start #}
+          <div class="card mb-3">
+            <div class="card-body text-center py-4">
+              <i class="bi bi-hourglass d-block" style="font-size:2rem;color:var(--c-muted);opacity:.5;margin-bottom:.6rem;"></i>
+              <p class="small mb-0" style="color:var(--c-muted);">El vendedor no ha iniciado la transacción todavía.</p>
+            </div>
+          </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ── MODALS ──────────────────────────────────────────── #}
+
+{% if chat.producto_id %}
+<div class="modal fade" id="modalReporte" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="POST" action="{{ BASE }}/public/views/chat.php?id={{ chatId }}">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title text-danger"><i class="bi bi-flag-fill me-2"></i>Reportar producto</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="small mb-3" style="color:var(--c-muted);">Nuestro equipo revisará el reporte.</p>
+          <div class="d-grid gap-2 mb-3">
+            {% set motivos = ['Producto falso o fraudulento','Precio engañoso','Contenido inapropiado o ilegal','El vendedor no responde','Posible estafa','Otro'] %}
+            {% for m in motivos %}
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="reporte_motivo_preset"
+                     id="motivo-{{ m|md5 }}" value="{{ m|e }}">
+              <label class="form-check-label" for="motivo-{{ m|md5 }}">{{ m|e }}</label>
+            </div>
+            {% endfor %}
+          </div>
+          <div class="mb-2">
+            <label for="motivo-custom" class="form-label fw-semibold">Detalle adicional</label>
+            <textarea id="motivo-custom" class="form-control" rows="3" maxlength="500"
+                      placeholder="Describe el problema…" disabled></textarea>
+          </div>
+          <input type="hidden" name="reporte_motivo" id="reporte-motivo-final">
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-danger btn-sm" id="btn-enviar-reporte" disabled>
+            <i class="bi bi-flag me-1"></i>Enviar reporte
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% if mostrarModalValoracion and transaccion %}
+<div class="modal fade" id="modalValoracion" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title"><i class="bi bi-star-fill text-warning me-2"></i>Valora tu experiencia</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="small mb-4" style="color:var(--c-muted);">Puntúa del 1 al 5 cada criterio.</p>
+        {% set criterios = {'fiabilidad':['bi-shield-check','Fiabilidad'],'comunicacion':['bi-chat-dots','Comunicación'],'puntualidad':['bi-clock','Puntualidad']} %}
+        {% for campo, c in criterios %}
+        <div class="mb-4">
+          <label class="form-label fw-semibold"><i class="bi {{ c[0] }} me-1"></i>{{ c[1] }}</label>
+          <div class="star-group d-flex gap-2 fs-3" data-field="{{ campo }}">
+            {% for i in 1..5 %}
+            <i class="bi bi-star star-btn" data-value="{{ i }}" style="cursor:pointer;color:var(--c-border);"></i>
+            {% endfor %}
+          </div>
+          <input type="hidden" id="inp-{{ campo }}" value="0">
+        </div>
+        {% endfor %}
+        <div class="mb-3">
+          <label for="comentario-val" class="form-label fw-semibold">
+            Comentario <span style="color:var(--c-muted);font-weight:400;">(opcional)</span>
+          </label>
+          <textarea id="comentario-val" class="form-control" rows="3" maxlength="500"
+                    placeholder="Cuéntanos tu experiencia…"></textarea>
+        </div>
+        <div id="resumen-media" class="alert alert-light text-center d-none">
+          Puntuación media: <strong id="media-val">—</strong> <span id="media-stars" class="text-warning"></span>
+        </div>
+        <div id="rating-feedback" class="d-none"></div>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Ahora no</button>
+        <button type="button" id="btn-enviar-valoracion" class="btn btn-primary btn-sm" disabled>
+          <i class="bi bi-send me-1"></i>Enviar valoración
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<div class="modal fade" id="modalConfirmarEntrega" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold"><i class="bi bi-check-circle text-success me-2"></i>Confirmar recepción</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>¿Confirmas que has recibido <strong>{{ chat.producto_titulo|default('')|e }}</strong>?</p>
+        <p class="small" style="color:var(--c-muted);">Esta acción no se puede deshacer.</p>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Volver</button>
+        <button type="button" class="btn btn-success btn-sm"
+                onclick="document.getElementById('form-entregado').submit()">
+          <i class="bi bi-check-circle me-1"></i>Sí, he recibido el producto
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalCancelarTransaccion" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-color:#dc3545;">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold text-danger"><i class="bi bi-x-circle me-2"></i>Cancelar transacción</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>¿Seguro que quieres cancelar <strong>{{ chat.producto_titulo|default('')|e }}</strong>?</p>
+        <p class="small" style="color:var(--c-muted);">El producto volverá a estar disponible.</p>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Volver</button>
+        <button type="button" class="btn btn-danger btn-sm"
+                onclick="document.getElementById('form-cancelar').submit()">
+          <i class="bi bi-x-circle me-1"></i>Cancelar transacción
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{% for toast in chatToasts|default([]) %}
+<script>document.addEventListener('DOMContentLoaded',()=>mostrarToast('{{ toast[1]|e('js') }}','{{ toast[0]|e('js') }}'));</script>
+{% endfor %}
+
+{% if mostrarModalValoracion and transaccion %}
+<script src="{{ asset('js/rating.js') }}"
+        data-transaccion-id="{{ transaccion.id }}"
+        data-chat-id="{{ chatId }}"
+        defer></script>
+{% endif %}
+
+<script src="{{ asset('js/address_autocomplete.js') }}"></script>
+{% if stripeDisponible %}
+<script src="https://js.stripe.com/v3/"></script>
+{% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  // Auto-scroll chat to bottom
+  const box = document.getElementById('chat-box');
+  if (box) box.scrollTop = box.scrollHeight;
+
+  // Address autocomplete
+  if (typeof initAddressAutocomplete === 'function') {
+    initAddressAutocomplete('direccion_envio', `${BASE}/api/normalize_address.php`);
+  }
+
+  // Report modal
+  const radios = document.querySelectorAll('input[name="reporte_motivo_preset"]');
+  const custom  = document.getElementById('motivo-custom');
+  const final   = document.getElementById('reporte-motivo-final');
+  const btnRep  = document.getElementById('btn-enviar-reporte');
+  if (radios.length && custom && final && btnRep) {
+    const syncReport = () => {
+      const sel = document.querySelector('input[name="reporte_motivo_preset"]:checked');
+      if (!sel) { btnRep.disabled = true; return; }
+      if (sel.value === 'Otro') {
+        const txt = custom.value.trim();
+        final.value = txt || 'Otro';
+        btnRep.disabled = txt === '';
+        custom.disabled = false;
+      } else {
+        final.value = sel.value;
+        btnRep.disabled = false;
+        custom.disabled = true;
+      }
+    };
+    radios.forEach(r => r.addEventListener('change', syncReport));
+    custom.addEventListener('input', syncReport);
+  }
+
+  // Payment method option highlight
+  document.querySelectorAll('.mp-option').forEach(label => {
+    const radio = label.querySelector('input[type="radio"]');
+    if (!radio) return;
+    radio.addEventListener('change', () => {
+      document.querySelectorAll('.mp-option').forEach(l => l.classList.remove('selected'));
+      if (radio.checked) label.classList.add('selected');
+    });
+  });
+
+  {% if esIntercambio and esComprador %}
+  // Exchange product loader
+  const sel = document.getElementById('sel-producto-ofrecido');
+  if (sel) {
+    fetch(`${BASE}/api/mis_productos_activos.php`).then(r => r.json()).then(res => {
+      const productos = res.data || [];
+      if (!productos.length) {
+        sel.innerHTML = '<option value="">No tienes productos activos para ofrecer</option>';
+        return;
+      }
+      sel.innerHTML = '<option value="">— Selecciona un producto —</option>';
+      productos.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = p.titulo + (p.precio ? ' (' + parseFloat(p.precio).toFixed(2) + ' €)' : '');
+        opt.dataset.imagen = p.imagen || '';
+        sel.appendChild(opt);
+      });
+    }).catch(() => {
+      sel.innerHTML = '<option value="">Error al cargar productos</option>';
+    });
+
+    sel.addEventListener('change', () => {
+      const opt   = sel.options[sel.selectedIndex];
+      const prev  = document.getElementById('preview-producto-ofrecido');
+      const img   = document.getElementById('img-producto-ofrecido');
+      const tit   = document.getElementById('titulo-producto-ofrecido');
+      if (opt && opt.value && opt.dataset.imagen) {
+        img.src = `${BASE}/${opt.dataset.imagen}`;
+        tit.textContent = opt.textContent;
+        prev.classList.remove('d-none');
+      } else {
+        prev.classList.add('d-none');
+      }
+    });
+  }
+  {% endif %}
+
+  {% if stripeDisponible %}
+  // Stripe Elements
+  const stripeBlock = document.getElementById('stripe-payment-block');
+  const errMsg      = document.getElementById('stripe-error-msg');
+  const errTxt      = document.getElementById('stripe-error-text');
+  const btnAceptar  = document.getElementById('btn-aceptar-transaccion');
+  const btnTexto    = document.getElementById('btn-aceptar-texto');
+  const btnIcon     = document.getElementById('btn-aceptar-icon');
+  const piInput     = document.getElementById('stripe-pi-id');
+  const formAceptar = document.getElementById('form-aceptar');
+
+  if (stripeBlock && formAceptar && btnAceptar) {
+    const STRIPE_PK      = '{{ stripeKey|e }}';
+    const TRANSACCION_ID = {{ transaccion ? transaccion.id|default(0) : 0 }};
+    const PRECIO         = {{ precioProducto|default(0) }};
+
+    const stripe      = Stripe(STRIPE_PK);
+    const elements    = stripe.elements();
+    const cardElement = elements.create('card', {
+      style: {
+        base: {
+          fontFamily: 'system-ui, sans-serif',
+          fontSize: '15px',
+          color: document.documentElement.getAttribute('data-theme') === 'dark' ? '#e0e0e0' : '#212529',
+          '::placeholder': { color: '#adb5bd' }
+        },
+        invalid: { color: '#dc3545' }
+      },
+      hidePostalCode: true
+    });
+    cardElement.mount('#stripe-card-element');
+    cardElement.on('change', e => {
+      if (e.error) { errTxt.textContent = e.error.message; errMsg.classList.remove('d-none'); }
+      else { errMsg.classList.add('d-none'); }
+    });
+
+    const mpStripeRadio = document.getElementById('mp-stripe');
+    if (mpStripeRadio) {
+      document.querySelectorAll('input[name="metodo_pago"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+          if (radio.value === 'stripe' && radio.checked) {
+            stripeBlock.style.display = 'block';
+            btnTexto.textContent = `Pagar ${PRECIO.toFixed(2).replace('.', ',')} € con tarjeta`;
+            btnIcon.className = 'bi bi-lock-fill me-1';
+            btnAceptar.classList.replace('btn-success', 'btn-primary');
+          } else if (radio.checked) {
+            stripeBlock.style.display = 'none';
+            btnTexto.textContent = '{{ esIntercambio ? 'Proponer intercambio' : 'Aceptar y confirmar' }}';
+            btnIcon.className = 'bi bi-hand-thumbs-up me-1';
+            btnAceptar.classList.replace('btn-primary', 'btn-success');
+          }
+        });
+      });
+    }
+
+    formAceptar.addEventListener('submit', async e => {
+      if (!mpStripeRadio || !mpStripeRadio.checked) return;
+      e.preventDefault();
+      btnAceptar.disabled = true;
+      btnTexto.textContent = 'Procesando pago…';
+      btnIcon.className = 'spinner-border spinner-border-sm me-1';
+      errMsg.classList.add('d-none');
+      try {
+        const resp = await fetch(`${BASE}/api/stripe_create_payment.php`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: `transaccion_id=${TRANSACCION_ID}`
+        });
+        if (!resp.ok) {
+          const err = await resp.json().catch(() => ({}));
+          throw new Error(err.error || 'Error al iniciar el pago');
+        }
+        const { client_secret } = await resp.json();
+        const { paymentIntent, error } = await stripe.confirmCardPayment(client_secret, {
+          payment_method: { card: cardElement }
+        });
+        if (error) throw new Error(error.message);
+        if (paymentIntent.status !== 'succeeded') throw new Error('El pago no pudo completarse.');
+        piInput.value = paymentIntent.id;
+        formAceptar.submit();
+      } catch (err) {
+        errTxt.textContent = err.message;
+        errMsg.classList.remove('d-none');
+        btnAceptar.disabled = false;
+        btnTexto.textContent = `Pagar ${PRECIO.toFixed(2).replace('.', ',')} € con tarjeta`;
+        btnIcon.className = 'bi bi-lock-fill me-1';
+      }
+    });
+  }
+  {% endif %}
+
+  // Show rating modal automatically if needed
+  {% if mostrarModalValoracion %}
+  const modalVal = document.getElementById('modalValoracion');
+  if (modalVal) {
+    setTimeout(() => {
+      const m = bootstrap.Modal.getOrCreateInstance(modalVal);
+      m.show();
+    }, 800);
+  }
+  {% endif %}
+});
+</script>
+{% endblock %}

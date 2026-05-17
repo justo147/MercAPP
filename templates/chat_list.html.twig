@@ -1,0 +1,150 @@
+{% extends 'base.html.twig' %}
+{% block title %}Mis chats — MercApp{% endblock %}
+
+{% block content %}
+
+{% set totalNoLeidos = 0 %}
+{% for chat in chats %}{% set totalNoLeidos = totalNoLeidos + chat.no_leidos %}{% endfor %}
+
+<div style="max-width:720px;margin:0 auto;">
+
+  <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+    <h4 class="fw-bold mb-0">
+      <i class="bi bi-chat-dots me-2 text-primary"></i>Mis chats
+    </h4>
+    <div class="d-flex align-items-center gap-2">
+      {% if totalNoLeidos > 0 %}
+      <span class="badge bg-danger rounded-pill" id="badge-total-noLeidos">{{ totalNoLeidos }} sin leer</span>
+      <button class="btn btn-sm btn-outline-secondary" id="btn-marcar-leidos"
+              aria-label="Marcar todos como leídos">
+        <i class="bi bi-envelope-open me-1"></i>Marcar todo leído
+      </button>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Filter tabs -->
+  <div class="filter-tabs mb-4">
+    {% for val, meta in filtros %}
+    <a href="?filtro={{ val|url_encode }}"
+       class="filter-tab {{ filtroActual == val ? 'active' : '' }}">
+      <i class="bi {{ meta[1] }} me-1"></i>{{ meta[0] }}
+    </a>
+    {% endfor %}
+  </div>
+
+  {% if chats is empty %}
+  <div class="empty-state">
+    <i class="bi bi-chat-square-dots"></i>
+    {% if filtroActual %}
+    <h3>Sin resultados</h3>
+    <p>No hay chats con este filtro.</p>
+    <a href="?" class="btn btn-outline-secondary btn-sm">Ver todos</a>
+    {% else %}
+    <h3>Todavía sin chats</h3>
+    <p>Cuando contactes con un vendedor aparecerá aquí.</p>
+    <a href="{{ BASE }}/public/views/home.php" class="btn btn-primary">
+      <i class="bi bi-search me-1"></i> Explorar productos
+    </a>
+    {% endif %}
+  </div>
+  {% else %}
+
+  <div class="card no-hover p-0" style="overflow:hidden;">
+    {% for chat in chats %}
+    {% set imgProd = chat.producto_imagen ? BASE ~ '/' ~ chat.producto_imagen : BASE ~ '/public/img/default.jpg' %}
+    {% set otraFoto = chat.otro_foto ? BASE ~ '/' ~ chat.otro_foto : null %}
+    {% set noLeidos = chat.no_leidos|default(0)|number_format(0,'','') %}
+    {% set estado   = chat.transaccion_estado ?? null %}
+    {% set badgeMap = {
+      'pendiente':       ['status-pendiente',      'Pendiente'],
+      'aceptada':        ['status-aceptada',        'Aceptada'],
+      'pago_pendiente':  ['status-pago_pendiente',  'Pago pendiente'],
+      'enviado':         ['status-enviado',          'Enviado'],
+      'entregado':       ['status-entregado',        'Entregado'],
+      'cancelada':       ['status-cancelada',        'Cancelada'],
+    } %}
+    {% set badge = estado ? badgeMap[estado] ?? ['',''] : ['',''] %}
+
+    <a href="{{ BASE }}/public/views/chat.php?id={{ chat.chat_id }}"
+       class="chat-list-item {{ noLeidos > 0 ? 'unread' : '' }}"
+       style="border-bottom:1px solid var(--c-border);{{ noLeidos > 0 ? 'border-left:3px solid var(--c-primary);' : '' }}">
+
+      <!-- Product img -->
+      <img src="{{ imgProd|e }}"
+           alt="Producto"
+           style="width:52px;height:52px;object-fit:cover;border-radius:var(--r-md);flex-shrink:0;"
+           onerror="this.onerror=null;this.src='{{ BASE }}/public/img/default.jpg'">
+
+      <!-- Content -->
+      <div class="flex-grow-1 min-w-0">
+        <div class="d-flex justify-content-between align-items-start">
+          <span class="fw-semibold text-truncate" style="max-width:280px;color:var(--c-text);">
+            {{ chat.producto_titulo ?? 'Producto'|e }}
+          </span>
+          <span class="text-muted flex-shrink-0 ms-2" style="font-size:.72rem;">
+            {{ chat.fecha_relativa ?? '' }}
+          </span>
+        </div>
+
+        <div class="d-flex align-items-center gap-1 mt-1">
+          {% if otraFoto %}
+          <img src="{{ otraFoto|e }}" alt=""
+               style="width:18px;height:18px;border-radius:50%;object-fit:cover;"
+               onerror="this.style.display='none'">
+          {% else %}
+          <i class="bi bi-person-circle text-muted" style="font-size:.9rem;"></i>
+          {% endif %}
+          <span class="small text-muted me-1 flex-shrink-0">{{ chat.otro_nombre ?? ''|e }}:</span>
+          <span class="chat-preview">{{ chat.ultimo_msg_clean ?? '' }}</span>
+        </div>
+
+        {% if estado %}
+        <div class="mt-1">
+          <span class="badge-status {{ badge[0] }}">
+            <i class="bi bi-arrow-left-right me-1"></i>{{ badge[1] }}
+          </span>
+        </div>
+        {% endif %}
+      </div>
+
+      {% if noLeidos > 0 %}
+      <span class="badge rounded-pill bg-danger flex-shrink-0">{{ noLeidos }}</span>
+      {% endif %}
+
+    </a>
+    {% endfor %}
+  </div>
+
+  {% endif %}
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('btn-marcar-leidos')?.addEventListener('click', function() {
+  const btn = this, orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Marcando…';
+  fetch(`${BASE}/api/chat_mark_all_read.php`, { method:'POST' })
+    .then(r => r.json())
+    .then(data => {
+      if (data.ok) {
+        document.querySelectorAll('[style*="border-left:3px"]').forEach(el => el.style.borderLeft = '');
+        document.querySelectorAll('.badge.rounded-pill.bg-danger').forEach(el => el.remove());
+        document.getElementById('badge-total-noLeidos')?.remove();
+        btn.remove();
+        mostrarToast('Todos los chats marcados como leídos.', 'success');
+        const bm = document.getElementById('badge-mensajes');
+        if (bm) { bm.style.display = 'none'; }
+      } else {
+        btn.disabled = false; btn.innerHTML = orig;
+        mostrarToast('No se pudo completar la acción.', 'error');
+      }
+    })
+    .catch(() => { btn.disabled = false; btn.innerHTML = orig; mostrarToast('Error de conexión.', 'error'); });
+});
+</script>
+{% endblock %}

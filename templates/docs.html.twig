@@ -1,0 +1,206 @@
+{% extends 'base.html.twig' %}
+{% block title %}Documentación técnica — MercApp{% endblock %}
+
+{% block head_extra %}
+<style>
+#api-content  { display:none; padding:1.5rem 0; }
+.method-get    { background:#0d6efd; color:#fff; }
+.method-post   { background:#198754; color:#fff; }
+.method-delete { background:#dc3545; color:#fff; }
+.method-badge  { font-size:.72rem; font-weight:700; padding:.2em .55em; border-radius:.3em; white-space:nowrap; }
+.endpoint-path { font-family:monospace; font-size:.85rem; }
+.section-title { border-left:4px solid var(--c-primary); padding-left:.6rem; }
+pre { background:var(--c-bg); border:1px solid var(--c-border); border-radius:var(--r-md); padding:1rem; font-size:.8rem; overflow-x:auto; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="max-width:1100px;margin:0 auto;">
+
+  <div class="text-center mb-4">
+    <h2 class="fw-bold"><i class="bi bi-file-earmark-code me-2 text-primary"></i>Documentación técnica</h2>
+    <p class="text-muted">Acceso centralizado a la documentación completa del proyecto.</p>
+  </div>
+
+  <ul class="nav nav-tabs justify-content-center gap-2 mb-4" id="docTabs">
+    <li class="nav-item"><button class="nav-link active" data-doc="php"><i class="bi bi-filetype-php me-1"></i>PHPDoc</button></li>
+    <li class="nav-item"><button class="nav-link" data-doc="js"><i class="bi bi-filetype-js me-1"></i>JSDoc</button></li>
+    <li class="nav-item"><button class="nav-link" data-doc="test"><i class="bi bi-speedometer2 me-1"></i>Tests</button></li>
+    <li class="nav-item"><button class="nav-link" data-doc="api"><i class="bi bi-braces me-1"></i>API REST</button></li>
+  </ul>
+
+  <!-- Iframe -->
+  <div id="iframe-content">
+    <div class="ratio ratio-16x9">
+      <iframe id="docFrame" src="../../docs/php/index.html" style="border:none;width:100%;height:100%;border-radius:var(--r-md);"></iframe>
+    </div>
+  </div>
+
+  <!-- API REST inline -->
+  <div id="api-content">
+
+    <div class="alert alert-info d-flex gap-2 align-items-start">
+      <i class="bi bi-info-circle-fill mt-1 flex-shrink-0"></i>
+      <div>Todos los endpoints requieren <strong>sesión activa</strong> salvo que se indique. Respuestas en <code>application/json</code> excepto exportaciones CSV.</div>
+    </div>
+
+    {% macro apiRow(method, path, desc, params) %}
+    {% set colors = {'GET':'method-get','POST':'method-post','DELETE':'method-delete'} %}
+    <tr>
+      <td><span class="method-badge {{ colors[method]|default('bg-secondary text-white') }}">{{ method }}</span></td>
+      <td class="endpoint-path">{{ path }}</td>
+      <td>{{ desc|raw }}</td>
+      <td class="small">{{ params|raw }}</td>
+    </tr>
+    {% endmacro %}
+    {% import _self as m %}
+
+    <h2 class="h5 section-title mb-3"><i class="bi bi-box-seam text-primary me-1"></i>Productos</h2>
+    <div class="table-responsive mb-4">
+      <table class="table table-bordered table-hover align-middle">
+        <thead class="table-light"><tr><th>Método</th><th>Ruta</th><th>Descripción</th><th>Parámetros</th></tr></thead>
+        <tbody>
+          {{ m.apiRow('GET','/api/getProductsPaginated.php','Lista productos activos con scroll infinito.','<code>limit</code>, <code>offset</code>') }}
+          {{ m.apiRow('GET','/api/search_products.php','Búsqueda con filtros y proximidad (Haversine).','<code>q</code>, <code>categoria</code>, <code>lat</code>, <code>lon</code>, <code>distancia_km</code>, <code>orden</code>…') }}
+          {{ m.apiRow('GET','/api/mis_productos_activos.php','Productos activos del usuario en sesión.','—') }}
+          {{ m.apiRow('GET','/api/get_filters.php','Categorías, estados de producto, tipos de transacción.','—') }}
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="h5 section-title mb-3"><i class="bi bi-chat-dots text-info me-1"></i>Chat y Transacciones</h2>
+    <div class="table-responsive mb-4">
+      <table class="table table-bordered table-hover align-middle">
+        <thead class="table-light"><tr><th>Método</th><th>Ruta</th><th>Descripción</th><th>Parámetros</th></tr></thead>
+        <tbody>
+          {{ m.apiRow('GET','/api/chat_messages.php','Mensajes de un chat (polling).','<code>chat_id</code>, <code>after_id</code>') }}
+          {{ m.apiRow('GET','/api/chat_unread_count.php','Nº total de mensajes no leídos.','—') }}
+          {{ m.apiRow('POST','/controllers/chat_start_transaction.php','Inicia una transacción (estado: <em>pendiente</em>).','<code>chat_id</code>') }}
+          {{ m.apiRow('POST','/controllers/chat_update_transaction.php','Avanza el estado de la transacción.','<code>transaccion_id</code>, <code>estado</code>, <code>chat_id</code>') }}
+          {{ m.apiRow('GET','/api/mis_transacciones.php','Historial paginado de transacciones.','<code>page</code>, <code>limit</code>, <code>rol</code>, <code>estado</code>') }}
+          {{ m.apiRow('POST','/api/chat_mark_all_read.php','Marca todos los mensajes como leídos.','—') }}
+          {{ m.apiRow('POST','/api/stripe_create_payment.php','Crea un PaymentIntent de Stripe.','<code>transaccion_id</code>') }}
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="h5 section-title mb-3"><i class="bi bi-bell text-warning me-1"></i>Notificaciones, Valoraciones y Usuario</h2>
+    <div class="table-responsive mb-4">
+      <table class="table table-bordered table-hover align-middle">
+        <thead class="table-light"><tr><th>Método</th><th>Ruta</th><th>Descripción</th><th>Parámetros</th></tr></thead>
+        <tbody>
+          {{ m.apiRow('GET','/api/notificaciones.php','Últimas 15 notificaciones no leídas.','—') }}
+          {{ m.apiRow('POST','/api/notificaciones.php','Marca todas como leídas.','<code>accion=mark_all</code>') }}
+          {{ m.apiRow('GET','/api/get_rating.php','Puntuación media de un usuario.','<code>user_id</code>') }}
+          {{ m.apiRow('GET','/api/normalize_address.php','Proxy Nominatim (geocodificación).','<code>q</code>') }}
+          {{ m.apiRow('GET','/api/check_session.php','Comprueba si hay sesión activa.','—') }}
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="h5 section-title mb-3"><i class="bi bi-shield-lock text-danger me-1"></i>Admin <span class="badge bg-danger ms-1" style="font-size:.7rem;vertical-align:middle;">Solo admins</span></h2>
+    <div class="table-responsive mb-4">
+      <table class="table table-bordered table-hover align-middle">
+        <thead class="table-light"><tr><th>Método</th><th>Ruta</th><th>Descripción</th><th>Parámetros</th></tr></thead>
+        <tbody>
+          {{ m.apiRow('GET','/api/admin_users.php','Lista usuarios con paginación y búsqueda.','<code>page</code>, <code>limit</code>, <code>q</code>') }}
+          {{ m.apiRow('GET','/api/admin_products.php','Lista productos con filtro.','<code>page</code>, <code>limit</code>, <code>q</code>, <code>estado</code>') }}
+          {{ m.apiRow('GET','/api/admin_reports.php','Lista reportes con filtro.','<code>page</code>, <code>limit</code>, <code>estado</code>') }}
+          {{ m.apiRow('GET','/api/admin_export_usuarios.php','Exporta CSV de usuarios.','—') }}
+          {{ m.apiRow('GET','/api/admin_export_transacciones.php','Exporta CSV de transacciones.','—') }}
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="h5 section-title mb-3">Máquina de estados de transacciones</h2>
+    <div class="card mb-4">
+      <div class="card-body p-0">
+        <table class="table table-sm table-bordered align-middle mb-0">
+          <thead class="table-light"><tr><th>Estado actual</th><th>→ Siguiente</th><th>Actor</th><th>Campos extra guardados</th></tr></thead>
+          <tbody>
+            <tr><td><code>pendiente</code></td><td><code>aceptada</code></td><td>Comprador</td><td><code>metodo_pago</code>, <code>direccion_envio</code>, <code>notas_comprador</code>, <code>producto_ofrecido_id</code> (intercambio)</td></tr>
+            <tr><td><code>aceptada</code></td><td><code>pago_pendiente</code></td><td>Comprador</td><td>—</td></tr>
+            <tr class="table-info"><td><code>pendiente</code> <span class="badge bg-info text-dark">Stripe</span></td><td><code>pago_pendiente</code></td><td>Comprador</td><td><code>stripe_payment_intent_id</code> (salta aceptada)</td></tr>
+            <tr><td><code>pago_pendiente</code></td><td><code>enviado</code></td><td>Vendedor</td><td><code>numero_seguimiento</code> (opcional), <code>fecha_envio</code></td></tr>
+            <tr><td><code>enviado</code></td><td><code>entregado</code></td><td>Comprador</td><td><code>fecha_entrega</code> · envía email a ambas partes</td></tr>
+            <tr class="table-danger"><td>cualquier estado</td><td><code>cancelada</code></td><td>Cualquiera</td><td>Producto vuelve a <code>activo</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <h2 class="h5 section-title mb-3">Tipos de transacción</h2>
+    <div class="table-responsive mb-4">
+      <table class="table table-sm table-bordered align-middle">
+        <thead class="table-light"><tr><th>Tipo</th><th>Descripción</th><th>Pago requerido</th><th>Producto a cambio</th></tr></thead>
+        <tbody>
+          <tr><td><code>venta</code></td><td>Compra/venta estándar</td><td>Sí</td><td>No</td></tr>
+          <tr><td><code>intercambio</code></td><td>Trueque puro de productos</td><td>No</td><td>Sí — seleccionado de <code>mis_productos_activos.php</code></td></tr>
+          <tr><td><code>mixto</code></td><td>Producto + compensación económica</td><td>Sí</td><td>Sí</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="h5 section-title mb-3">Flujo de pago Stripe</h2>
+    <div class="card mb-4">
+      <div class="card-body" style="font-size:.88rem;">
+        <ol class="mb-0">
+          <li>Comprador selecciona <strong>Tarjeta · Stripe</strong> como método de pago.</li>
+          <li>El frontend carga <code>Stripe.js v3</code> y monta el <code>CardElement</code>.</li>
+          <li>Al enviar el formulario, llama a <code>POST /api/stripe_create_payment.php</code> con <code>transaccion_id</code>.</li>
+          <li>El servidor crea un <code>PaymentIntent</code> (importe = <code>precio_final</code> del producto, en céntimos) y devuelve el <code>client_secret</code>.</li>
+          <li>El frontend llama a <code>stripe.confirmCardPayment(client_secret, {payment_method:{card}})</code>.</li>
+          <li>Si el pago tiene <code>status = "succeeded"</code>, se envía el formulario con <code>stripe_payment_intent_id</code>.</li>
+          <li>El controlador verifica el PaymentIntent en el servidor (<code>PaymentIntent::retrieve()</code>) y avanza la transacción directamente a <code>pago_pendiente</code>.</li>
+        </ol>
+      </div>
+    </div>
+
+    <h2 class="h5 section-title mb-3">Migraciones de base de datos</h2>
+    <div class="table-responsive mb-4">
+      <table class="table table-sm table-bordered align-middle">
+        <thead class="table-light"><tr><th>Archivo</th><th>Descripción</th></tr></thead>
+        <tbody>
+          <tr><td><code>001_transacciones_realistas.sql</code></td><td>ENUM <code>estado</code> ampliado, campos <code>metodo_pago</code>, <code>direccion_envio</code>, <code>notas_comprador</code>, timestamps</td></tr>
+          <tr><td><code>002_rate_limiting_intercambio.sql</code></td><td>Tabla <code>LoginIntentos</code> y tabla <code>Intercambio_Detalle</code></td></tr>
+          <tr><td><code>003_productos_coordenadas.sql</code></td><td>Columnas <code>lat</code> y <code>lon</code> en <code>Productos</code></td></tr>
+          <tr><td><code>004_stripe_payment_intent.sql</code></td><td><code>stripe_payment_intent_id</code>, <code>numero_seguimiento</code>, <code>fecha_*</code> en <code>Transacciones</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="alert alert-warning d-flex gap-2 align-items-start mb-4">
+      <i class="bi bi-exclamation-triangle-fill mt-1 flex-shrink-0"></i>
+      <div>En phpMyAdmin: selecciona la BD <strong>mercapp</strong>, ve a la pestaña <strong>SQL</strong>, pega el contenido del archivo y ejecuta. Las migraciones usan <code>IF NOT EXISTS</code> para ser idempotentes.</div>
+    </div>
+
+    <h2 class="h5 section-title mb-3">Ejemplo de respuesta — <code>/api/search_products.php</code></h2>
+    <pre><code>{{ '{"success":true,"data":[{"id":42,"titulo":"Bicicleta Trek","precio":"120.00","tipo_transaccion":"venta","imagenes":[{"url":"uploads/products/Prod_42.webp","orden":1}]}]}'|raw }}</code></pre>
+
+    <h2 class="h5 section-title mb-3">Ejemplo de respuesta — <code>/api/mis_transacciones.php</code></h2>
+    <pre><code>{{ '{"data":[{"id":12,"estado":"enviado","tipo":"venta","producto_titulo":"Guitarra Yamaha","comprador_nombre":"Ana","metodo_pago":"stripe","numero_seguimiento":"ES123456789ES","chat_id":7}],"total":1,"page":1}'|raw }}</code></pre>
+
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const docFrame = document.getElementById('docFrame');
+const iframeCtn = document.getElementById('iframe-content');
+const apiCtn   = document.getElementById('api-content');
+document.querySelectorAll('#docTabs .nav-link').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('#docTabs .nav-link').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const tipo = tab.dataset.doc;
+    if (tipo === 'api') { iframeCtn.style.display='none'; apiCtn.style.display='block'; }
+    else {
+      iframeCtn.style.display='block'; apiCtn.style.display='none';
+      const srcs = { php:'../../docs/php/index.html', js:'../../docs/js/index.html', test:'../../docs/tests/index_test.html' };
+      docFrame.src = srcs[tipo] ?? '';
+    }
+  });
+});
+</script>
+{% endblock %}

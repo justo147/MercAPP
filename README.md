@@ -5,6 +5,7 @@
 ![PHP](https://img.shields.io/badge/PHP-8.x-777BB4?logo=php&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql&logoColor=white)
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3.3-7952B3?logo=bootstrap&logoColor=white)
+![Twig](https://img.shields.io/badge/Twig-3.x-bacf29?logo=symfony&logoColor=white)
 ![PHPUnit](https://img.shields.io/badge/PHPUnit-11.x-6C9B3A?logo=php&logoColor=white)
 ![Stripe](https://img.shields.io/badge/Stripe-v3-635BFF?logo=stripe&logoColor=white)
 ![License](https://img.shields.io/badge/licencia-académica-lightgrey)
@@ -19,15 +20,17 @@
 4. [Arquitectura](#arquitectura)
 5. [Estructura del proyecto](#estructura-del-proyecto)
 6. [Base de datos](#base-de-datos)
-7. [Máquina de estados — Transacciones](#máquina-de-estados--transacciones)
-8. [Pago con tarjeta — Stripe](#pago-con-tarjeta--stripe)
-9. [API REST](#api-rest)
-10. [Vistas](#vistas)
-11. [Mejoras UX](#mejoras-ux)
-12. [Instalación local (XAMPP)](#instalación-local-xampp)
-13. [Variables de entorno](#variables-de-entorno)
-14. [Tests](#tests)
-15. [Convenciones de código](#convenciones-de-código)
+7. [Migraciones](#migraciones)
+8. [Máquina de estados — Transacciones](#máquina-de-estados--transacciones)
+9. [Pago con tarjeta — Stripe](#pago-con-tarjeta--stripe)
+10. [Chat y panel de transacción](#chat-y-panel-de-transacción)
+11. [API REST](#api-rest)
+12. [Vistas](#vistas)
+13. [Diseño y UX](#diseño-y-ux)
+14. [Instalación local (XAMPP)](#instalación-local-xampp)
+15. [Variables de entorno](#variables-de-entorno)
+16. [Tests](#tests)
+17. [Convenciones de código](#convenciones-de-código)
 
 ---
 
@@ -36,6 +39,8 @@
 **MercApp** es una aplicación web de marketplace que permite a usuarios registrados publicar artículos para **venta**, **intercambio** o ambos (**mixto**). Los compradores pueden contactar al vendedor mediante un sistema de **chat integrado**, gestionar **transacciones** con seguimiento de estado, dejar **valoraciones** y guardar artículos en **favoritos** o en una **lista de deseos** con alertas automáticas.
 
 Incluye un **panel de administración** completo con gestión de usuarios, productos, reportes y exportación de datos a CSV.
+
+El frontend ha sido rediseñado completamente usando **Twig 3** como motor de plantillas y un sistema de diseño propio inspirado en plataformas como Wallapop o Vinted, con soporte nativo para **modo oscuro** sin parpadeo.
 
 ---
 
@@ -51,13 +56,15 @@ Incluye un **panel de administración** completo con gestión de usuarios, produ
 - **Seguir usuarios**: feed personalizado con novedades de seguidos y sugerencias de usuarios a seguir
 - **Valoraciones** tras la entrega (fiabilidad, comunicación, puntualidad)
 - Notificaciones in-app con badge y polling cada 30 s (mensajes, coincidencias, valoraciones, moderación)
-- Modo oscuro persistente (sesión + localStorage)
+- Modo oscuro persistente con antiparpadeo — sin flash al cargar la página
 - hCaptcha en registro para protección anti-bots
 
 ### Transacciones
 - Flujo guiado de 6 estados con transiciones por rol (comprador / vendedor)
+- Tipos de transacción: **venta**, **intercambio** (trueque de productos) y **mixto** (producto + dinero)
 - Elección de método de pago: efectivo, transferencia, Bizum, PayPal, otro o **tarjeta de crédito/débito vía Stripe**
 - Pago con tarjeta integrado mediante **Stripe.js v3** + PaymentIntent (flujo seguro PCI-compliant)
+- Intercambio de productos: el comprador propone su producto desde sus activos; ambas partes ven los artículos cruzados
 - Dirección de envío con autocomplete Nominatim
 - Número de seguimiento de paquete
 - Email de confirmación al completar la entrega
@@ -77,7 +84,9 @@ Incluye un **panel de administración** completo con gestión de usuarios, produ
 |------|-----------|
 | Backend | PHP 8.x + PDO (prepared statements) |
 | Base de datos | MySQL 8 — charset `utf8mb4` |
-| Frontend | Bootstrap 5.3.3 · Bootstrap Icons 1.11.1 · SASS/SCSS |
+| Motor de plantillas | **Twig 3.x** — todas las vistas son templates `.html.twig` |
+| Frontend | Bootstrap 5.3.3 · Bootstrap Icons 1.11.1 · Inter (Google Fonts) |
+| Sistema de diseño | CSS custom properties — tema claro/oscuro vía `data-theme` en `<html>` |
 | Email | PHPMailer 6.x — SMTP Gmail |
 | Tests | PHPUnit 11.x |
 | Configuración | `vlucas/phpdotenv` 5.x |
@@ -89,15 +98,15 @@ Incluye un **panel de administración** completo con gestión de usuarios, produ
 
 ## Arquitectura
 
-El proyecto sigue una **arquitectura MVC ligera** sin framework, ejecutada sobre XAMPP.
+El proyecto sigue una **arquitectura MVC ligera** sin framework, ejecutada sobre XAMPP. Las vistas PHP delegan todo el HTML a **Twig**, actuando únicamente como controladores finos.
 
 ```
 Petición HTTP
      │
      ▼
-public/views/*.php          ← Vistas (HTML + PHP mínimo)
+public/views/*.php          ← Controladores finos: lógica + $twig->render()
      │
-     ├─► controllers/        ← Controladores y handlers de formulario
+     ├─► controllers/        ← Handlers de formularios y lógica de negocio
      │         │
      │         ▼
      │       models/         ← Clases de acceso a datos (PDO)
@@ -105,16 +114,22 @@ public/views/*.php          ← Vistas (HTML + PHP mínimo)
      │         ▼
      │       config/db.php   ← Conexión PDO (Database)
      │
+     ├─► templates/          ← Plantillas Twig (.html.twig)
+     │         ├── base.html.twig          (layout principal)
+     │         ├── base_auth.html.twig     (layout páginas de auth)
+     │         ├── components/             (navbar, footer)
+     │         ├── auth/                   (login, registro…)
+     │         └── *.html.twig             (resto de vistas)
+     │
      └─► api/*.php           ← Endpoints JSON para llamadas AJAX
 ```
 
 **Reglas clave:**
 - Prepared statements PDO en **toda** consulta SQL.
-- `htmlspecialchars()` en todas las salidas HTML.
-- `intval()` / `trim()` al recibir cualquier input.
+- Twig escapa automáticamente el output HTML (`|e`). Nunca usar `|raw` con datos de usuario.
+- `intval()` / `trim()` al recibir cualquier input en PHP.
 - Los modelos reciben `PDO $conn` por constructor (inyección de dependencias manual).
-- `$BASE` (ruta base `/MercApp`) disponible en cualquier archivo tras `require_once config/bootstrap.php`.
-- `const BASE` declarado **una sola vez** en `navbar.php` para uso en JavaScript.
+- `$BASE` (ruta base `/MercApp`) disponible en cualquier archivo tras `require_once config/bootstrap.php`. También expuesto como global Twig y como `const BASE` en JS desde `base.html.twig`.
 
 ---
 
@@ -127,13 +142,12 @@ MercApp/
 ├── config/
 │   ├── bootstrap.php           # Carga .env, define $BASE
 │   ├── db.php                  # Clase Database → PDO
-│   ├── flash.php               # Helpers setFlash() / hasFlash() para mensajes de sesión
+│   ├── twig.php                # ⭐ Entorno Twig (globals, filtros, funciones)
+│   ├── flash.php               # Helpers setFlash() / hasFlash()
 │   └── mail_config.php         # PHPMailer SMTP
 │
 ├── controllers/
-│   ├── AuthController.php      # Login, registro, verificación, recuperación
 │   ├── handlers/               # 14 procesadores de formularios (POST)
-│   ├── chat_start.php
 │   ├── chat_start_transaction.php
 │   ├── chat_update_transaction.php
 │   ├── follow.php / unfollow.php
@@ -150,16 +164,54 @@ MercApp/
 │   ├── Report.php
 │   └── RateLimiter.php
 │
+├── templates/                  # ⭐ Plantillas Twig
+│   ├── base.html.twig          # Layout principal (navbar + footer + dark mode)
+│   ├── base_auth.html.twig     # Layout auth (sin navbar)
+│   ├── components/
+│   │   ├── navbar.html.twig
+│   │   └── footer.html.twig
+│   ├── auth/
+│   │   ├── login.html.twig
+│   │   ├── register.html.twig
+│   │   └── pending_verification.html.twig
+│   ├── home.html.twig
+│   ├── profile.html.twig
+│   ├── detail_product.html.twig
+│   ├── upload_product.html.twig
+│   ├── mod_product.html.twig
+│   ├── chat.html.twig
+│   ├── chat_list.html.twig
+│   ├── my_transactions.html.twig
+│   ├── my_favorites.html.twig
+│   ├── my_wishlist.html.twig
+│   ├── followers_products.html.twig
+│   ├── detail_account.html.twig
+│   ├── admin_dashboard.html.twig
+│   ├── help.html.twig
+│   ├── docs.html.twig
+│   ├── forgot_pass.html.twig
+│   ├── reset_password.html.twig
+│   └── verify_email.html.twig
+│
 ├── public/
-│   ├── views/                  # 21 plantillas PHP
-│   ├── js/                     # 15 scripts JavaScript (incluye ux.js)
-│   ├── css/                    # CSS compilado
-│   ├── scss/                   # Fuentes SASS
+│   ├── views/                  # Controladores finos PHP (delegan HTML a Twig)
+│   ├── js/                     # Scripts JavaScript
+│   │   ├── theme.js            # Toggle data-theme en <html>, sin parpadeo
+│   │   ├── ux.js               # Toasts, spinners, offline banner…
+│   │   ├── navbar.js           # Notificaciones, badge de mensajes
+│   │   └── address_autocomplete.js  # Autocomplete Nominatim
+│   ├── css/
+│   │   └── app.css             # ⭐ Sistema de diseño completo (CSS custom props)
 │   └── img/ · ico/ · fonts/    # Recursos estáticos
 │
 ├── uploads/products/           # Imágenes subidas por usuarios (WebP)
-├── migrations/                 # Scripts SQL de migración incremental
 ├── tests/                      # PHPUnit — 8 suites de pruebas
+├── migrations/                 # Migraciones SQL incrementales
+│   ├── 001_transacciones_realistas.sql
+│   ├── 002_rate_limiting_intercambio.sql
+│   ├── 003_productos_coordenadas.sql
+│   └── 004_stripe_payment_intent.sql
+│
 ├── docs/                       # PHPDoc generado automáticamente
 │
 ├── bd.sql                      # Schema completo ← fuente de verdad
@@ -208,14 +260,38 @@ SOURCE ejemplo-pruebas.sql;   -- opcional, carga datos de prueba
 
 ---
 
+## Migraciones
+
+Las migraciones son archivos SQL incrementales para actualizar una base de datos existente sin recrearla. Se encuentran en `migrations/` y deben aplicarse en orden.
+
+| Archivo | Descripción |
+|---------|-------------|
+| `001_transacciones_realistas.sql` | Amplía el ENUM de `estado` con `pago_pendiente`, añade `metodo_pago`, `direccion_envio`, `notas_comprador` y timestamps de cada paso |
+| `002_rate_limiting_intercambio.sql` | Crea la tabla `LoginIntentos` para rate limiting y añade la tabla `Intercambio_Detalle` |
+| `003_productos_coordenadas.sql` | Añade columnas `lat` y `lon` a `Productos` para búsqueda por proximidad |
+| `004_stripe_payment_intent.sql` | Añade `stripe_payment_intent_id`, `numero_seguimiento`, `fecha_aceptacion`, `fecha_pago_confirmado`, `fecha_envio` y `fecha_entrega` a `Transacciones` |
+
+### Cómo aplicar una migración
+
+```sql
+-- En phpMyAdmin: selecciona la BD mercapp → pestaña SQL → pega el contenido del archivo
+-- Todas usan IF NOT EXISTS / IF EXISTS para ser idempotentes
+```
+
+> ⚠️ Los archivos `001` y `002` contienen `USE mercapp;` — si los ejecutas desde phpMyAdmin con la BD ya seleccionada, elimina esa línea o ignora el aviso.
+
+---
+
 ## Máquina de estados — Transacciones
 
 ```
 pendiente
    │  Comprador acepta + elige método de pago + dirección de envío
+   │  (en intercambios: propone también su producto a cambio)
    ▼
 aceptada
    │  Comprador informa que ha pagado
+   │  (con Stripe: salta directamente a pago_pendiente)
    ▼
 pago_pendiente
    │  Vendedor confirma recepción del pago + añade nº seguimiento
@@ -228,13 +304,59 @@ entregado  ✅  (estado final positivo)
 Cualquier estado  →  cancelada  ❌  (estado final negativo)
 ```
 
-| Transición | Actor |
-|-----------|-------|
-| `pendiente → aceptada` | Comprador |
-| `aceptada → pago_pendiente` | Comprador |
-| `pago_pendiente → enviado` | Vendedor |
-| `enviado → entregado` | Comprador |
-| `* → cancelada` | Cualquiera |
+| Transición | Actor | Datos extra |
+|-----------|-------|-------------|
+| `pendiente → aceptada` | Comprador | `metodo_pago`, `direccion_envio`, `notas_comprador`, `producto_ofrecido_id` (intercambio) |
+| `aceptada → pago_pendiente` | Comprador | — |
+| `pago_pendiente → enviado` | Vendedor | `numero_seguimiento` (opcional) |
+| `enviado → entregado` | Comprador | — (envía email de confirmación a ambas partes) |
+| `* → cancelada` | Cualquiera | El producto vuelve a estado `activo` |
+
+### Tipos de transacción
+
+| Tipo | Descripción | Método de pago requerido |
+|------|-------------|--------------------------|
+| `venta` | Compra/venta estándar | Sí |
+| `intercambio` | Trueque puro de productos | No — el comprador propone su producto |
+| `mixto` | Producto + compensación económica | Sí + producto a cambio |
+
+---
+
+## Chat y panel de transacción
+
+La vista de chat (`chat.php`) usa un **layout de dos columnas** en escritorio:
+
+```
+┌─────────────────────────────────────────────────────┐
+│  [Imagen + Título del producto]      [Reportar]     │
+├────────────────────────┬────────────────────────────┤
+│                        │  Panel de transacción       │
+│   Mensajes del chat    │  ┌─ Timeline vertical ──┐  │
+│   (scroll interno)     │  │  ● Pendiente          │  │
+│                        │  │  │ Aceptada           │  │
+│   [burbuja saliente]   │  │  │ Pago               │  │
+│   [burbuja entrante]   │  │  │ Enviado            │  │
+│   [mensaje sistema]    │  │  │ Entregado          │  │
+│                        │  └───────────────────────┘  │
+│                        │  [Solo la acción actual]    │
+│                        │  [Cancelar transacción]     │
+├────────────────────────┴────────────────────────────┤
+│  [Escribe un mensaje…]                      [Enviar] │
+└─────────────────────────────────────────────────────┘
+```
+
+**Panel de transacción — comportamiento por estado y rol:**
+
+| Estado | Comprador ve | Vendedor ve |
+|--------|-------------|-------------|
+| `pendiente` | Formulario de aceptación (pago + dirección + producto si es intercambio) | "Esperando al comprador" |
+| `aceptada` | Botón "Ya he pagado" | "Esperando confirmación de pago" |
+| `pago_pendiente` | "Pago notificado" / confirmación Stripe | Formulario de nº seguimiento + "Confirmar envío" |
+| `enviado` | Botón "He recibido el producto" | "Esperando confirmación" |
+| `entregado` | Tarjeta de éxito + modal de valoración | Tarjeta de éxito |
+| `cancelada` | Tarjeta de cancelación | Tarjeta de cancelación |
+
+En móvil las columnas se apilan (chat arriba, panel abajo) y el panel de transacción no es sticky.
 
 ---
 
@@ -255,7 +377,8 @@ El flujo de pago con tarjeta sigue el patrón **PaymentIntent** de Stripe para m
 | Variable `.env` | Descripción |
 |----------------|-------------|
 | `STRIPE_SECRET_KEY` | Clave secreta de Stripe (empieza por `sk_`) |
-| `STRIPE_PUBLISHABLE_KEY` | Clave pública de Stripe (empieza por `pk_`) |
+| `STRIPE_KEY` | Clave pública de Stripe (empieza por `pk_`) |
+| `STRIPE_WEBHOOK_SECRET` | Secret del webhook de Stripe (empieza por `whsec_`) |
 
 > Para desarrollo usa las claves de **test** del dashboard de Stripe. Las tarjetas de prueba (`4242 4242 4242 4242`, CVV cualquiera, fecha futura) no realizan cobros reales.
 
@@ -328,67 +451,79 @@ Todos los endpoints devuelven `Content-Type: application/json` y requieren sesi�
 
 ## Vistas
 
-| Vista | Descripción |
-|-------|-------------|
-| `landing_page.php` | Página de inicio pública |
-| `auth/login.php` | Inicio de sesión |
-| `auth/register.php` | Registro con hCaptcha |
-| `verify_email.php` | Verificación de email por token |
-| `forgot_pass.php` / `reset_password.php` | Recuperación de contraseña |
-| `home.php` | Feed principal con búsqueda, filtros y búsqueda por proximidad |
-| `detail_product.php` | Detalle de producto con galería, carrusel de sugeridos y valoraciones |
-| `upload_product.php` | Publicar nuevo producto con autocomplete de ubicación |
-| `mod_product.php` | Editar producto propio |
-| `profile.php` | Perfil público de usuario con reputación y productos |
-| `detail_account.php` | Ajustes de cuenta (email, contraseña, foto de perfil) |
-| `my_transactions.php` | Historial de transacciones (compras y ventas) |
-| `my_favorites.php` | Productos guardados como favoritos |
-| `my_wishlist.php` | Lista de deseos con matching de productos en catálogo |
-| `chat_list.php` | Lista de chats con filtros (abiertos, cerrados, con transacción…) |
-| `chat.php` | Conversación individual y gestión del flujo de transacción |
-| `followers_products.php` | Feed de seguidos + lista de siguiendo + sugerencias |
-| `admin_dashboard.php` | Panel de administración completo |
-| `docs.php` | Documentación técnica (PHPDoc, JSDoc, Tests, API) |
-| `help.php` | Preguntas frecuentes y ayuda |
+Todas las vistas PHP actúan como controladores finos: ejecutan la lógica, consultan los modelos y llaman a `$twig->render('template.html.twig', $datos)`. El HTML reside íntegramente en `templates/`.
+
+| Vista (PHP) | Template Twig | Descripción |
+|-------------|---------------|-------------|
+| `landing_page.php` | — | Página de inicio pública |
+| `auth/login.php` | `auth/login.html.twig` | Inicio de sesión |
+| `auth/register.php` | `auth/register.html.twig` | Registro con hCaptcha |
+| `verify_email.php` | `verify_email.html.twig` | Verificación de email por token |
+| `forgot_pass.php` | `forgot_pass.html.twig` | Solicitar recuperación de contraseña |
+| `reset_password.php` | `reset_password.html.twig` | Restablecer contraseña con token |
+| `home.php` | `home.html.twig` | Feed principal con búsqueda, filtros y scroll infinito |
+| `detail_product.php` | `detail_product.html.twig` | Detalle de producto con galería, sugeridos y valoraciones |
+| `upload_product.php` | `upload_product.html.twig` | Publicar nuevo producto con autocomplete de ubicación |
+| `mod_product.php` | `mod_product.html.twig` | Editar producto propio |
+| `profile.php` | `profile.html.twig` | Perfil público con reputación, seguidores y productos |
+| `detail_account.php` | `detail_account.html.twig` | Ajustes de cuenta (datos personales y foto) |
+| `my_transactions.php` | `my_transactions.html.twig` | Historial de transacciones (compras y ventas) |
+| `my_favorites.php` | `my_favorites.html.twig` | Productos guardados como favoritos |
+| `my_wishlist.php` | `my_wishlist.html.twig` | Lista de deseos con matching en catálogo |
+| `chat_list.php` | `chat_list.html.twig` | Lista de chats con filtros |
+| `chat.php` | `chat.html.twig` | Chat individual — layout dos columnas: mensajes izquierda, panel de transacción con timeline derecha |
+| `followers_products.php` | `followers_products.html.twig` | Feed de seguidos + sugerencias |
+| `admin_dashboard.php` | `admin_dashboard.html.twig` | Panel de administración completo |
+| `docs.php` | `docs.html.twig` | Documentación técnica (PHPDoc, JSDoc, Tests, API) |
+| `help.php` | `help.html.twig` | Preguntas frecuentes y ayuda |
 
 ---
 
-## Mejoras UX
+## Diseño y UX
 
-Conjunto de mejoras de experiencia de usuario implementadas sobre el diseño base:
+### Sistema de diseño (`public/css/app.css`)
 
-### Sistema de feedback unificado (`public/js/ux.js` + `public/js/navbar.js`)
-- **Toast notifications**: `mostrarToast(mensaje, tipo)` disponible globalmente — soporta `success`, `error`, `warning`, `info`. Reemplaza todos los `alert()` y `confirm()` nativos del navegador.
-- **Mensajes flash de sesión**: `setFlash(tipo, mensaje)` en PHP (`config/flash.php`) — los mensajes persisten a través de redirects y se emiten como toasts al cargar la siguiente página.
-- **Confirmación de acciones destructivas**: modales Bootstrap en lugar de `confirm()` nativo en chat, wishlist y panel de administración.
+Toda la interfaz se basa en **CSS custom properties** declaradas en `:root`, lo que permite cambiar el tema completo con un solo atributo en el `<html>`:
 
-### Estados de carga
-- **Botón de carga**: `data-loading-text="..."` en cualquier botón de submit activa automáticamente un spinner y deshabilita el botón durante el envío del formulario, evitando dobles envíos.
-- **Skeleton loaders**: tarjetas placeholder (`placeholder-glow`) en el home, perfil de usuario y panel de administración mientras se cargan los datos vía AJAX.
-- **Spinner en botones de seguir**: los botones "Seguir/Dejar de seguir" muestran un spinner giratorio hasta recibir respuesta del servidor.
+```css
+/* Tema claro (por defecto) */
+:root {
+  --c-primary: #038065;   /* verde MercApp */
+  --c-bg:      #f7f8fa;
+  --c-surface: #ffffff;
+  --c-text:    #111827;
+  /* … */
+}
 
-### Protección de datos
-- **Aviso de cambios no guardados**: `data-unsaved-warning` en formularios activa un aviso `beforeunload` si el usuario intenta salir con cambios sin guardar.
-- **Autoguardado de borrador**: los formularios de publicar y editar producto guardan automáticamente los campos cada 5 s en `localStorage` y los restauran al volver a la página.
-- **Contadores de caracteres**: campos `titulo` (máx. 100) y `descripcion` (máx. 2000) muestran contador en tiempo real con aviso en rojo al acercarse al límite.
+/* Tema oscuro */
+[data-theme="dark"] {
+  --c-bg:      #0f1117;
+  --c-surface: #1a1d27;
+  --c-text:    #f1f5f9;
+  /* … */
+}
+```
 
-### Búsqueda y filtros (home)
-- **Chips de filtros activos**: cada filtro aplicado genera una píldora con botón ✕ para quitarlo individualmente o limpiar todos a la vez.
-- **Contador de resultados**: texto dinámico "N productos encontrados" con `aria-live="polite"` para lectores de pantalla.
-- **Empty state diferenciado**: mensaje y CTA distintos según haya filtros aplicados o no.
-- **Spinner de scroll infinito**: indicador visible mientras se cargan más productos.
-- **Reintentar en error**: botón "Reintentar" cuando falla la carga de productos.
+### Modo oscuro sin parpadeo
 
-### Detección offline
-- Banner rojo fijo en la parte superior cuando el navegador pierde la conexión a Internet; desaparece automáticamente al recuperarla.
+El script de antiparpadeo se ejecuta **inline en `<head>`** antes de pintar la página, leyendo `localStorage` y aplicando `data-theme` sobre `<html>` de inmediato. El botón de toggle actualiza el atributo y persiste la preferencia tanto en `localStorage` como en la sesión del servidor (`api/set_theme.php`).
 
-### Registro
-- **Toggle de contraseña**: botón ojo en los campos de contraseña para mostrar/ocultar el texto.
-- **Indicador de fortaleza**: barra de progreso de 5 niveles (débil → muy fuerte) en tiempo real.
-- **Validación de confirmación**: feedback inmediato con ✓/✗ mientras el usuario escribe en "Confirmar contraseña".
+### Componentes Twig
 
-### Chat
-- **Marcar todo como leído**: botón en la lista de chats que marca todos los mensajes no leídos de una sola acción, con actualización inmediata del badge de la navbar.
+- **`base.html.twig`** — layout principal con navbar, footer, toast container y scripts core
+- **`base_auth.html.twig`** — layout minimalista para páginas de autenticación (sin navbar)
+- **`components/navbar.html.twig`** — navbar sticky: logo izquierda, buscador centro (desktop), iconos derecha
+- **`components/footer.html.twig`** — footer de cuatro columnas
+
+### Feedback y UX (`public/js/ux.js`)
+
+- **`mostrarToast(msg, tipo)`** — toasts Bootstrap accesibles (`success`, `error`, `warning`, `info`)
+- **`data-loading-text="…"`** en botones de submit → spinner automático + deshabilita el botón
+- **`data-unsaved-warning`** en formularios → aviso `beforeunload` si hay cambios sin guardar
+- **Autoguardado de borrador** en upload/edición de producto (localStorage, cada 5 s)
+- **Contadores de caracteres** en campos con `maxlength`
+- **Banner offline** — detecta `navigator.onLine` y muestra aviso rojo automáticamente
+- **Skeleton loaders** en home, perfil y panel de administración
 
 ---
 
@@ -407,13 +542,14 @@ Conjunto de mejoras de experiencia de usuario implementadas sobre el diseño bas
 cd C:/xampp/htdocs
 git clone https://github.com/justo147/MercAPP.git MercApp
 
-# 2. Instalar dependencias PHP
+# 2. Instalar dependencias PHP (incluye Twig y phpdotenv)
 cd MercApp
 composer install
 
 # 3. Crear la base de datos
 #    Abrir phpMyAdmin → crear BD 'mercapp' → importar bd.sql
 #    (Opcional) importar ejemplo-pruebas.sql para datos de prueba
+#    Si ya tenías la BD creada, aplica las migraciones de migrations/ en orden
 
 # 4. Configurar variables de entorno
 copy .env.example .env
@@ -455,8 +591,9 @@ HCAPTCHA_SECRET=0x0000000000000000000000000000000000000000
 # Stripe — pagos con tarjeta
 # Obtén tus claves en: https://dashboard.stripe.com/apikeys
 # Usa claves "test" (sk_test_... / pk_test_...) para desarrollo
+STRIPE_KEY=pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 STRIPE_SECRET_KEY=sk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
-STRIPE_PUBLISHABLE_KEY=pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+STRIPE_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 > ⚠️ **Nunca subas el `.env` con credenciales reales.** Ya está incluido en `.gitignore`.
@@ -491,10 +628,11 @@ vendor/bin/phpunit tests/prueba_unitaria/TransactionModelTest.php --testdox
 ## Convenciones de código
 
 - **SQL:** Prepared statements PDO siempre — nunca concatenar variables en queries.
-- **Output HTML:** `htmlspecialchars()` en todas las salidas dinámicas.
+- **Output HTML:** Twig escapa automáticamente. En PHP puro, usar `htmlspecialchars()`. Nunca `|raw` con datos de usuario.
 - **Input:** `intval()` y `trim()` al recibir datos del usuario.
 - **Modelos:** Reciben `PDO $conn` por constructor.
-- **JavaScript:** `const BASE` declarado una sola vez en `navbar.php`. Nunca redeclarar en otras vistas.
+- **Twig globals:** `BASE`, `session`, `year` disponibles en todas las plantillas. Función `asset('ruta')` para URLs de `public/`.
+- **JavaScript:** `const BASE` declarado una sola vez en `base.html.twig`. Nunca redeclarar en otras vistas.
 - **Imágenes subidas:** Convertidas a WebP (calidad 80, máx. 900 px de ancho) antes de guardar.
 - **Rate limiting:** 5 intentos fallidos de login en 15 minutos → bloqueo por IP.
 

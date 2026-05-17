@@ -1,0 +1,197 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ user.nombre ?? 'Perfil' }} — MercApp{% endblock %}
+
+{% block content %}
+
+{% if not user %}
+<div class="text-center py-5">
+  <i class="bi bi-person-x" style="font-size:4rem;color:var(--c-muted);opacity:.4;display:block;margin-bottom:1rem;"></i>
+  <h2>Usuario no encontrado</h2>
+  <p class="text-muted">El perfil que buscas no existe o fue eliminado.</p>
+  <a href="{{ BASE }}/public/views/home.php" class="btn btn-primary mt-2">Volver al inicio</a>
+</div>
+{% else %}
+
+<!-- Profile card -->
+<div class="card no-hover mb-4">
+  <!-- Cover -->
+  <div class="profile-cover"></div>
+
+  <div class="card-body pt-0">
+    <div class="d-flex flex-column flex-sm-row align-items-start gap-3">
+
+      <!-- Avatar -->
+      <div class="profile-avatar-wrap flex-shrink-0">
+        {% if user.foto_perfil %}
+          <img src="{{ BASE }}/{{ user.foto_perfil|e }}" class="profile-avatar" alt="Foto de perfil">
+        {% else %}
+          <div class="profile-avatar d-flex align-items-center justify-content-center"
+               style="background:var(--c-primary-light);">
+            <i class="bi bi-person-fill" style="font-size:3rem;color:var(--c-primary);"></i>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Info -->
+      <div class="flex-grow-1 mt-3 mt-sm-4 pt-2">
+        <h1 class="fs-4 fw-bold mb-1" style="color:var(--c-text);">
+          {{ user.nombre|e }} {{ user.apellidos|e }}
+        </h1>
+        <p class="text-muted small mb-3">
+          <i class="bi bi-calendar3 me-1"></i>
+          Miembro desde {{ user.fecha_registro|date('m/Y') }}
+        </p>
+
+        <!-- Stats -->
+        <div class="d-flex gap-4 mb-3">
+          <div class="profile-stat">
+            <div class="val" id="stat-productos">—</div>
+            <div class="lbl">Productos</div>
+          </div>
+          <div class="profile-stat">
+            <div class="val" id="stat-ventas">—</div>
+            <div class="lbl">Ventas</div>
+          </div>
+          <div class="profile-stat">
+            <div class="val" id="stat-valoracion">—</div>
+            <div class="lbl">Valoración</div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="d-flex gap-2 flex-wrap">
+          <a href="{{ BASE }}/public/views/chat_list.php" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-envelope me-1"></i>Mensajes
+            <span id="badge-mensajes" class="badge bg-danger ms-1" style="display:none;"></span>
+          </a>
+
+          {% if not esPropietario %}
+          <button id="btn-follow"
+                  class="btn btn-sm {{ yaSigue ? 'btn-secondary' : 'btn-primary' }}"
+                  data-seguidor="{{ usuarioLogueado }}"
+                  data-seguido="{{ perfilId }}"
+                  data-sigue="{{ yaSigue ? '1' : '0' }}">
+            {{ yaSigue ? 'Siguiendo' : 'Seguir' }}
+          </button>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Products section -->
+<div class="mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+  <h2 class="fs-5 fw-bold mb-0" style="color:var(--c-text);">
+    {{ esPropietario ? 'Mis productos' : 'Productos' }}
+  </h2>
+  {% if esPropietario %}
+  <a href="{{ BASE }}/public/views/upload_product.php" class="btn btn-primary btn-sm">
+    <i class="bi bi-plus-lg me-1"></i>Subir producto
+  </a>
+  {% endif %}
+</div>
+
+<div class="mb-3">
+  <input type="text" id="buscador-productos" class="form-control"
+         placeholder="Buscar en productos de este perfil…">
+</div>
+
+<div id="productos-usuario" class="row g-3"></div>
+<div class="d-flex justify-content-center mt-4" id="paginacion-productos"></div>
+
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const PERFIL_ID     = {{ perfilId }};
+  const ES_PROPIETARIO = {{ esPropietario ? 'true' : 'false' }};
+</script>
+<script src="{{ asset('js/productosPerfil.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  /* ── Follow / Unfollow ── */
+  const btnFollow = document.getElementById('btn-follow');
+  if (!btnFollow) return;
+
+  let sigue = btnFollow.dataset.sigue === '1';
+  actualizarBoton();
+
+  btnFollow.addEventListener('mouseenter', () => { if (sigue) btnFollow.textContent = 'Dejar de seguir'; });
+  btnFollow.addEventListener('mouseleave', () => { if (sigue) btnFollow.textContent = 'Siguiendo'; });
+
+  btnFollow.addEventListener('click', () => {
+    const seguidor = btnFollow.dataset.seguidor;
+    const seguido  = btnFollow.dataset.seguido;
+    const origHtml = btnFollow.innerHTML;
+    btnFollow.disabled  = true;
+    btnFollow.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+    const url = sigue ? `${BASE}/controllers/unfollow.php` : `${BASE}/controllers/follow.php`;
+
+    fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `seguidor=${seguidor}&seguido=${seguido}`
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (!data.success) { btnFollow.innerHTML = origHtml; mostrarToast('Error al actualizar.', 'error'); return; }
+      sigue = !sigue;
+      btnFollow.dataset.sigue = sigue ? '1' : '0';
+      actualizarBoton();
+      mostrarToast(sigue ? 'Ahora sigues a este usuario.' : 'Has dejado de seguir.', 'success');
+    })
+    .catch(() => { btnFollow.innerHTML = origHtml; mostrarToast('Error de conexión.', 'error'); })
+    .finally(() => { btnFollow.disabled = false; });
+  });
+
+  function actualizarBoton() {
+    if (sigue) {
+      btnFollow.classList.replace('btn-primary', 'btn-secondary');
+      btnFollow.textContent = 'Siguiendo';
+    } else {
+      btnFollow.classList.replace('btn-secondary', 'btn-primary');
+      btnFollow.textContent = 'Seguir';
+    }
+  }
+
+  /* ── Delete modal ── */
+  const deleteModal = document.getElementById('modalEliminarProducto');
+  if (deleteModal) {
+    deleteModal.addEventListener('show.bs.modal', e => {
+      document.getElementById('btnConfirmarEliminar').href =
+        `${BASE}/controllers/handlers/delete_product_handler.php?id=${e.relatedTarget.dataset.productId}`;
+    });
+  }
+  if (new URLSearchParams(location.search).has('deleted')) {
+    mostrarToast('Producto eliminado correctamente.', 'success');
+  }
+});
+</script>
+
+<!-- Delete modal -->
+<div class="modal fade" id="modalEliminarProducto" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-0 pb-0">
+        <div style="width:48px;height:48px;border-radius:50%;background:#fee2e2;display:flex;align-items:center;justify-content:center;">
+          <i class="bi bi-trash3" style="color:var(--c-danger);font-size:1.25rem;"></i>
+        </div>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body pt-2">
+        <h5 class="fw-bold mb-1">Eliminar producto</h5>
+        <p class="text-muted mb-0" style="font-size:.9rem;">Esta acción no se puede deshacer.</p>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+        <a id="btnConfirmarEliminar" class="btn btn-danger btn-sm">Eliminar</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

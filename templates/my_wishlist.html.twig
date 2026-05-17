@@ -1,0 +1,176 @@
+{% extends 'base.html.twig' %}
+{% block title %}Lista de deseos — MercApp{% endblock %}
+
+{% block content %}
+<div style="max-width:760px;margin:0 auto;">
+
+  <div class="d-flex align-items-center mb-4">
+    <i class="bi bi-stars fs-3 text-warning me-2"></i>
+    <div>
+      <h4 class="fw-bold mb-0">Mi lista de deseos</h4>
+      <small class="text-muted">Añade lo que buscas; te avisamos cuando aparezca en el catálogo</small>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header fw-semibold">
+      <i class="bi bi-plus-circle me-1 text-success"></i>Añadir nuevo deseo
+    </div>
+    <div class="card-body">
+      <form id="form-deseo">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">¿Qué buscas? <span class="text-danger">*</span></label>
+          <input type="text" id="etiquetas" class="form-control"
+                 placeholder="Ej: bicicleta montaña, cámara analógica…" maxlength="200" required>
+          <div class="form-text">Palabras clave separadas por comas o espacios.</div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Categoría preferida</label>
+            <select id="categoria_id" class="form-select">
+              <option value="">Cualquier categoría</option>
+              {% for cat in categorias %}
+              <option value="{{ cat.id }}">{{ cat.nombre|e }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Estado del artículo</label>
+            <select id="estado_producto_id" class="form-select">
+              <option value="">Cualquier estado</option>
+              {% for ep in estadosProducto %}
+              <option value="{{ ep.id }}">{{ ep.nombre|e }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="mt-3">
+          <button type="submit" class="btn btn-success" id="btn-add">
+            <i class="bi bi-plus-lg me-1"></i>Añadir deseo
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="lista-deseos">
+    <div class="text-center py-4 text-muted">
+      <div class="spinner-border spinner-border-sm me-2"></div>Cargando…
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function esc(str) { const d = document.createElement('div'); d.textContent = str ?? ''; return d.innerHTML; }
+
+function badgeTipo(tipo) {
+  const m = { venta:'primary', intercambio:'warning text-dark', mixto:'success' };
+  return `<span class="badge bg-${m[tipo]??'secondary'}" style="font-size:.65rem;">${esc(tipo)}</span>`;
+}
+
+function renderMatchGrid(productos) {
+  if (!productos.length) return '<p class="text-muted small mb-0">Sin productos coincidentes ahora mismo.</p>';
+  const DEF = `${BASE}/public/img/default.jpg`;
+  return `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.75rem;">` + productos.map(p => {
+    const img = p.imagen ? `${BASE}/${esc(p.imagen)}` : DEF;
+    return `<a href="${BASE}/public/views/detail_product.php?id=${p.id}" class="text-decoration-none text-body" target="_blank"
+               style="border-radius:var(--r-md);overflow:hidden;border:1px solid var(--c-border);display:block;">
+      <img src="${img}" alt="${esc(p.titulo)}" style="width:100%;height:110px;object-fit:cover;"
+           onerror="this.src='${DEF}'">
+      <div class="p-2">
+        <div class="small fw-semibold text-truncate">${esc(p.titulo)}</div>
+        <div class="small fw-bold" style="color:var(--c-primary);">${p.precio ? parseFloat(p.precio).toFixed(2)+' €' : 'Gratis'}</div>
+        <div class="mt-1">${badgeTipo(p.tipo_transaccion)}</div>
+      </div>
+    </a>`;
+  }).join('') + '</div>';
+}
+
+async function cargarDeseos() {
+  const res  = await fetch(`${BASE}/api/deseos.php`);
+  const json = await res.json();
+  const cont = document.getElementById('lista-deseos');
+  if (!json.data || !json.data.length) {
+    cont.innerHTML = '<div class="empty-state"><i class="bi bi-stars"></i><h3>Lista vacía</h3><p>Describe lo que buscas y te avisaremos cuando alguien lo publique.</p></div>';
+    return;
+  }
+  const totalC = json.data.reduce((s, d) => s + (d.coincidencias || 0), 0);
+  cont.innerHTML = `<div class="d-flex align-items-center justify-content-between mb-3">
+    <h6 class="fw-semibold text-muted mb-0"><i class="bi bi-list-ul me-1"></i>${json.data.length} deseo(s)</h6>
+    ${totalC > 0 ? `<span class="badge bg-success">${totalC} coincidencia(s)</span>` : ''}
+  </div><div id="deseos-list" class="d-flex flex-column gap-3"></div>`;
+  const list = document.getElementById('deseos-list');
+  json.data.forEach(d => {
+    const hasMatch = d.coincidencias > 0;
+    const card = document.createElement('div');
+    card.className = 'card' + (hasMatch ? ' border-success' : ''); card.dataset.id = d.id;
+    card.innerHTML = `<div class="card-body py-3">
+      <div class="d-flex align-items-start gap-3">
+        <i class="bi bi-stars ${hasMatch?'text-success':'text-warning'} fs-5 mt-1 flex-shrink-0"></i>
+        <div class="flex-grow-1 min-w-0">
+          <div class="fw-semibold">${esc(d.etiquetas)}</div>
+          <div class="small text-muted mt-1 d-flex flex-wrap gap-1">
+            ${d.categoria_nombre ? `<span class="badge bg-secondary">${esc(d.categoria_nombre)}</span>` : ''}
+            ${d.estado_producto_nombre ? `<span class="badge" style="background:var(--c-bg);border:1px solid var(--c-border);color:var(--c-text);">${esc(d.estado_producto_nombre)}</span>` : ''}
+          </div>
+        </div>
+        <div class="d-flex gap-2 flex-shrink-0 align-items-center">
+          ${hasMatch ? `<button class="btn btn-sm btn-success btn-ver-matches" data-id="${d.id}" data-open="0"><i class="bi bi-search me-1"></i>${d.coincidencias} coincidencia${d.coincidencias>1?'s':''}</button>` : '<span class="small text-muted">Sin resultados aún</span>'}
+          <button class="btn btn-sm btn-outline-danger btn-del" data-id="${d.id}" aria-label="Eliminar"><i class="bi bi-trash"></i></button>
+        </div>
+      </div>
+      <div class="d-none mt-3" id="matches-${d.id}"></div>
+    </div>`;
+    list.appendChild(card);
+  });
+  list.querySelectorAll('.btn-ver-matches').forEach(btn => btn.addEventListener('click', () => toggleMatches(btn)));
+  list.querySelectorAll('.btn-del').forEach(btn => btn.addEventListener('click', () => eliminarDeseo(btn.dataset.id)));
+}
+
+async function toggleMatches(btn) {
+  const id = btn.dataset.id, panel = document.getElementById(`matches-${id}`), open = btn.dataset.open === '1';
+  if (open) { panel.classList.add('d-none'); btn.dataset.open = '0'; return; }
+  panel.classList.remove('d-none'); btn.dataset.open = '1';
+  if (panel.dataset.loaded === '1') return;
+  panel.innerHTML = '<div class="text-center text-muted small py-2"><div class="spinner-border spinner-border-sm me-1"></div>Cargando…</div>';
+  try {
+    const res = await fetch(`${BASE}/api/deseos.php?accion=matches&id=${id}`);
+    const json = await res.json();
+    panel.innerHTML = renderMatchGrid(json.data || []);
+    panel.dataset.loaded = '1';
+    btn.innerHTML = `<i class="bi bi-chevron-up me-1"></i>Ocultar (${json.total ?? 0})`;
+  } catch { panel.innerHTML = '<p class="text-danger small">Error al cargar.</p>'; }
+}
+
+async function eliminarDeseo(id) {
+  const fd = new FormData(); fd.append('accion','delete'); fd.append('id',id);
+  try { await fetch(`${BASE}/api/deseos.php`,{method:'POST',body:fd}); mostrarToast('Deseo eliminado.','info'); cargarDeseos(); }
+  catch { mostrarToast('No se pudo eliminar.','error'); }
+}
+
+document.getElementById('form-deseo').addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = document.getElementById('btn-add');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Buscando…';
+  const fd = new FormData();
+  fd.append('accion','add');
+  fd.append('etiquetas', document.getElementById('etiquetas').value);
+  fd.append('categoria_id', document.getElementById('categoria_id').value);
+  fd.append('estado_producto_id', document.getElementById('estado_producto_id').value);
+  try {
+    const res = await fetch(`${BASE}/api/deseos.php`,{method:'POST',body:fd});
+    const json = await res.json();
+    if (!json.ok) { mostrarToast(json.error ?? 'Error al guardar.','error'); return; }
+    e.target.reset();
+    mostrarToast(json.coincidencias > 0 ? `¡Deseo añadido! ${json.coincidencias} producto(s) ya coinciden.` : 'Deseo añadido. Te avisaremos cuando aparezca algo.', json.coincidencias > 0 ? 'success' : 'info');
+    cargarDeseos();
+  } catch { mostrarToast('Error de conexión.','error'); }
+  finally { btn.disabled = false; btn.innerHTML = '<i class="bi bi-plus-lg me-1"></i>Añadir deseo'; }
+});
+
+cargarDeseos();
+</script>
+{% endblock %}

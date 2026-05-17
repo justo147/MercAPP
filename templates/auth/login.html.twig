@@ -1,0 +1,89 @@
+{% extends 'base_auth.html.twig' %}
+
+{% block title %}Iniciar Sesión — MercApp{% endblock %}
+
+{% block content %}
+<div class="auth-card fade-in show">
+
+  <div class="text-center mb-4">
+    <a href="{{ BASE }}/public/views/landing_page.php">
+      <img src="{{ asset('img/logo_sinfondo.png') }}" alt="MercApp"
+           style="width:56px;height:56px;object-fit:contain;margin:0 auto 1rem;">
+    </a>
+    <h1 class="auth-title">Bienvenido de nuevo</h1>
+    <p class="auth-subtitle">Inicia sesión en tu cuenta</p>
+  </div>
+
+  {% if error_message %}
+  <div class="alert alert-danger d-flex align-items-center gap-2 mb-3 py-2" role="alert">
+    <i class="bi bi-exclamation-circle-fill flex-shrink-0"></i>
+    <span style="font-size:.88rem;">{{ error_message }}</span>
+  </div>
+  {% endif %}
+
+  <form id="formLogin" method="post" novalidate>
+    <div class="mb-3">
+      <label for="email" class="form-label">Correo electrónico</label>
+      <input type="email" id="email" name="email" class="form-control"
+             placeholder="tu@correo.com" required
+             value="{{ post_email ?? '' }}">
+    </div>
+
+    <div class="mb-1">
+      <label for="password" class="form-label">Contraseña</label>
+      <div class="input-group">
+        <input type="password" id="password" name="password" class="form-control"
+               placeholder="••••••••" required>
+        <button type="button" class="btn btn-outline-secondary" id="toggle-pass"
+                aria-label="Mostrar contraseña" tabindex="-1">
+          <i class="bi bi-eye" id="icon-pass"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="text-end mb-3">
+      <a href="{{ BASE }}/public/views/forgot_pass.php" style="font-size:.85rem;">
+        ¿Olvidaste tu contraseña?
+      </a>
+    </div>
+
+    <button type="submit" name="login" class="btn btn-primary w-100 btn-lg">
+      Iniciar sesión
+    </button>
+  </form>
+
+  <div class="auth-divider">o continúa con</div>
+
+  <div class="social-login-btns">
+    <a href="https://www.facebook.com/profile.php?id=61587328942929" target="_blank"
+       rel="noopener" class="social-btn-round" title="Facebook">
+      <i class="bi bi-facebook"></i>
+    </a>
+    <a href="https://www.instagram.com/merc_appoficial/" target="_blank"
+       rel="noopener" class="social-btn-round" title="Instagram">
+      <i class="bi bi-instagram"></i>
+    </a>
+    <a href="https://x.com/MercaAppOficial" target="_blank"
+       rel="noopener" class="social-btn-round" title="Twitter/X">
+      <i class="bi bi-twitter-x"></i>
+    </a>
+  </div>
+
+  <p class="text-center mt-4 mb-0" style="font-size:.88rem;color:var(--c-muted);">
+    ¿No tienes cuenta?
+    <a href="{{ BASE }}/public/views/auth/register.php" class="fw-semibold">Regístrate aquí</a>
+  </p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ asset('js/login.js') }}" defer></script>
+<script>
+document.getElementById('toggle-pass')?.addEventListener('click', function(){
+  const inp = document.getElementById('password');
+  const ico = document.getElementById('icon-pass');
+  if (inp.type === 'password') { inp.type = 'text'; ico.className = 'bi bi-eye-slash'; }
+  else { inp.type = 'password'; ico.className = 'bi bi-eye'; }
+});
+</script>
+{% endblock %}

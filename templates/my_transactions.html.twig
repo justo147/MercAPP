@@ -1,0 +1,154 @@
+{% extends 'base.html.twig' %}
+{% block title %}Mis transacciones — MercApp{% endblock %}
+
+{% block content %}
+<div style="max-width:760px;margin:0 auto;">
+
+  <h4 class="mb-4 fw-bold">
+    <i class="bi bi-clock-history me-2 text-primary"></i>Mis transacciones
+  </h4>
+
+  <div class="card mb-4" style="background:var(--c-bg);">
+    <div class="card-body py-2 px-3 d-flex flex-wrap gap-2 align-items-center">
+      <span class="text-muted small me-1">Rol:</span>
+      <div class="btn-group btn-group-sm" id="filtro-rol">
+        <button class="btn btn-outline-primary filter-btn active" data-val="">Todos</button>
+        <button class="btn btn-outline-primary filter-btn" data-val="compra">
+          <i class="bi bi-bag me-1"></i>Compras
+        </button>
+        <button class="btn btn-outline-primary filter-btn" data-val="venta">
+          <i class="bi bi-tag me-1"></i>Ventas
+        </button>
+      </div>
+      <span class="text-muted small ms-2 me-1">Estado:</span>
+      <select id="filtro-estado" class="form-select form-select-sm" style="width:auto;">
+        <option value="">Todos</option>
+        <option value="pendiente">Pendiente</option>
+        <option value="aceptada">Aceptada</option>
+        <option value="pago_pendiente">Pago pendiente</option>
+        <option value="enviado">Enviado</option>
+        <option value="entregado">Entregado</option>
+        <option value="cancelada">Cancelada</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="tx-lista"></div>
+  <nav id="tx-paginacion" class="mt-3"></nav>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const TX_USER_ID = {{ usuarioId }};
+let txState = { page:1, limit:10, rol:'', estadoFiltro:'' };
+
+function badgeEstado(e) {
+  const map = {
+    pendiente:      ['warning',  'bi-hourglass-split', 'Pendiente'],
+    aceptada:       ['info',     'bi-hand-thumbs-up',  'Aceptada'],
+    pago_pendiente: ['warning',  'bi-credit-card',     'Pago pendiente'],
+    enviado:        ['primary',  'bi-truck',           'Enviado'],
+    entregado:      ['success',  'bi-check-circle',    'Entregado'],
+    cancelada:      ['danger',   'bi-x-circle',        'Cancelada'],
+  };
+  const [color, icon, label] = map[e] ?? ['secondary','bi-question',e];
+  return `<span class="badge text-bg-${color}" style="font-size:.72rem;"><i class="bi ${icon} me-1"></i>${label}</span>`;
+}
+
+function fechaRelativa(fecha) {
+  if (!fecha) return '';
+  const diff = Math.floor((Date.now() - new Date(fecha)) / 1000);
+  if (diff < 60)     return 'Hace un momento';
+  if (diff < 3600)   return `Hace ${Math.floor(diff/60)} min`;
+  if (diff < 86400)  return `Hace ${Math.floor(diff/3600)} h`;
+  if (diff < 604800) return `Hace ${Math.floor(diff/86400)} d`;
+  return new Date(fecha).toLocaleDateString('es-ES');
+}
+
+function escHtml(s) {
+  const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML;
+}
+
+function metodoLabel(m) {
+  const map = { efectivo:'Efectivo', transferencia:'Transferencia', bizum:'Bizum', paypal:'PayPal', stripe:'Tarjeta', otro:'Otro' };
+  return map[m] ?? m;
+}
+
+function renderTarjeta(tx) {
+  const esCompra   = tx.comprador_id == TX_USER_ID;
+  const otroNombre = esCompra ? tx.vendedor_nombre : tx.comprador_nombre;
+  const otraFoto   = esCompra ? tx.vendedor_foto   : tx.comprador_foto;
+  const imgProd    = tx.producto_imagen ? `${BASE}/${tx.producto_imagen}` : `${BASE}/public/img/default.jpg`;
+  const imgOtro    = otraFoto ? `${BASE}/${otraFoto}` : `${BASE}/public/img/default.jpg`;
+  const rolLabel   = esCompra
+    ? `<span class="badge text-bg-secondary" style="font-size:.7rem;"><i class="bi bi-bag me-1"></i>Compra</span>`
+    : `<span class="badge text-bg-dark"      style="font-size:.7rem;"><i class="bi bi-tag me-1"></i>Venta</span>`;
+  const precio = tx.precio_final > 0 ? `<span class="fw-semibold">${parseFloat(tx.precio_final).toFixed(2)} €</span>` : '';
+  const chatLink = tx.chat_id ? `<a href="${BASE}/public/views/chat.php?id=${tx.chat_id}" class="btn btn-sm btn-outline-primary"><i class="bi bi-chat-dots me-1"></i>Ver chat</a>` : '';
+  return `
+  <div class="card mb-3">
+    <div class="card-body d-flex gap-3 align-items-start">
+      <img src="${imgProd}" alt="Producto" style="width:56px;height:56px;object-fit:cover;border-radius:var(--r-md);flex-shrink:0;"
+           onerror="this.src='${BASE}/public/img/default.jpg'">
+      <div class="flex-grow-1 min-w-0">
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+          ${rolLabel} ${badgeEstado(tx.estado)}
+          <span class="text-muted small ms-auto">${fechaRelativa(tx.fecha_transaccion)}</span>
+        </div>
+        <div class="fw-semibold text-truncate" style="color:var(--c-text);">${escHtml(tx.producto_titulo ?? 'Producto eliminado')}</div>
+        <div class="d-flex align-items-center gap-2 mt-1 small text-muted">
+          <img src="${imgOtro}" class="rounded-circle" width="20" height="20" style="object-fit:cover;"
+               onerror="this.src='${BASE}/public/img/default.jpg'">
+          ${escHtml(otroNombre ?? '')} ${precio ? '·' : ''} ${precio}
+        </div>
+        ${tx.metodo_pago ? `<div class="small text-muted mt-1"><i class="bi bi-credit-card me-1"></i>${metodoLabel(tx.metodo_pago)}${tx.numero_seguimiento ? ` · <i class="bi bi-box-seam me-1"></i><code>${escHtml(tx.numero_seguimiento)}</code>` : ''}</div>` : ''}
+      </div>
+      <div class="d-flex flex-column gap-1 align-items-end flex-shrink-0">${chatLink}</div>
+    </div>
+  </div>`;
+}
+
+function renderPaginacion(page, pages) {
+  const nav = document.getElementById('tx-paginacion');
+  if (pages <= 1) { nav.innerHTML = ''; return; }
+  let html = '<ul class="pagination pagination-sm justify-content-center">';
+  html += `<li class="page-item ${page<=1?'disabled':''}"><button class="page-link" data-p="${page-1}">‹</button></li>`;
+  for (let i = 1; i <= pages; i++) html += `<li class="page-item ${i===page?'active':''}"><button class="page-link" data-p="${i}">${i}</button></li>`;
+  html += `<li class="page-item ${page>=pages?'disabled':''}"><button class="page-link" data-p="${page+1}">›</button></li></ul>`;
+  nav.innerHTML = html;
+  nav.querySelectorAll('button[data-p]').forEach(btn => btn.addEventListener('click', () => { txState.page = parseInt(btn.dataset.p); cargarTx(); }));
+}
+
+function cargarTx() {
+  const lista = document.getElementById('tx-lista');
+  lista.innerHTML = '<div class="text-center py-5 text-muted"><div class="spinner-border spinner-border-sm me-2"></div>Cargando…</div>';
+  const params = new URLSearchParams({ page:txState.page, limit:txState.limit, rol:txState.rol, estado:txState.estadoFiltro });
+  fetch(`${BASE}/api/mis_transacciones.php?${params}`).then(r => r.json()).then(res => {
+    if (!res.data || !res.data.length) {
+      const hayFiltros = txState.rol || txState.estadoFiltro;
+      lista.innerHTML = hayFiltros
+        ? `<div class="empty-state"><i class="bi bi-funnel"></i><h3>Sin resultados</h3><p>Ninguna transacción coincide con estos filtros.</p><button class="btn btn-outline-secondary btn-sm" onclick="document.querySelector('[data-val=\\'\\']').click();document.getElementById('filtro-estado').value='';cargarTx()"><i class="bi bi-x-circle me-1"></i>Quitar filtros</button></div>`
+        : `<div class="empty-state"><i class="bi bi-bag"></i><h3>Sin transacciones</h3><p>Aquí verás el historial de tus compras y ventas.</p><a href="${BASE}/public/views/home.php" class="btn btn-primary btn-sm"><i class="bi bi-search me-1"></i>Explorar productos</a></div>`;
+      document.getElementById('tx-paginacion').innerHTML = '';
+      return;
+    }
+    lista.innerHTML = res.data.map(renderTarjeta).join('');
+    renderPaginacion(res.page, res.pages);
+  }).catch(() => {
+    lista.innerHTML = '<div class="alert alert-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Error al cargar. <button class="btn btn-sm btn-outline-danger ms-2" onclick="cargarTx()">Reintentar</button></div>';
+  });
+}
+
+document.getElementById('filtro-rol').addEventListener('click', e => {
+  const btn = e.target.closest('.filter-btn');
+  if (!btn) return;
+  document.querySelectorAll('#filtro-rol .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  txState.rol = btn.dataset.val; txState.page = 1; cargarTx();
+});
+document.getElementById('filtro-estado').addEventListener('change', e => { txState.estadoFiltro = e.target.value; txState.page = 1; cargarTx(); });
+cargarTx();
+</script>
+{% endblock %}

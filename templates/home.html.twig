@@ -1,0 +1,118 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}MercApp — Inicio{% endblock %}
+
+{% block head_extra %}
+<link rel="stylesheet" href="{{ asset('css/homeStyle.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<!-- Filters card -->
+<div class="card no-hover mb-4">
+  <div class="card-body pb-2">
+    <div class="row g-3">
+
+      <div class="col-6 col-md-3">
+        <label for="filtro-categoria" class="visually-hidden">Categoría</label>
+        <select id="filtro-categoria" class="form-select">
+          <option value="">Categoría</option>
+        </select>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <label for="filtro-estado" class="visually-hidden">Estado del producto</label>
+        <select id="filtro-estado" class="form-select">
+          <option value="">Estado</option>
+        </select>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <label for="filtro-transaccion" class="visually-hidden">Tipo de transacción</label>
+        <select id="filtro-transaccion" class="form-select">
+          <option value="">Transacción</option>
+        </select>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <label for="filtro-orden" class="visually-hidden">Ordenar</label>
+        <select id="filtro-orden" class="form-select">
+          <option value="fecha_desc">Más recientes</option>
+          <option value="fecha_asc">Más antiguos</option>
+          <option value="precio_asc">Precio: menor a mayor</option>
+          <option value="precio_desc">Precio: mayor a menor</option>
+          <option value="distancia">Más cercanos</option>
+        </select>
+      </div>
+
+      <!-- Proximity filter (shown by JS) -->
+      <div class="col-12" id="filtro-proximidad-wrap" style="display:none;">
+        <div class="d-flex flex-wrap align-items-center gap-2">
+          <i class="bi bi-geo-alt-fill text-primary"></i>
+          <span class="small" id="proximidad-coords-label">Detectando ubicación…</span>
+          <select id="filtro-distancia" class="form-select form-select-sm" style="width:auto;">
+            <option value="5">5 km</option>
+            <option value="10" selected>10 km</option>
+            <option value="25">25 km</option>
+            <option value="50">50 km</option>
+            <option value="100">100 km</option>
+          </select>
+          <button class="btn btn-sm btn-outline-secondary" id="btn-geolocalizar">
+            <i class="bi bi-crosshair"></i> Mi ubicación
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Active filter chips -->
+<div id="filtros-activos" class="d-flex flex-wrap gap-2 mb-3" aria-label="Filtros activos"
+     style="display:none!important;"></div>
+
+<!-- Results header -->
+<div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+  <h1 class="mb-0 fs-5 fw-bold" style="color:var(--c-text);">Productos disponibles</h1>
+  <span id="resultado-contador" class="text-muted small" aria-live="polite"></span>
+</div>
+
+<!-- Skeleton loader -->
+<div id="skeleton-loader" class="row g-4"></div>
+
+<!-- Products grid (populated by home.js) -->
+<div id="product-list" class="row g-4"></div>
+
+<!-- Empty state -->
+<div id="empty-state" style="display:none;" class="empty-state">
+  <i class="bi bi-search"></i>
+  <h3>Sin resultados</h3>
+  <p>No hay productos que coincidan con tu búsqueda.</p>
+  <button class="btn btn-outline-primary btn-sm" id="btn-limpiar-filtros">
+    <i class="bi bi-x-circle me-1"></i>Limpiar filtros
+  </button>
+</div>
+
+<!-- Infinite scroll sentinel -->
+<div id="sentinel" style="height:1px;"></div>
+
+<!-- Infinite scroll spinner -->
+<div id="scroll-spinner" style="display:none;" class="text-center py-3 text-muted">
+  <div class="spinner-border spinner-border-sm me-2" role="status" aria-label="Cargando"></div>
+  <span class="small">Cargando más…</span>
+</div>
+
+<!-- Error state -->
+<div id="error" style="display:none;" class="empty-state">
+  <i class="bi bi-exclamation-triangle text-danger"></i>
+  <h3>Error al cargar</h3>
+  <button class="btn btn-outline-danger btn-sm" id="btn-retry">
+    <i class="bi bi-arrow-clockwise me-1"></i>Reintentar
+  </button>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ asset('js/home.js') }}" defer></script>
+{% endblock %}

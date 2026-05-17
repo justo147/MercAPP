@@ -1,0 +1,252 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ producto.titulo|e }} — MercApp{% endblock %}
+
+{% block head_extra %}
+<link rel="stylesheet" href="{{ asset('css/detail_product.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="row g-4 align-items-start">
+
+  <!-- Gallery -->
+  <div class="col-lg-6">
+    <div class="dp-gallery">
+      <div class="dp-main-wrap">
+        <img id="dp-main-img"
+             src="{{ imgPrincipal|e }}"
+             alt="{{ producto.titulo|e }}"
+             class="dp-main-img"
+             onerror="this.onerror=null;this.src='{{ BASE }}/public/img/default.jpg'">
+      </div>
+
+      {% if imagenes|length > 1 %}
+      <div class="dp-thumbs mt-2">
+        {% for i, img in imagenes %}
+        {% set src = BASE ~ '/' ~ img.url %}
+        <img src="{{ src|e }}"
+             alt="Imagen {{ i + 1 }}"
+             class="dp-thumb {{ i == 0 ? 'dp-thumb--active' : '' }}"
+             onerror="this.onerror=null;this.src='{{ BASE }}/public/img/default.jpg'"
+             onclick="dpSetMain(this, '{{ src|e|escape('js') }}')">
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Info -->
+  <div class="col-lg-6">
+    <div class="dp-info">
+
+      <!-- Badges -->
+      <div class="d-flex flex-wrap gap-2 mb-3">
+        <span class="badge {{ tipoCls }}">{{ tipoLabel }}</span>
+        {% if producto.estado_producto %}
+        <span class="badge bg-light text-dark border">{{ producto.estado_producto|e }}</span>
+        {% endif %}
+        {% if producto.categoria %}
+        <span class="badge bg-light text-dark border">
+          <i class="bi bi-tag me-1"></i>{{ producto.categoria|e }}
+        </span>
+        {% endif %}
+      </div>
+
+      <h1 class="dp-title">{{ producto.titulo|e }}</h1>
+
+      <!-- Price -->
+      <div class="dp-price-wrap mb-3">
+        <span class="dp-price">{{ precioStr }}</span>
+        {% if producto.precio_original is defined and producto.precio_original and producto.precio_original > producto.precio %}
+        <span class="dp-price-old">{{ producto.precio_original|number_format(2) }} €</span>
+        <span class="badge bg-danger ms-1">
+          -{{ ((producto.precio_original - producto.precio) / producto.precio_original * 100)|round }}%
+        </span>
+        {% endif %}
+      </div>
+
+      <!-- Location -->
+      {% if producto.ubicacion %}
+      <p class="dp-location mb-3">
+        <i class="bi bi-geo-alt-fill me-1 text-danger"></i>{{ producto.ubicacion|e }}
+      </p>
+      {% endif %}
+
+      <div class="divider"></div>
+
+      <!-- Actions -->
+      <div class="d-flex gap-2 mb-3">
+        <button id="favBtn"
+                class="btn btn-outline-danger dp-fav-btn"
+                onclick="toggleFavorito({{ producto.id }})"
+                title="Añadir a favoritos">
+          <i class="bi bi-heart fs-5"></i>
+        </button>
+
+        {% if usuarioLogueado and usuarioLogueado != vendedorId %}
+        <a href="{{ BASE }}/controllers/chat_start.php?producto_id={{ producto.id }}"
+           class="btn btn-primary flex-grow-1 d-flex align-items-center justify-content-center gap-2">
+          <i class="bi bi-chat-dots-fill"></i> Contactar con el vendedor
+        </a>
+        {% else %}
+        <button class="btn btn-primary flex-grow-1" disabled>
+          <i class="bi bi-chat-dots-fill me-1"></i>
+          {{ usuarioLogueado == vendedorId ? 'Tu producto' : 'Contactar con el vendedor' }}
+        </button>
+        {% endif %}
+      </div>
+
+      <!-- Trust badges -->
+      <div class="dp-guarantees">
+        <span><i class="bi bi-truck me-1 text-primary"></i>Envío a acordar con el vendedor</span>
+        <span><i class="bi bi-shield-check me-1 text-success"></i>Compra segura en MercApp</span>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- Description -->
+<div class="card mt-4">
+  <div class="card-body">
+    <h5 class="fw-semibold mb-3">
+      <i class="bi bi-file-text me-2 text-muted"></i>Descripción
+    </h5>
+    {% if producto.descripcion|trim %}
+    <p class="mb-0 lh-lg">{{ producto.descripcion|nl2br|raw }}</p>
+    {% else %}
+    <p class="text-muted fst-italic mb-0">El vendedor no ha añadido descripción.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Seller card -->
+{% if vendedor %}
+<div class="card mt-3">
+  <div class="card-body">
+    <h5 class="fw-semibold mb-3">
+      <i class="bi bi-person-circle me-2 text-muted"></i>Sobre el vendedor
+    </h5>
+    <div class="d-flex align-items-center gap-3">
+
+      <a href="{{ BASE }}/public/views/profile.php?id={{ vendedorId }}" class="flex-shrink-0">
+        {% if vendedor.foto_perfil %}
+        <img src="{{ BASE }}/{{ vendedor.foto_perfil|e }}"
+             alt="Foto del vendedor"
+             class="dp-seller-avatar"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <span class="dp-seller-avatar-fb" style="display:none"><i class="bi bi-person fs-2"></i></span>
+        {% else %}
+        <span class="dp-seller-avatar-fb"><i class="bi bi-person fs-2"></i></span>
+        {% endif %}
+      </a>
+
+      <div class="flex-grow-1">
+        <div class="fw-semibold">
+          <a href="{{ BASE }}/public/views/profile.php?id={{ vendedorId }}"
+             style="color:var(--c-text);text-decoration:none;">
+            {{ vendedor.nombre|e }} {{ vendedor.apellidos|e }}
+          </a>
+        </div>
+        <small class="text-muted">
+          <i class="bi bi-calendar3 me-1"></i>Miembro desde {{ vendedor.fecha_registro|date('m/Y') }}
+        </small>
+      </div>
+
+      {% if usuarioLogueado and usuarioLogueado != vendedorId %}
+      <button id="btn-follow"
+              class="btn btn-sm {{ yaSigue ? 'btn-secondary' : 'btn-primary' }}"
+              data-seguidor="{{ usuarioLogueado }}"
+              data-seguido="{{ vendedorId }}"
+              data-sigue="{{ yaSigue ? '1' : '0' }}">
+        {{ yaSigue ? 'Siguiendo' : 'Seguir' }}
+      </button>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Suggested products -->
+{% if productosSugeridos %}
+<section class="mt-5 mb-4">
+  <h5 class="fw-semibold mb-3">
+    <i class="bi bi-grid me-2 text-muted"></i>Productos sugeridos
+  </h5>
+  <div class="dp-sug-wrap">
+    <button class="dp-sug-arrow" onclick="dpScrollSug(-1)" aria-label="Anterior">
+      <i class="bi bi-chevron-left"></i>
+    </button>
+    <div class="dp-sug-scroll" id="dp-sugeridos">
+      {% for s in productosSugeridos %}
+      {% set sImg = s.imagenes[0].url is defined ? BASE ~ '/' ~ s.imagenes[0].url : BASE ~ '/public/img/default.jpg' %}
+      {% set sPrecio = s.precio and s.precio > 0 ? s.precio|number_format(2) ~ ' €' : 'Gratis' %}
+      <a href="{{ BASE }}/public/views/detail_product.php?id={{ s.id }}"
+         class="dp-sug-card text-decoration-none text-body">
+        <img src="{{ sImg|e }}"
+             alt="{{ s.titulo|e }}"
+             onerror="this.onerror=null;this.src='{{ BASE }}/public/img/default.jpg'">
+        <div class="dp-sug-body">
+          <div class="dp-sug-title">{{ s.titulo|e }}</div>
+          <div class="dp-sug-price">{{ sPrecio }}</div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    <button class="dp-sug-arrow" onclick="dpScrollSug(1)" aria-label="Siguiente">
+      <i class="bi bi-chevron-right"></i>
+    </button>
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+window.productoIdGlobal = {{ producto.id }};
+
+function dpSetMain(thumb, src) {
+  document.getElementById('dp-main-img').src = src;
+  document.querySelectorAll('.dp-thumb').forEach(t => t.classList.remove('dp-thumb--active'));
+  thumb.classList.add('dp-thumb--active');
+}
+function dpScrollSug(dir) {
+  const el = document.getElementById('dp-sugeridos');
+  if (el) el.scrollBy({ left: dir * 320, behavior: 'smooth' });
+}
+</script>
+<script src="{{ asset('js/favorite.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('btn-follow');
+  if (!btn) return;
+  let sigue = btn.dataset.sigue === '1';
+  function actualizarBoton() {
+    btn.classList.toggle('btn-primary', !sigue);
+    btn.classList.toggle('btn-secondary', sigue);
+    btn.textContent = sigue ? 'Siguiendo' : 'Seguir';
+  }
+  actualizarBoton();
+  btn.addEventListener('mouseenter', () => { if (sigue) btn.textContent = 'Dejar de seguir'; });
+  btn.addEventListener('mouseleave', actualizarBoton);
+  btn.addEventListener('click', () => {
+    const orig = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+    const url = sigue ? `${BASE}/controllers/unfollow.php` : `${BASE}/controllers/follow.php`;
+    fetch(url, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
+                 body:`seguidor=${btn.dataset.seguidor}&seguido=${btn.dataset.seguido}` })
+    .then(r=>r.json()).then(data=>{
+      if(data.success){ sigue=!sigue; btn.dataset.sigue=sigue?'1':'0'; actualizarBoton();
+        mostrarToast(sigue?'Ahora sigues a este vendedor.':'Has dejado de seguir.','success'); }
+      else { btn.innerHTML=orig; mostrarToast('No se pudo actualizar.','error'); }
+    }).catch(()=>{ btn.innerHTML=orig; mostrarToast('Error de conexión.','error'); })
+    .finally(()=>{ btn.disabled=false; });
+  });
+});
+</script>
+{% endblock %}

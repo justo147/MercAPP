@@ -1,0 +1,21 @@
+{% extends 'base_auth.html.twig' %}
+{% block title %}Verificar correo — MercApp{% endblock %}
+{% block content %}
+<div class="auth-card fade-in show text-center">
+  <div style="width:72px;height:72px;border-radius:50%;background:var(--c-primary-light);
+              display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;">
+    <i class="bi bi-envelope-open-heart" style="font-size:2rem;color:var(--c-primary);"></i>
+  </div>
+  <h1 class="auth-title">Verificación de correo</h1>
+
+  {% if estado %}
+  <div class="alert alert-info py-2 my-3" style="font-size:.9rem;">
+    {{ estado }}
+  </div>
+  {% endif %}
+
+  <a href="{{ BASE }}/public/views/auth/login.php" class="btn btn-primary px-4 mt-2">
+    <i class="bi bi-house me-1"></i> Ir al login
+  </a>
+</div>
+{% endblock %}

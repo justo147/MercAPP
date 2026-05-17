@@ -1,0 +1,142 @@
+<nav class="app-navbar" aria-label="Navegación principal">
+  <div class="navbar-inner">
+
+    <!-- Brand -->
+    <a href="{{ BASE }}/public/views/home.php" class="brand">
+      <img src="{{ asset('img/logo_sinfondo.png') }}" alt="MercApp">
+      MercApp
+    </a>
+
+    <!-- Search (desktop) -->
+    <div class="search-wrap d-none d-md-block">
+      <form class="search-form" method="get" action="{{ BASE }}/public/views/home.php">
+        <input type="search" name="q" placeholder="Buscar productos, categorías…"
+               value="{{ app_query is defined ? app_query : '' }}"
+               autocomplete="off" aria-label="Buscar productos">
+        <button type="submit" aria-label="Buscar"><i class="bi bi-search"></i></button>
+      </form>
+    </div>
+
+    <!-- Actions -->
+    <div class="nav-actions ms-auto ms-md-0">
+
+      <!-- Notifications -->
+      <div class="dropdown">
+        <button class="nav-icon-btn" id="notif-btn" data-bs-toggle="dropdown"
+                aria-label="Notificaciones" aria-expanded="false">
+          <i class="bi bi-bell"></i>
+          <span id="badge-notif" class="badge-count"></span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end p-1" id="notif-lista"
+            style="min-width:300px;max-height:360px;overflow-y:auto;">
+          <li class="px-3 py-2 text-muted small" id="notif-vacio">Sin notificaciones nuevas</li>
+        </ul>
+      </div>
+
+      <!-- Favorites -->
+      <a href="{{ BASE }}/public/views/my_favorites.php"
+         class="nav-icon-btn" title="Favoritos" aria-label="Mis favoritos">
+        <i class="bi bi-heart"></i>
+      </a>
+
+      <!-- Messages -->
+      <a href="{{ BASE }}/public/views/chat_list.php?id={{ session.user_id }}"
+         class="nav-icon-btn position-relative" title="Mensajes" aria-label="Mensajes">
+        <i class="bi bi-chat"></i>
+        <span id="badge-mensajes" class="badge-count"></span>
+      </a>
+
+      <!-- User dropdown -->
+      <div class="dropdown">
+        <button class="app-dropdown-toggle" id="userMenu" data-bs-toggle="dropdown"
+                aria-label="Menú de usuario" aria-expanded="false">
+          {% if session.profile_photo %}
+            <img src="{{ BASE }}/{{ session.profile_photo|e }}" class="nav-avatar" alt="Foto de perfil">
+          {% else %}
+            <span class="nav-avatar-placeholder"><i class="bi bi-person"></i></span>
+          {% endif %}
+          <i class="bi bi-chevron-down" style="font-size:.7rem;color:var(--c-muted);"></i>
+        </button>
+
+        <ul class="dropdown-menu dropdown-menu-end">
+          {% if session.role == 'admin' %}
+          <li>
+            <a class="dropdown-item fw-semibold" href="{{ BASE }}/public/views/admin_dashboard.php">
+              <i class="bi bi-shield-lock text-primary"></i> Panel Admin
+            </a>
+          </li>
+          <li><hr class="dropdown-divider"></li>
+          {% endif %}
+
+          <li>
+            <a class="dropdown-item" href="{{ BASE }}/public/views/profile.php?id={{ session.user_id }}">
+              <i class="bi bi-person-circle"></i> Mi perfil
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="{{ BASE }}/public/views/chat_list.php?id={{ session.user_id }}">
+              <i class="bi bi-envelope"></i> Mensajes
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="{{ BASE }}/public/views/my_transactions.php">
+              <i class="bi bi-clock-history"></i> Mis transacciones
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="{{ BASE }}/public/views/upload_product.php">
+              <i class="bi bi-plus-circle"></i> Subir producto
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="{{ BASE }}/public/views/my_wishlist.php">
+              <i class="bi bi-stars"></i> Lista de deseos
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="{{ BASE }}/public/views/followers_products.php?id={{ session.user_id }}">
+              <i class="bi bi-people"></i> Siguiendo
+            </a>
+          </li>
+          <li><hr class="dropdown-divider"></li>
+          <li>
+            <a class="dropdown-item" href="{{ BASE }}/public/views/detail_account.php">
+              <i class="bi bi-gear"></i> Ajustes de cuenta
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="{{ BASE }}/public/views/help.php">
+              <i class="bi bi-question-circle"></i> Ayuda
+            </a>
+          </li>
+          <li><hr class="dropdown-divider"></li>
+          <li>
+            <a class="dropdown-item text-danger" href="{{ BASE }}/controllers/logout.php">
+              <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Theme toggle -->
+      <button id="themeToggle" class="theme-toggle" aria-label="Cambiar tema" title="Cambiar tema">
+        <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+      </button>
+
+      <!-- Mobile search toggle -->
+      <button class="navbar-mobile-toggle d-md-none" id="mobileSearchToggle" aria-label="Buscar">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Mobile search bar -->
+  <div class="search-wrap px-3 pb-2 d-md-none" id="mobileSearch" style="display:none!important;">
+    <form class="search-form" method="get" action="{{ BASE }}/public/views/home.php">
+      <input type="search" name="q" placeholder="Buscar productos…"
+             value="{{ app_query is defined ? app_query : '' }}" autocomplete="off">
+      <button type="submit"><i class="bi bi-search"></i></button>
+    </form>
+  </div>
+</nav>
