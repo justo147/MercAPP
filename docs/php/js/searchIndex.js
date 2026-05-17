@@ -3,12 +3,17 @@ Search.appendIndex(
                 {
             "fqsen": "\\Database",
             "name": "Database",
-            "summary": "Clase\u0020Database",
+            "summary": "",
             "url": "classes/Database.html"
+        },                {
+            "fqsen": "\\Database\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Database.html#method___construct"
         },                {
             "fqsen": "\\Database\u003A\u003AgetConnection\u0028\u0029",
             "name": "getConnection",
-            "summary": "Obtiene\u0020la\u0020conexi\u00F3n\u0020a\u0020la\u0020base\u0020de\u0020datos.",
+            "summary": "",
             "url": "classes/Database.html#method_getConnection"
         },                {
             "fqsen": "\\Database\u003A\u003A\u0024host",
@@ -35,6 +40,16 @@ Search.appendIndex(
             "name": "conn",
             "summary": "",
             "url": "classes/Database.html#property_conn"
+        },                {
+            "fqsen": "\\setFlash\u0028\u0029",
+            "name": "setFlash",
+            "summary": "flash.php\u0020\u2014\u0020helpers\u0020para\u0020mensajes\u0020flash\u0020via\u0020sesi\u00F3n",
+            "url": "namespaces/default.html#function_setFlash"
+        },                {
+            "fqsen": "\\hasFlash\u0028\u0029",
+            "name": "hasFlash",
+            "summary": "",
+            "url": "namespaces/default.html#function_hasFlash"
         },                {
             "fqsen": "\\sendMail\u0028\u0029",
             "name": "sendMail",
@@ -65,6 +80,11 @@ Search.appendIndex(
             "name": "userModel",
             "summary": "",
             "url": "classes/AuthController.html#property_userModel"
+        },                {
+            "fqsen": "\\AuthController\u003A\u003A\u0024rateLimiter",
+            "name": "rateLimiter",
+            "summary": "",
+            "url": "classes/AuthController.html#property_rateLimiter"
         },                {
             "fqsen": "\\Chat",
             "name": "Chat",
@@ -103,7 +123,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Chat\u003A\u003AgetChatsByUser\u0028\u0029",
             "name": "getChatsByUser",
-            "summary": "Obtiene\u0020todos\u0020los\u0020chats\u0020activos\u0020en\u0020los\u0020que\u0020participa\u0020un\u0020usuario.",
+            "summary": "",
             "url": "classes/Chat.html#method_getChatsByUser"
         },                {
             "fqsen": "\\Chat\u003A\u003AsetTransaction\u0028\u0029",
@@ -123,47 +143,47 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Message\u003A\u003A__construct\u0028\u0029",
             "name": "__construct",
-            "summary": "Constructor\u0020del\u0020modelo.",
+            "summary": "",
             "url": "classes/Message.html#method___construct"
         },                {
             "fqsen": "\\Message\u003A\u003AgetByChat\u0028\u0029",
             "name": "getByChat",
-            "summary": "Obtiene\u0020todos\u0020los\u0020mensajes\u0020pertenecientes\u0020a\u0020un\u0020chat.",
+            "summary": "Obtiene\u0020todos\u0020los\u0020mensajes\u0020de\u0020un\u0020chat,\u0020incluyendo\u0020los\u0020mensajes\u0020del\u0020sistema\n\u0028usuario_id\u0020\u003D\u0020NULL\u0029.\u0020Usa\u0020LEFT\u0020JOIN\u0020para\u0020no\u0020excluirlos.",
             "url": "classes/Message.html#method_getByChat"
         },                {
             "fqsen": "\\Message\u003A\u003Asend\u0028\u0029",
             "name": "send",
-            "summary": "Env\u00EDa\u0020un\u0020mensaje\u0020dentro\u0020de\u0020un\u0020chat.",
+            "summary": "",
             "url": "classes/Message.html#method_send"
         },                {
             "fqsen": "\\Message\u003A\u003AmarkAsRead\u0028\u0029",
             "name": "markAsRead",
-            "summary": "",
+            "summary": "Marca\u0020como\u0020le\u00EDdos\u0020los\u0020mensajes\u0020del\u0020otro\u0020usuario\u0020\u0028no\u0020los\u0020propios\u0020ni\u0020los\u0020del\u0020sistema\u0029.",
             "url": "classes/Message.html#method_markAsRead"
+        },                {
+            "fqsen": "\\Message\u003A\u003AmarkSystemAsRead\u0028\u0029",
+            "name": "markSystemAsRead",
+            "summary": "Marca\u0020como\u0020le\u00EDdos\u0020los\u0020mensajes\u0020del\u0020sistema\u0020de\u0020un\u0020chat.",
+            "url": "classes/Message.html#method_markSystemAsRead"
         },                {
             "fqsen": "\\Message\u003A\u003AcountUnread\u0028\u0029",
             "name": "countUnread",
-            "summary": "",
+            "summary": "Mensajes\u0020sin\u0020leer\u0020del\u0020otro\u0020usuario\u0020en\u0020un\u0020chat\u0020concreto.",
             "url": "classes/Message.html#method_countUnread"
         },                {
             "fqsen": "\\Message\u003A\u003AcountAllUnread\u0028\u0029",
             "name": "countAllUnread",
-            "summary": "Cuenta\u0020todos\u0020los\u0020mensajes\u0020sin\u0020leer\u0020del\u0020usuario\u0020en\u0020todos\u0020sus\u0020chats.",
+            "summary": "Total\u0020de\u0020mensajes\u0020sin\u0020leer\u0020del\u0020usuario\u0020en\u0020todos\u0020sus\u0020chats.",
             "url": "classes/Message.html#method_countAllUnread"
         },                {
             "fqsen": "\\Message\u003A\u003AenviarMensajeSistema\u0028\u0029",
             "name": "enviarMensajeSistema",
-            "summary": "Env\u00EDa\u0020un\u0020mensaje\u0020autom\u00E1tico\u0020del\u0020sistema\u0020al\u0020chat.",
+            "summary": "Inserta\u0020un\u0020mensaje\u0020autom\u00E1tico\u0020del\u0020sistema\u0020\u0028usuario_id\u0020\u003D\u0020NULL\u0029.",
             "url": "classes/Message.html#method_enviarMensajeSistema"
-        },                {
-            "fqsen": "\\Message\u003A\u003AmarkSystemAsRead\u0028\u0029",
-            "name": "markSystemAsRead",
-            "summary": "",
-            "url": "classes/Message.html#method_markSystemAsRead"
         },                {
             "fqsen": "\\Message\u003A\u003A\u0024conn",
             "name": "conn",
-            "summary": "Conexi\u00F3n\u0020a\u0020la\u0020base\u0020de\u0020datos.",
+            "summary": "",
             "url": "classes/Message.html#property_conn"
         },                {
             "fqsen": "\\Notification",
@@ -336,6 +356,61 @@ Search.appendIndex(
             "summary": "Conexi\u00F3n\u0020a\u0020la\u0020base\u0020de\u0020datos.",
             "url": "classes/Product.html#property_conn"
         },                {
+            "fqsen": "\\RateLimiter",
+            "name": "RateLimiter",
+            "summary": "",
+            "url": "classes/RateLimiter.html"
+        },                {
+            "fqsen": "\\RateLimiter\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/RateLimiter.html#method___construct"
+        },                {
+            "fqsen": "\\RateLimiter\u003A\u003AregistrarIntento\u0028\u0029",
+            "name": "registrarIntento",
+            "summary": "Registra\u0020un\u0020intento\u0020fallido\u0020para\u0020la\u0020IP\u0020dada.",
+            "url": "classes/RateLimiter.html#method_registrarIntento"
+        },                {
+            "fqsen": "\\RateLimiter\u003A\u003AcontarIntentos\u0028\u0029",
+            "name": "contarIntentos",
+            "summary": "Cuenta\u0020los\u0020intentos\u0020fallidos\u0020recientes\u0020de\u0020una\u0020IP.",
+            "url": "classes/RateLimiter.html#method_contarIntentos"
+        },                {
+            "fqsen": "\\RateLimiter\u003A\u003AestaBloqueado\u0028\u0029",
+            "name": "estaBloqueado",
+            "summary": "Indica\u0020si\u0020la\u0020IP\u0020est\u00E1\u0020bloqueada\u0020por\u0020exceso\u0020de\u0020intentos.",
+            "url": "classes/RateLimiter.html#method_estaBloqueado"
+        },                {
+            "fqsen": "\\RateLimiter\u003A\u003AsegundosRestantes\u0028\u0029",
+            "name": "segundosRestantes",
+            "summary": "Devuelve\u0020los\u0020segundos\u0020que\u0020restan\u0020de\u0020bloqueo.",
+            "url": "classes/RateLimiter.html#method_segundosRestantes"
+        },                {
+            "fqsen": "\\RateLimiter\u003A\u003AlimpiarIntentos\u0028\u0029",
+            "name": "limpiarIntentos",
+            "summary": "Elimina\u0020los\u0020intentos\u0020de\u0020la\u0020IP\u0020\u0028al\u0020hacer\u0020login\u0020correcto\u0029.",
+            "url": "classes/RateLimiter.html#method_limpiarIntentos"
+        },                {
+            "fqsen": "\\RateLimiter\u003A\u003AgetClientIp\u0028\u0029",
+            "name": "getClientIp",
+            "summary": "Obtiene\u0020la\u0020IP\u0020real\u0020del\u0020cliente\u0020\u0028considera\u0020proxies\u0029.",
+            "url": "classes/RateLimiter.html#method_getClientIp"
+        },                {
+            "fqsen": "\\RateLimiter\u003A\u003A\u0024conn",
+            "name": "conn",
+            "summary": "",
+            "url": "classes/RateLimiter.html#property_conn"
+        },                {
+            "fqsen": "\\RateLimiter\u003A\u003A\u0024maxIntentos",
+            "name": "maxIntentos",
+            "summary": "",
+            "url": "classes/RateLimiter.html#property_maxIntentos"
+        },                {
+            "fqsen": "\\RateLimiter\u003A\u003A\u0024ventanaSegundos",
+            "name": "ventanaSegundos",
+            "summary": "",
+            "url": "classes/RateLimiter.html#property_ventanaSegundos"
+        },                {
             "fqsen": "\\Rating",
             "name": "Rating",
             "summary": "",
@@ -448,62 +523,112 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Transaction\u003A\u003A__construct\u0028\u0029",
             "name": "__construct",
-            "summary": "Constructor\u0020del\u0020modelo.",
+            "summary": "",
             "url": "classes/Transaction.html#method___construct"
         },                {
             "fqsen": "\\Transaction\u003A\u003Acreate\u0028\u0029",
             "name": "create",
-            "summary": "Crea\u0020una\u0020nueva\u0020transacci\u00F3n.",
+            "summary": "Crea\u0020una\u0020transacci\u00F3n\u0020b\u00E1sica\u0020\u0028usada\u0020por\u0020createFromChat\u0029.",
             "url": "classes/Transaction.html#method_create"
-        },                {
-            "fqsen": "\\Transaction\u003A\u003AgetAll\u0028\u0029",
-            "name": "getAll",
-            "summary": "Obtiene\u0020todas\u0020las\u0020transacciones.",
-            "url": "classes/Transaction.html#method_getAll"
-        },                {
-            "fqsen": "\\Transaction\u003A\u003AgetByUser\u0028\u0029",
-            "name": "getByUser",
-            "summary": "Obtiene\u0020las\u0020transacciones\u0020de\u0020un\u0020usuario\u0020\u0028como\u0020comprador\u0020o\u0020vendedor\u0029.",
-            "url": "classes/Transaction.html#method_getByUser"
-        },                {
-            "fqsen": "\\Transaction\u003A\u003AgetByProduct\u0028\u0029",
-            "name": "getByProduct",
-            "summary": "Obtiene\u0020las\u0020transacciones\u0020de\u0020un\u0020producto.",
-            "url": "classes/Transaction.html#method_getByProduct"
-        },                {
-            "fqsen": "\\Transaction\u003A\u003AupdateStatus\u0028\u0029",
-            "name": "updateStatus",
-            "summary": "Actualiza\u0020el\u0020estado\u0020de\u0020una\u0020transacci\u00F3n.",
-            "url": "classes/Transaction.html#method_updateStatus"
-        },                {
-            "fqsen": "\\Transaction\u003A\u003Adelete\u0028\u0029",
-            "name": "delete",
-            "summary": "Elimina\u0020una\u0020transacci\u00F3n\u0020por\u0020ID.",
-            "url": "classes/Transaction.html#method_delete"
-        },                {
-            "fqsen": "\\Transaction\u003A\u003AgetActiveTransactionByProduct\u0028\u0029",
-            "name": "getActiveTransactionByProduct",
-            "summary": "",
-            "url": "classes/Transaction.html#method_getActiveTransactionByProduct"
         },                {
             "fqsen": "\\Transaction\u003A\u003AcreateFromChat\u0028\u0029",
             "name": "createFromChat",
-            "summary": "",
+            "summary": "Crea\u0020una\u0020transacci\u00F3n\u0020desde\u0020el\u0020chat.",
             "url": "classes/Transaction.html#method_createFromChat"
+        },                {
+            "fqsen": "\\Transaction\u003A\u003AaddIntercambioProducto\u0028\u0029",
+            "name": "addIntercambioProducto",
+            "summary": "A\u00F1ade\u0020un\u0020producto\u0020ofrecido\u0020por\u0020el\u0020comprador\u0020al\u0020detalle\u0020de\u0020intercambio.",
+            "url": "classes/Transaction.html#method_addIntercambioProducto"
+        },                {
+            "fqsen": "\\Transaction\u003A\u003AgetIntercambioDetalle\u0028\u0029",
+            "name": "getIntercambioDetalle",
+            "summary": "Obtiene\u0020los\u0020productos\u0020ofrecidos\u0020en\u0020un\u0020intercambio.",
+            "url": "classes/Transaction.html#method_getIntercambioDetalle"
+        },                {
+            "fqsen": "\\Transaction\u003A\u003AgetAll\u0028\u0029",
+            "name": "getAll",
+            "summary": "",
+            "url": "classes/Transaction.html#method_getAll"
         },                {
             "fqsen": "\\Transaction\u003A\u003AgetById\u0028\u0029",
             "name": "getById",
             "summary": "",
             "url": "classes/Transaction.html#method_getById"
         },                {
+            "fqsen": "\\Transaction\u003A\u003AgetByUser\u0028\u0029",
+            "name": "getByUser",
+            "summary": "",
+            "url": "classes/Transaction.html#method_getByUser"
+        },                {
+            "fqsen": "\\Transaction\u003A\u003AgetByUserDetailed\u0028\u0029",
+            "name": "getByUserDetailed",
+            "summary": "Transacciones\u0020del\u0020usuario\u0020con\u0020datos\u0020del\u0020producto\u0020y\u0020del\u0020otro\u0020participante.",
+            "url": "classes/Transaction.html#method_getByUserDetailed"
+        },                {
+            "fqsen": "\\Transaction\u003A\u003AcountByUser\u0028\u0029",
+            "name": "countByUser",
+            "summary": "",
+            "url": "classes/Transaction.html#method_countByUser"
+        },                {
+            "fqsen": "\\Transaction\u003A\u003AgetByProduct\u0028\u0029",
+            "name": "getByProduct",
+            "summary": "",
+            "url": "classes/Transaction.html#method_getByProduct"
+        },                {
+            "fqsen": "\\Transaction\u003A\u003AgetActiveTransactionByProduct\u0028\u0029",
+            "name": "getActiveTransactionByProduct",
+            "summary": "",
+            "url": "classes/Transaction.html#method_getActiveTransactionByProduct"
+        },                {
             "fqsen": "\\Transaction\u003A\u003AgetLastTransactionByProduct\u0028\u0029",
             "name": "getLastTransactionByProduct",
             "summary": "",
             "url": "classes/Transaction.html#method_getLastTransactionByProduct"
         },                {
+            "fqsen": "\\Transaction\u003A\u003AupdateStatus\u0028\u0029",
+            "name": "updateStatus",
+            "summary": "",
+            "url": "classes/Transaction.html#method_updateStatus"
+        },                {
+            "fqsen": "\\Transaction\u003A\u003Aaceptar\u0028\u0029",
+            "name": "aceptar",
+            "summary": "Comprador\u0020acepta\u003A\u0020guarda\u0020m\u00E9todo\u0020de\u0020pago,\u0020direcci\u00F3n\u0020de\u0020env\u00EDo\u0020y\u0020notas.",
+            "url": "classes/Transaction.html#method_aceptar"
+        },                {
+            "fqsen": "\\Transaction\u003A\u003AaceptarConStripe\u0028\u0029",
+            "name": "aceptarConStripe",
+            "summary": "Comprador\u0020acepta\u0020con\u0020Stripe\u003A\u0020guarda\u0020datos\u0020de\u0020env\u00EDo\u0020y\u0020salta\u0020directamente\u0020a\npago_pendiente\u0020\u0028el\u0020pago\u0020ya\u0020est\u00E1\u0020confirmado\u0020por\u0020Stripe\u0029.",
+            "url": "classes/Transaction.html#method_aceptarConStripe"
+        },                {
+            "fqsen": "\\Transaction\u003A\u003AmarcarPagado\u0028\u0029",
+            "name": "marcarPagado",
+            "summary": "Comprador\u0020informa\u0020que\u0020ha\u0020pagado\u0020\u2192\u0020pago_pendiente.",
+            "url": "classes/Transaction.html#method_marcarPagado"
+        },                {
+            "fqsen": "\\Transaction\u003A\u003AmarcarEnviado\u0028\u0029",
+            "name": "marcarEnviado",
+            "summary": "Vendedor\u0020confirma\u0020pago\u0020y\u0020marca\u0020como\u0020enviado\u0020con\u0020n\u00FAmero\u0020de\u0020seguimiento.",
+            "url": "classes/Transaction.html#method_marcarEnviado"
+        },                {
+            "fqsen": "\\Transaction\u003A\u003AmarcarEntregado\u0028\u0029",
+            "name": "marcarEntregado",
+            "summary": "Comprador\u0020confirma\u0020entrega.",
+            "url": "classes/Transaction.html#method_marcarEntregado"
+        },                {
+            "fqsen": "\\Transaction\u003A\u003Acancelar\u0028\u0029",
+            "name": "cancelar",
+            "summary": "Cancelar\u0020transacci\u00F3n.",
+            "url": "classes/Transaction.html#method_cancelar"
+        },                {
+            "fqsen": "\\Transaction\u003A\u003Adelete\u0028\u0029",
+            "name": "delete",
+            "summary": "",
+            "url": "classes/Transaction.html#method_delete"
+        },                {
             "fqsen": "\\Transaction\u003A\u003A\u0024conn",
             "name": "conn",
-            "summary": "Conexi\u00F3n\u0020a\u0020la\u0020base\u0020de\u0020datos.",
+            "summary": "",
             "url": "classes/Transaction.html#property_conn"
         },                {
             "fqsen": "\\User",
@@ -660,16 +785,6 @@ Search.appendIndex(
             "name": "db",
             "summary": "Conexi\u00F3n\u0020a\u0020la\u0020base\u0020de\u0020datos.",
             "url": "classes/User.html#property_db"
-        },                {
-            "fqsen": "\\stepActive\u0028\u0029",
-            "name": "stepActive",
-            "summary": "",
-            "url": "namespaces/default.html#function_stepActive"
-        },                {
-            "fqsen": "\\iconActive\u0028\u0029",
-            "name": "iconActive",
-            "summary": "",
-            "url": "namespaces/default.html#function_iconActive"
         },                {
             "fqsen": "\\",
             "name": "\\",

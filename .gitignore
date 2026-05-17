@@ -2,6 +2,7 @@ node_modules/
 vendor/
 uploads/
 .phpdoc/
+docs/.cache/
 .phpunit.result.cache
 .claude/
 .claire/
