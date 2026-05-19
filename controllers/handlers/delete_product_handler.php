@@ -1,9 +1,12 @@
 <?php
 session_start();
+
+require_once __DIR__ . '/../../config/bootstrap.php';
+
 $userId = $_SESSION["user_id"];
 
 if (!isset($userId)) {
-    header("Location: ../../public/views/auth/login.php");
+    header("Location: {$BASE}/public/views/auth/login.php");
     exit;
 }
 

@@ -31,17 +31,18 @@ class Notification
      * @param string $contenido
      * @return bool
      */
-    public function create($usuarioId, $tipo, $contenido)
+    public function create($usuarioId, $tipo, $contenido, $url = null)
     {
-        $sql = "INSERT INTO notificaciones (usuario_id, tipo, contenido, fecha, leida)
-                VALUES (:usuario_id, :tipo, :contenido, NOW(), 0)";
+        $sql = "INSERT INTO notificaciones (usuario_id, tipo, contenido, referencia_url, fecha, leida)
+                VALUES (:usuario_id, :tipo, :contenido, :url, NOW(), 0)";
 
         $stmt = $this->conn->prepare($sql);
 
         return $stmt->execute([
             ':usuario_id' => $usuarioId,
             ':tipo'       => $tipo,
-            ':contenido'  => $contenido
+            ':contenido'  => $contenido,
+            ':url'        => $url,
         ]);
     }
 

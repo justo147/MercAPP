@@ -14,6 +14,33 @@
 .admin-nav .nav-link i { margin-right:.4rem; }
 .table th { white-space:nowrap; }
 .product-thumb { width:40px; height:40px; object-fit:cover; border-radius:var(--r-sm); }
+.admin-thead th { background-color:var(--c-surface); color:var(--c-muted); border-bottom:2px solid var(--c-border); }
+
+/* ── Badges de estado de reportes ── */
+.badge-pendiente { background-color:#fd7e14 !important; color:#fff !important; }
+.badge-revisado  { background-color:#0d6efd !important; color:#fff !important; }
+.badge-rechazado { background-color:#6c757d !important; color:#fff !important; }
+
+/* ── Dark mode: tablas ── */
+/* Bootstrap 5.3 aplica color en > :not(caption) > * > * usando --bs-emphasis-color,
+   que no hereda del body-color. Hay que forzarlo directamente con !important. */
+[data-theme="dark"] .table > :not(caption) > * > * {
+  color: var(--c-text) !important;
+  background-color: var(--c-surface) !important;
+  border-color: var(--c-border) !important;
+}
+[data-theme="dark"] .table > .admin-thead > * > * {
+  background-color: #12151f !important;
+  color: var(--c-muted) !important;
+  border-color: var(--c-border) !important;
+  font-weight: 600;
+}
+[data-theme="dark"] .table-hover > tbody > tr:hover > * {
+  background-color: #222535 !important;
+  color: var(--c-text) !important;
+}
+[data-theme="dark"] .table .text-muted,
+[data-theme="dark"] .table small { color: var(--c-muted) !important; }
 </style>
 {% endblock %}
 
@@ -119,9 +146,9 @@
   <li class="nav-item"><button class="nav-link active" data-tab="usuarios" onclick="cambiarTab('usuarios')"><i class="bi bi-people"></i>Usuarios</button></li>
   <li class="nav-item ms-1"><button class="nav-link" data-tab="productos" onclick="cambiarTab('productos')"><i class="bi bi-box-seam"></i>Productos</button></li>
   <li class="nav-item ms-1">
-    <button class="nav-link position-relative" data-tab="reportes" onclick="cambiarTab('reportes')">
+    <button class="nav-link" data-tab="reportes" onclick="cambiarTab('reportes')">
       <i class="bi bi-flag"></i>Reportes
-      <span id="badge-reportes" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none"></span>
+      <span id="badge-reportes" class="badge rounded-pill bg-danger ms-1 d-none"></span>
     </button>
   </li>
 </ul>
@@ -139,7 +166,7 @@
     <div class="card-body p-0">
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
-          <thead class="table-light">
+          <thead class="admin-thead">
             <tr><th>ID</th><th>Usuario</th><th>Email</th><th>Registro</th><th>Rol</th><th>Estado</th><th class="text-center">Acciones</th></tr>
           </thead>
           <tbody id="tabla-usuarios">
@@ -173,7 +200,7 @@
     <div class="card-body p-0">
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
-          <thead class="table-light">
+          <thead class="admin-thead">
             <tr><th>ID</th><th>Imagen</th><th>Título</th><th>Vendedor</th><th>Categoría</th><th>Precio</th><th>Estado</th><th>Fecha</th><th class="text-center">Acciones</th></tr>
           </thead>
           <tbody id="tabla-productos">
@@ -201,7 +228,7 @@
     <div class="card-body p-0">
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
-          <thead class="table-light">
+          <thead class="admin-thead">
             <tr><th>ID</th><th>Producto</th><th>Reportado por</th><th>Propietario</th><th>Motivo</th><th>Fecha</th><th>Estado</th><th class="text-center">Acciones</th></tr>
           </thead>
           <tbody id="tabla-reportes">

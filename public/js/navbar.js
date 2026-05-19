@@ -35,16 +35,32 @@ function renderNotificaciones(items) {
     };
 
     lista.innerHTML = items.map(n => {
-        const ic = iconos[n.tipo] ?? "bi-bell";
-        const ts = new Date(n.fecha).toLocaleString("es-ES", { day:"2-digit", month:"short", hour:"2-digit", minute:"2-digit" });
+        const ic  = iconos[n.tipo] ?? "bi-bell";
+        const ts  = new Date(n.fecha).toLocaleString("es-ES", { day:"2-digit", month:"short", hour:"2-digit", minute:"2-digit" });
+        const url = n.referencia_url || null;
+
+        const inner = `
+            <i class="bi ${ic} text-primary mt-1 flex-shrink-0"></i>
+            <div style="min-width:0;">
+                <div class="small">${n.contenido}</div>
+                <div class="text-muted d-flex align-items-center gap-1" style="font-size:.7rem;">
+                    ${ts}${url ? ' <i class="bi bi-arrow-right-short"></i>' : ''}
+                </div>
+            </div>`;
+
+        if (url) {
+            return `<li>
+                <a href="${url}" class="dropdown-item d-flex gap-2 align-items-start py-2 border-bottom"
+                   style="white-space:normal; text-decoration:none;"
+                   onclick="fetch('${BASE}/api/notificaciones.php',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'id=${n.id}'})">
+                    ${inner}
+                </a>
+            </li>`;
+        }
         return `<li>
             <div class="dropdown-item d-flex gap-2 align-items-start py-2 border-bottom"
                  style="white-space:normal; cursor:default;">
-                <i class="bi ${ic} text-primary mt-1 flex-shrink-0"></i>
-                <div>
-                    <div class="small">${n.contenido}</div>
-                    <div class="text-muted" style="font-size:.7rem;">${ts}</div>
-                </div>
+                ${inner}
             </div>
         </li>`;
     }).join('');

@@ -2,6 +2,7 @@
 session_start();
 
 require_once __DIR__ . '/../../config/mail_config.php';
+require_once __DIR__ . '/../../config/mail_templates.php';
 require_once __DIR__ . '/../../config/db.php';
 require_once __DIR__ . '/../../models/User.php';
 
@@ -28,15 +29,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Enlace de recuperación
         $resetLink = "{$BASE}/public/views/reset_password.php?token=$token&email=" . urlencode($email);
+        $nombreUsuario = $user['nombre'] ? ' ' . $user['nombre'] : '';
 
-        $htmlBody = "
-            <p>Has solicitado restablecer tu contraseña.</p>
-            <p>Haz clic en el siguiente enlace para cambiarla:</p>
-            <p><a href='$resetLink'>$resetLink</a></p>
-            <p>Este enlace caduca en 1 hora.</p>
-        ";
-
-        sendMail($email, '', 'Recuperar contraseña - MercApp', $htmlBody);
+        sendMail($email, $user['nombre'] ?? '', 'Recuperar contraseña — MercApp', mailRecuperarContrasena($nombreUsuario, $resetLink));
 
         $mensaje = "Hemos enviado un enlace de recuperación a tu correo.";
 

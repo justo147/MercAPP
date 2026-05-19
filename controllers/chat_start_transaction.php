@@ -56,17 +56,23 @@ if (!empty($chat["transaccion_id"])) {
 $productoId  = intval($chat["producto_id"]);
 $compradorId = intval($chat["usuario_comprador"]);
 
+// Para productos mixtos el vendedor elige el tipo al iniciar
+$tipoElegido  = trim($_POST["tipo_elegido"] ?? "");
+$tiposValidos = ['venta', 'intercambio'];
+$tipoParam    = in_array($tipoElegido, $tiposValidos) ? $tipoElegido : null;
+
 // Crear transacción y vincularla al chat
-$transactionId = $transactionModel->createFromChat($productoId, $compradorId, $usuarioActual);
+$transactionId = $transactionModel->createFromChat($productoId, $compradorId, $usuarioActual, $tipoParam);
 $chatModel->setTransaction($chatId, $transactionId);
 
 // Pausar el producto mientras se negocia
 $productoModel->reservarProducto($productoId);
 
 // Notificación interna
+$tipoMsg = ($tipoParam === 'intercambio') ? 'intercambio' : 'venta';
 $mensajeModel->enviarMensajeSistema(
     $chatId,
-    "El vendedor ha iniciado una transacción. El producto ha sido pausado mientras se negocia."
+    "El vendedor ha iniciado una transacción de {$tipoMsg}. El producto ha sido pausado mientras se negocia."
 );
 
 header("Location: {$BASE}/public/views/chat.php?id={$chatId}");

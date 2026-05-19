@@ -113,6 +113,18 @@
 <script src="{{ asset('js/productosPerfil.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+  /* ── Delete modal ── */
+  const deleteModal = document.getElementById('modalEliminarProducto');
+  if (deleteModal) {
+    deleteModal.addEventListener('show.bs.modal', e => {
+      document.getElementById('btnConfirmarEliminar').href =
+        `${BASE}/controllers/handlers/delete_product_handler.php?id=${e.relatedTarget.dataset.productId}`;
+    });
+  }
+  if (new URLSearchParams(location.search).has('deleted')) {
+    mostrarToast('Producto eliminado correctamente.', 'success');
+  }
+
   /* ── Follow / Unfollow ── */
   const btnFollow = document.getElementById('btn-follow');
   if (!btnFollow) return;
@@ -159,17 +171,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  /* ── Delete modal ── */
-  const deleteModal = document.getElementById('modalEliminarProducto');
-  if (deleteModal) {
-    deleteModal.addEventListener('show.bs.modal', e => {
-      document.getElementById('btnConfirmarEliminar').href =
-        `${BASE}/controllers/handlers/delete_product_handler.php?id=${e.relatedTarget.dataset.productId}`;
-    });
-  }
-  if (new URLSearchParams(location.search).has('deleted')) {
-    mostrarToast('Producto eliminado correctamente.', 'success');
-  }
 });
 </script>
 

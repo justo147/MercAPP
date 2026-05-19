@@ -19,6 +19,7 @@ require_once __DIR__ . '/../models/Chat.php';
 require_once __DIR__ . '/../models/Product.php';
 require_once __DIR__ . '/../models/Notification.php';
 require_once __DIR__ . '/../config/mail_config.php';
+require_once __DIR__ . '/../config/mail_templates.php';
 require_once __DIR__ . '/../vendor/autoload.php';
 
 $db   = new Database();
@@ -69,10 +70,11 @@ if (in_array($estadoActual, ['entregado', 'cancelada'])) {
 // ── Máquina de estados ────────────────────────────────────────
 // Mapa: estado_actual → [estados_destino_válidos]
 $transicionesValidas = [
-    'pendiente'     => ['aceptada',        'cancelada'],
-    'aceptada'      => ['pago_pendiente',   'cancelada'],
-    'pago_pendiente'=> ['enviado',          'cancelada'],
-    'enviado'       => ['entregado',        'cancelada'],
+    'pendiente'             => ['aceptada', 'propuesta_intercambio', 'cancelada'],
+    'propuesta_intercambio' => ['aceptada', 'pendiente',             'cancelada'],
+    'aceptada'              => ['pago_pendiente',                    'cancelada'],
+    'pago_pendiente'        => ['enviado',                           'cancelada'],
+    'enviado'               => ['entregado',                         'cancelada'],
 ];
 
 if (
@@ -85,9 +87,30 @@ if (
 
 // ── Autorización por rol ──────────────────────────────────────
 switch ($nuevoEstado) {
-    case 'aceptada':
-        // Solo el comprador acepta y aporta datos de pago y envío
+    case 'propuesta_intercambio':
+        // Solo el comprador puede proponer
         if (!$esComprador) {
+            header("Location: {$BASE}/public/views/chat.php?id={$chatId}");
+            exit;
+        }
+        break;
+
+    case 'aceptada':
+        // Desde pendiente: solo el comprador acepta (venta)
+        // Desde propuesta_intercambio: solo el vendedor acepta la propuesta
+        if ($estadoActual === 'pendiente' && !$esComprador) {
+            header("Location: {$BASE}/public/views/chat.php?id={$chatId}");
+            exit;
+        }
+        if ($estadoActual === 'propuesta_intercambio' && !$esVendedor) {
+            header("Location: {$BASE}/public/views/chat.php?id={$chatId}");
+            exit;
+        }
+        break;
+
+    case 'pendiente':
+        // Desde propuesta_intercambio: solo el vendedor puede rechazar
+        if ($estadoActual === 'propuesta_intercambio' && !$esVendedor) {
             header("Location: {$BASE}/public/views/chat.php?id={$chatId}");
             exit;
         }
@@ -102,7 +125,7 @@ switch ($nuevoEstado) {
         break;
 
     case 'enviado':
-        // Solo el vendedor marca como enviado (confirma pago + añade tracking)
+        // Solo el vendedor marca como enviado
         if (!$esVendedor) {
             header("Location: {$BASE}/public/views/chat.php?id={$chatId}");
             exit;
@@ -127,54 +150,75 @@ $productoId = intval($transaccion["producto_id"]);
 
 switch ($nuevoEstado) {
 
-    case 'aceptada':
-        $metodoPago     = trim($_POST["metodo_pago"]      ?? "");
-        $direccionEnvio = trim($_POST["direccion_envio"]  ?? "");
-        $notas          = trim($_POST["notas_comprador"]  ?? "");
-        $productoOfrecidoId  = intval($_POST["producto_ofrecido_id"]  ?? 0);
-        $stripePaymentIntent = trim($_POST["stripe_payment_intent_id"] ?? "");
+    // ── Comprador propone un intercambio ──────────────────────
+    case 'propuesta_intercambio':
+        $productoOfrecidoId = intval($_POST["producto_ofrecido_id"] ?? 0);
+        $dineroExtra        = floatval($_POST["dinero_extra"] ?? 0);
 
-        $tipoTransaccion = $transaccion['tipo'];
-        $esIntercambio   = in_array($tipoTransaccion, ['intercambio', 'mixto']);
-
-        // Para venta y mixto se requiere método de pago; intercambio puro no
-        $metodosValidos = ['efectivo', 'transferencia', 'bizum', 'paypal', 'stripe', 'otro'];
-        if (!$esIntercambio || $tipoTransaccion === 'mixto') {
-            if (!in_array($metodoPago, $metodosValidos)) {
-                header("Location: {$BASE}/public/views/chat.php?id={$chatId}&error=metodo_pago");
-                exit;
-            }
-        }
-
-        // En intercambio/mixto el comprador debe proponer un producto
-        if ($esIntercambio && $productoOfrecidoId <= 0) {
+        if ($productoOfrecidoId <= 0) {
             header("Location: {$BASE}/public/views/chat.php?id={$chatId}&error=producto_ofrecido");
             exit;
         }
 
-        // ── Flujo Stripe ─────────────────────────────────────────────────────
+        $transactionModel->proponerIntercambio($transaccionId, $productoOfrecidoId, $dineroExtra);
+
+        $msgPropuesta = "El comprador ha propuesto un intercambio.";
+        if ($dineroExtra > 0) {
+            $msgPropuesta .= " Dinero extra ofrecido: " . number_format($dineroExtra, 2) . " €.";
+        }
+        $messageModel->enviarMensajeSistema($chatId, $msgPropuesta);
+        break;
+
+    // ── Vendedor rechaza la propuesta → vuelve a pendiente ────
+    case 'pendiente':
+        $transactionModel->rechazarPropuestaIntercambio($transaccionId);
+        $messageModel->enviarMensajeSistema(
+            $chatId,
+            "El vendedor ha rechazado la propuesta de intercambio. El comprador puede hacer una nueva propuesta."
+        );
+        break;
+
+    // ── aceptada: desde pendiente (comprador acepta venta)
+    //             o desde propuesta_intercambio (vendedor acepta intercambio)
+    case 'aceptada':
+        if ($estadoActual === 'propuesta_intercambio') {
+            // Vendedor acepta la propuesta de intercambio
+            $transactionModel->aceptarPropuestaIntercambio($transaccionId);
+            $messageModel->enviarMensajeSistema(
+                $chatId,
+                "El vendedor ha aceptado la propuesta de intercambio. El comprador debe confirmar el método de pago."
+            );
+            break;
+        }
+
+        // Comprador acepta una venta (estado pendiente → aceptada)
+        $metodoPago          = trim($_POST["metodo_pago"]              ?? "");
+        $direccionEnvio      = trim($_POST["direccion_envio"]          ?? "");
+        $notas               = trim($_POST["notas_comprador"]          ?? "");
+        $stripePaymentIntent = trim($_POST["stripe_payment_intent_id"] ?? "");
+
+        $metodosValidos = ['efectivo', 'transferencia', 'bizum', 'paypal', 'stripe', 'otro'];
+        if (!in_array($metodoPago, $metodosValidos)) {
+            header("Location: {$BASE}/public/views/chat.php?id={$chatId}&error=metodo_pago");
+            exit;
+        }
+
+        // ── Stripe ───────────────────────────────────────────────────────────
         if ($metodoPago === 'stripe') {
             if (!$stripePaymentIntent) {
                 header("Location: {$BASE}/public/views/chat.php?id={$chatId}&error=stripe_no_intent");
                 exit;
             }
-
             $stripeSecretKey = $_ENV['STRIPE_SECRET_KEY'] ?? '';
             if (!$stripeSecretKey) {
                 header("Location: {$BASE}/public/views/chat.php?id={$chatId}&error=stripe_config");
                 exit;
             }
-
             try {
                 \Stripe\Stripe::setApiKey($stripeSecretKey);
                 $intent = \Stripe\PaymentIntent::retrieve($stripePaymentIntent);
-
-                // Verificar que el PaymentIntent corresponde a esta transacción
                 $intentTransaccionId = intval($intent->metadata->transaccion_id ?? 0);
-                if (
-                    $intent->status !== 'succeeded' ||
-                    $intentTransaccionId !== $transaccionId
-                ) {
+                if ($intent->status !== 'succeeded' || $intentTransaccionId !== $transaccionId) {
                     header("Location: {$BASE}/public/views/chat.php?id={$chatId}&error=stripe_pago_fallido");
                     exit;
                 }
@@ -182,32 +226,16 @@ switch ($nuevoEstado) {
                 header("Location: {$BASE}/public/views/chat.php?id={$chatId}&error=stripe_error");
                 exit;
             }
-
-            // Pago verificado: acepta + marca como pago_pendiente en un solo paso
-            $transactionModel->aceptarConStripe(
-                $transaccionId,
-                $direccionEnvio,
-                $notas,
-                $stripePaymentIntent
-            );
-
+            $transactionModel->aceptarConStripe($transaccionId, $direccionEnvio, $notas, $stripePaymentIntent);
             $msgStripe = "El comprador ha pagado con tarjeta (Stripe). El pago ha sido confirmado automáticamente.";
             if ($direccionEnvio) $msgStripe .= " Dirección de envío: {$direccionEnvio}.";
             $messageModel->enviarMensajeSistema($chatId, $msgStripe);
-
-            // Redirigir directamente — el estado ya es pago_pendiente
-            $nuevoEstado = 'pago_pendiente'; // para el bloque de notificaciones de abajo
+            $nuevoEstado = 'pago_pendiente';
             break;
         }
 
-        // ── Resto de métodos de pago ─────────────────────────────────────────
-        $transactionModel->aceptar($transaccionId, $metodoPago ?: null, $direccionEnvio, $notas);
-
-        // Guardar producto ofrecido en Intercambio_Detalle
-        if ($esIntercambio && $productoOfrecidoId > 0) {
-            $transactionModel->addIntercambioProducto($transaccionId, $productoOfrecidoId);
-        }
-
+        // Otros métodos de pago
+        $transactionModel->aceptar($transaccionId, $metodoPago, $direccionEnvio, $notas);
         $etiquetas = [
             'efectivo'      => 'Efectivo al entregar',
             'transferencia' => 'Transferencia bancaria',
@@ -215,24 +243,76 @@ switch ($nuevoEstado) {
             'paypal'        => 'PayPal',
             'otro'          => 'Otro método',
         ];
-        $etiqueta = isset($etiquetas[$metodoPago]) ? $etiquetas[$metodoPago] : '';
-
         $msgAceptada = "El comprador ha aceptado la transacción.";
-        if ($etiqueta)       $msgAceptada .= " Método de pago: {$etiqueta}.";
+        if (isset($etiquetas[$metodoPago])) $msgAceptada .= " Método de pago: {$etiquetas[$metodoPago]}.";
         if ($direccionEnvio) $msgAceptada .= " Dirección de envío: {$direccionEnvio}.";
-        if ($esIntercambio && $productoOfrecidoId > 0) {
-            $msgAceptada .= " El comprador ha propuesto un producto a cambio.";
-        }
-
         $messageModel->enviarMensajeSistema($chatId, $msgAceptada);
         break;
 
+    // ── Comprador confirma pago (general o con datos de intercambio) ──────
     case 'pago_pendiente':
-        $transactionModel->marcarPagado($transaccionId);
-        $messageModel->enviarMensajeSistema(
-            $chatId,
-            "El comprador indica que ha realizado el pago. El vendedor debe confirmarlo antes de enviar."
-        );
+        $metodoPago     = trim($_POST["metodo_pago"]              ?? "");
+        $direccionEnvio = trim($_POST["direccion_envio"]          ?? "");
+        $notas          = trim($_POST["notas_comprador"]          ?? "");
+        $stripePaymentIntent = trim($_POST["stripe_payment_intent_id"] ?? "");
+
+        // Intercambio: el método de pago aún no estaba guardado, se recoge aquí
+        if ($metodoPago && !$transaccion['metodo_pago']) {
+            $metodosValidos = ['efectivo', 'transferencia', 'bizum', 'paypal', 'stripe', 'otro'];
+            if (!in_array($metodoPago, $metodosValidos)) {
+                header("Location: {$BASE}/public/views/chat.php?id={$chatId}&error=metodo_pago");
+                exit;
+            }
+
+            if ($metodoPago === 'stripe') {
+                if (!$stripePaymentIntent) {
+                    header("Location: {$BASE}/public/views/chat.php?id={$chatId}&error=stripe_no_intent");
+                    exit;
+                }
+                $stripeSecretKey = $_ENV['STRIPE_SECRET_KEY'] ?? '';
+                if (!$stripeSecretKey) {
+                    header("Location: {$BASE}/public/views/chat.php?id={$chatId}&error=stripe_config");
+                    exit;
+                }
+                try {
+                    \Stripe\Stripe::setApiKey($stripeSecretKey);
+                    $intent = \Stripe\PaymentIntent::retrieve($stripePaymentIntent);
+                    $intentTransaccionId = intval($intent->metadata->transaccion_id ?? 0);
+                    if ($intent->status !== 'succeeded' || $intentTransaccionId !== $transaccionId) {
+                        header("Location: {$BASE}/public/views/chat.php?id={$chatId}&error=stripe_pago_fallido");
+                        exit;
+                    }
+                } catch (\Stripe\Exception\ApiErrorException $e) {
+                    header("Location: {$BASE}/public/views/chat.php?id={$chatId}&error=stripe_error");
+                    exit;
+                }
+                $transactionModel->confirmarPagoConStripe($transaccionId, $direccionEnvio, $notas, $stripePaymentIntent);
+                $msgPago = "El comprador ha pagado con tarjeta (Stripe). El pago ha sido confirmado automáticamente.";
+                if ($direccionEnvio) $msgPago .= " Dirección de envío: {$direccionEnvio}.";
+                $messageModel->enviarMensajeSistema($chatId, $msgPago);
+                break;
+            }
+
+            $transactionModel->confirmarPagoIntercambio($transaccionId, $metodoPago, $direccionEnvio, $notas);
+            $etiquetas = [
+                'efectivo'      => 'Efectivo al entregar',
+                'transferencia' => 'Transferencia bancaria',
+                'bizum'         => 'Bizum',
+                'paypal'        => 'PayPal',
+                'otro'          => 'Otro método',
+            ];
+            $msgPago = "El comprador confirma el pago del intercambio.";
+            if (isset($etiquetas[$metodoPago])) $msgPago .= " Método de pago: {$etiquetas[$metodoPago]}.";
+            if ($direccionEnvio) $msgPago .= " Dirección de envío: {$direccionEnvio}.";
+            $messageModel->enviarMensajeSistema($chatId, $msgPago);
+        } else {
+            // Venta normal: solo confirma que pagó
+            $transactionModel->marcarPagado($transaccionId);
+            $messageModel->enviarMensajeSistema(
+                $chatId,
+                "El comprador indica que ha realizado el pago. El vendedor debe confirmarlo antes de enviar."
+            );
+        }
         break;
 
     case 'enviado':
@@ -261,21 +341,18 @@ switch ($nuevoEstado) {
         $stmtUsers->execute([':cid' => $transaccion['comprador_id'], ':vid' => $transaccion['vendedor_id']]);
         $usuarios = $stmtUsers->fetchAll(PDO::FETCH_ASSOC);
 
-        $stmtProd = $conn->prepare("SELECT titulo FROM Productos WHERE id = :pid");
+        $stmtProd = $conn->prepare("SELECT titulo, precio FROM Productos WHERE id = :pid");
         $stmtProd->execute([':pid' => $productoId]);
-        $productoTitulo = $stmtProd->fetchColumn() ?: 'producto';
+        $prodRow        = $stmtProd->fetch(PDO::FETCH_ASSOC);
+        $productoTitulo = $prodRow['titulo'] ?? 'producto';
+        $precioProd     = $prodRow['precio'] ? number_format((float)$prodRow['precio'], 2, ',', '.') . ' €' : 'Trueque';
+        $fechaTrans     = date('d/m/Y');
 
         foreach ($usuarios as $u) {
             $esCompradorEmail = ($u['id'] == $transaccion['comprador_id']);
-            $rol  = $esCompradorEmail ? 'comprador' : 'vendedor';
-            $msg  = $esCompradorEmail
-                ? "Has confirmado la recepción de <strong>{$productoTitulo}</strong>. ¡Gracias por usar MercApp!"
-                : "El comprador ha confirmado la entrega de <strong>{$productoTitulo}</strong>. La transacción está completada.";
+            $rol = $esCompradorEmail ? 'comprador' : 'vendedor';
 
-            $html = "<h2 style='color:#0d6efd'>MercApp — Transacción completada</h2>"
-                  . "<p>Hola <strong>{$u['nombre']}</strong>,</p>"
-                  . "<p>{$msg}</p>"
-                  . "<p style='color:#6c757d;font-size:.9em'>Este es un correo automático. No respondas a este mensaje.</p>";
+            $html = mailTransaccionCompletada($u['nombre'], $rol, $productoTitulo, $precioProd, $fechaTrans);
 
             sendMail($u['email'], $u['nombre'], "Transacción completada — {$productoTitulo}", $html);
         }
@@ -293,7 +370,9 @@ switch ($nuevoEstado) {
 
 // ── Notificar al otro participante sobre el cambio de estado ──
 $mensajesEstado = [
-    'aceptada'       => 'El comprador ha aceptado la transacción.',
+    'propuesta_intercambio' => 'El comprador ha propuesto un intercambio.',
+    'pendiente'      => 'El vendedor ha rechazado la propuesta. El comprador puede hacer una nueva.',
+    'aceptada'       => 'La transacción ha avanzado al siguiente paso.',
     'pago_pendiente' => 'El comprador indica que ha realizado el pago.',
     'enviado'        => 'El vendedor ha marcado el pedido como enviado.',
     'entregado'      => '¡La entrega ha sido confirmada! Transacción completada.',
@@ -307,7 +386,8 @@ if (isset($mensajesEstado[$nuevoEstado])) {
     $notifModel->create(
         $destinatarioNotif,
         'mensaje',
-        $mensajesEstado[$nuevoEstado] . " ({$tituloProducto})"
+        $mensajesEstado[$nuevoEstado] . " ({$tituloProducto})",
+        "{$BASE}/public/views/chat.php?id={$chatId}"
     );
 }
 

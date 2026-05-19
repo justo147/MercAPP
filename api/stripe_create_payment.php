@@ -47,8 +47,9 @@ if ($usuarioActual != $transaccion['comprador_id']) {
     exit;
 }
 
-// Solo se puede pagar cuando está pendiente
-if ($transaccion['estado'] !== 'pendiente') {
+// Se puede pagar en estado pendiente (venta) o aceptada (intercambio con dinero extra)
+$estadosPermitidos = ['pendiente', 'aceptada'];
+if (!in_array($transaccion['estado'], $estadosPermitidos)) {
     http_response_code(400);
     echo json_encode(['error' => 'Estado de transacción no válido para pago']);
     exit;
@@ -64,10 +65,14 @@ if (!$producto) {
     exit;
 }
 
-$precio = floatval($producto['precio'] ?? 0);
+// Para intercambio en aceptada: usar dinero_extra; para venta: usar precio del producto
+$precio = ($transaccion['tipo'] === 'intercambio' && $transaccion['estado'] === 'aceptada')
+    ? floatval($transaccion['dinero_extra'] ?? 0)
+    : floatval($producto['precio'] ?? 0);
+
 if ($precio < 0.50) {
     http_response_code(400);
-    echo json_encode(['error' => 'El precio mínimo para pago con tarjeta es 0,50 €']);
+    echo json_encode(['error' => 'El importe mínimo para pago con tarjeta es 0,50 €']);
     exit;
 }
 

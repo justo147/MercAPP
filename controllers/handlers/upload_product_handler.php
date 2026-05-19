@@ -224,7 +224,8 @@ try {
                     $notifModel->create(
                         $destinatario,
                         'coincidencia',
-                        "¡Hay un nuevo producto que coincide con tu deseo \"{$deseo['etiquetas']}\": {$titulo}."
+                        "¡Hay un nuevo producto que coincide con tu deseo \"{$deseo['etiquetas']}\": {$titulo}.",
+                        "{$BASE}/public/views/producto.php?id={$productoId}"
                     );
                     $notificados[] = $destinatario;
                 }

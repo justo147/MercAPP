@@ -130,6 +130,24 @@
 
   </div>
 </div>
+<!-- Modal dejar de seguir -->
+<div class="modal fade" id="modalUnfollow" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header border-0 pb-0">
+        <h6 class="modal-title fw-semibold">¿Dejar de seguir?</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body pt-1 small text-muted">
+        Dejarás de ver las novedades de este usuario en tu feed.
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-sm btn-danger" id="btnUnfollowConfirm">Dejar de seguir</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -141,13 +159,22 @@ const DEF = `${BASE}/public/img/default.jpg`;
 
 function esc(s) { const d=document.createElement('div');d.textContent=s??'';return d.innerHTML; }
 function badgeTipo(tipo) {
-  const m={venta:'primary',intercambio:'warning text-dark',mixto:'success'};
+  const m={venta:'primary',intercambio:'info text-dark',mixto:'success'};
   return `<span class="badge bg-${m[tipo]??'secondary'}" style="font-size:.6rem;">${esc(tipo)}</span>`;
+}
+
+function renderPrecio(p) {
+  if (p.tipo_transaccion === 'intercambio') {
+    return '<span class="badge bg-info text-dark"><i class="bi bi-arrow-left-right me-1"></i>Intercambio</span>';
+  }
+  if (p.precio && parseFloat(p.precio) > 0) {
+    return `<span class="fw-bold" style="color:var(--c-primary);">${parseFloat(p.precio).toFixed(2)} €</span>`;
+  }
+  return '<span class="text-muted" style="font-size:.85em;">Sin precio especificado</span>';
 }
 
 function renderProduct(p) {
   const img = p.imagenes?.length ? `${BASE}/${p.imagenes[0].url}` : DEF;
-  const precio = p.precio && parseFloat(p.precio)>0 ? `${parseFloat(p.precio).toFixed(2)} €` : 'Gratis';
   const col = document.createElement('div');
   col.className = 'col-6 col-md-4';
   col.innerHTML = `<a href="${BASE}/public/views/detail_product.php?id=${p.id}" class="text-decoration-none">
@@ -157,7 +184,7 @@ function renderProduct(p) {
       <div class="p-3">
         <div class="fw-semibold text-truncate" style="color:var(--c-text);">${esc(p.titulo)}</div>
         <div class="my-1">${badgeTipo(p.tipo_transaccion)}</div>
-        <div class="fw-bold" style="color:var(--c-primary);">${precio}</div>
+        <div class="mt-1">${renderPrecio(p)}</div>
         <div class="small text-muted mt-1"><i class="bi bi-person me-1"></i>${esc(p.usuario_nombre??'')}</div>
       </div>
     </div>
@@ -204,16 +231,26 @@ document.querySelectorAll('.fw-follow-btn').forEach(btn => {
   });
 });
 
-// Unfollow
+// Unfollow con modal de confirmación
+let _unfollowTargetBtn = null;
+const unfollowModal = new bootstrap.Modal(document.getElementById('modalUnfollow'));
+
 document.querySelectorAll('.fw-unfollow-btn').forEach(btn => {
   btn.addEventListener('click', function() {
-    const seguido = this.dataset.id;
-    if (!confirm('¿Dejar de seguir a este usuario?')) return;
-    this.disabled=true;
-    fetch(`${BASE}/controllers/unfollow.php`,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`seguidor=${FW_USER_ID}&seguido=${seguido}`})
-      .then(r=>r.json()).then(data => { if(data.success) window.location.reload(); else this.disabled=false; })
-      .catch(() => this.disabled=false);
+    _unfollowTargetBtn = this;
+    unfollowModal.show();
   });
+});
+
+document.getElementById('btnUnfollowConfirm').addEventListener('click', () => {
+  if (!_unfollowTargetBtn) return;
+  const btn = _unfollowTargetBtn;
+  const seguido = btn.dataset.id;
+  btn.disabled = true;
+  unfollowModal.hide();
+  fetch(`${BASE}/controllers/unfollow.php`,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`seguidor=${FW_USER_ID}&seguido=${seguido}`})
+    .then(r=>r.json()).then(data => { if(data.success) window.location.reload(); else btn.disabled=false; })
+    .catch(() => { btn.disabled=false; });
 });
 </script>
 {% endblock %}

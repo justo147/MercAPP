@@ -76,7 +76,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mensaje'])) {
         $notifModel->create(
             $destinatarioId,
             'mensaje',
-            "{$nombreRemit} te ha enviado un mensaje en el chat sobre \"{$chatData['producto_titulo']}\"."
+            "{$nombreRemit} te ha enviado un mensaje en el chat sobre \"{$chatData['producto_titulo']}\".",
+            "{$BASE}/public/views/chat.php?id={$chatId}"
         );
     }
     header('Location: chat.php?id=' . $chatId);
@@ -145,15 +146,23 @@ foreach ($mensajes as &$msg) {
 }
 unset($msg);
 
-$pasos     = ['pendiente', 'aceptada', 'pago_pendiente', 'enviado', 'entregado'];
-$stepIndex = array_flip($pasos);
+$pasosVenta       = ['pendiente', 'aceptada', 'pago_pendiente', 'enviado', 'entregado'];
+$pasosIntercambio = ['pendiente', 'propuesta_intercambio', 'aceptada', 'pago_pendiente', 'enviado', 'entregado'];
+$pasos            = ($transaccion && $transaccion['tipo'] === 'intercambio') ? $pasosIntercambio : $pasosVenta;
+$stepIndex        = array_flip($pasos);
 
 $esIntercambio      = $transaccion && in_array($transaccion['tipo'] ?? '', ['intercambio', 'mixto']);
 $intercambioDetalle = $esIntercambio ? $transactionModel->getIntercambioDetalle($transaccion['id']) : [];
 
-$productoParaStripe = $productoModel->getById($chat['producto_id'] ?? 0);
-$precioProducto     = floatval($productoParaStripe['precio'] ?? 0);
-$stripeDisponible   = $precioProducto >= 0.50;
+$productoParaStripe      = $productoModel->getById($chat['producto_id'] ?? 0);
+$precioProducto          = floatval($productoParaStripe['precio'] ?? 0);
+$tipoTransaccionProducto = $productoParaStripe['tipo_transaccion'] ?? 'venta';
+
+// Para intercambio en estado aceptada, Stripe usa el dinero_extra como importe
+$importeStripe  = ($transaccion && $transaccion['tipo'] === 'intercambio' && $transaccion['estado'] === 'aceptada')
+    ? floatval($transaccion['dinero_extra'] ?? 0)
+    : $precioProducto;
+$stripeDisponible = $importeStripe >= 0.50;
 
 $etiquetaMetodo = [
     'efectivo'      => ['bi-cash-coin',           'Efectivo al entregar'],
@@ -203,5 +212,7 @@ echo $twig->render('chat.html.twig', [
     'stripeKey'              => $_ENV['STRIPE_KEY'] ?? '',
     'stripeDisponible'       => $stripeDisponible,
     'precioProducto'         => $precioProducto,
+    'importeStripe'          => $importeStripe,
+    'tipoTransaccionProducto'=> $tipoTransaccionProducto,
     'chatToasts'             => $chatToasts,
 ]);

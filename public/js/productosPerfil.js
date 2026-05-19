@@ -181,7 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <a href="detail_product.php?id=${prod.id}" class="card-title fw-semibold mb-2">${prod.titulo}</a>
 
                 <div class="d-flex align-items-center mb-2">
-                  <span class="badge bg-success me-2">€${prod.precio}</span>
+                  ${prod.tipo_transaccion === 'intercambio' ? '<span class="badge bg-info text-dark me-2"><i class="bi bi-arrow-left-right me-1"></i>Intercambio</span>' : prod.precio ? `<span class="badge bg-success me-2">€${parseFloat(prod.precio).toFixed(2)}</span>` : ''}
                   <span class="badge bg-primary me-2">${prod.estado_producto}</span>
                   <span class="badge ${
                     prod.estado_publicacion === 'activo' ? 'bg-success' :

@@ -61,7 +61,9 @@
 {% block content %}
 {% set txAction = BASE ~ '/controllers/chat_update_transaction.php' %}
 {% if transaccion %}{% set estado = transaccion.estado %}{% else %}{% set estado = '' %}{% endif %}
-{% set esFinalizado = estado in ['entregado','cancelada'] %}
+{% set esFinalizado   = estado in ['cancelada'] %}
+{% set esIntercambio  = transaccion and transaccion.tipo == 'intercambio' %}
+{% set esMixtoProducto = tipoTransaccionProducto == 'mixto' %}
 
 <div style="max-width:1080px;margin:0 auto;">
 
@@ -121,12 +123,12 @@
 
           {% for msg in mensajes %}
             {% if msg.usuario_id is null %}
-            <div class="msg-sistema">
+            <div class="msg-sistema" data-id="{{ msg.id }}">
               <span class="bubble"><i class="bi bi-info-circle me-1"></i>{{ msg.contenido_clean|e }}</span>
             </div>
             {% else %}
             {% set esMio = (msg.usuario_id == usuarioActual) %}
-            <div class="mb-2 d-flex {{ esMio ? 'justify-content-end' : 'justify-content-start' }}">
+            <div class="mb-2 d-flex {{ esMio ? 'justify-content-end' : 'justify-content-start' }}" data-id="{{ msg.id }}">
               <div style="max-width:80%;">
                 <div class="small mb-1 {{ esMio ? 'text-end' : '' }}" style="color:var(--c-muted);">
                   {{ msg.sender_name|default('')|e }} · {{ msg.fecha_envio|e }}
@@ -170,6 +172,16 @@
           {# Timeline #}
           <div class="card mb-3">
             <div class="card-body p-3">
+              {% if esIntercambio %}
+              {% set pasos = {
+                'pendiente':             ['bi-hourglass-split',  'Pendiente',  'Esperando propuesta'],
+                'propuesta_intercambio': ['bi-arrow-left-right', 'Propuesta',  'Esperando respuesta'],
+                'aceptada':              ['bi-hand-thumbs-up',   'Aceptada',   'Confirmar pago'],
+                'pago_pendiente':        ['bi-credit-card',      'Pago',       'Verificando el pago'],
+                'enviado':               ['bi-truck',            'Enviado',    'En camino'],
+                'entregado':             ['bi-check-circle',     'Entregado',  'Intercambio completado']
+              } %}
+              {% else %}
               {% set pasos = {
                 'pendiente':      ['bi-hourglass-split', 'Pendiente',  'Esperando aceptación'],
                 'aceptada':       ['bi-hand-thumbs-up',  'Aceptada',   'Datos de pago listos'],
@@ -177,6 +189,7 @@
                 'enviado':        ['bi-truck',            'Enviado',    'En camino'],
                 'entregado':      ['bi-check-circle',     'Entregado',  'Transacción completada']
               } %}
+              {% endif %}
               <div class="tx-timeline">
                 {% for key, meta in pasos %}
                   {% set isCurrent = (key == estado and estado != 'cancelada') %}
@@ -280,26 +293,23 @@
           {# ── ACTION AREA ── only the current state's action ── #}
           {% if not esFinalizado %}
 
-            {# PENDIENTE → comprador acepta #}
-            {% if estado == 'pendiente' and esComprador %}
+            {# PENDIENTE → comprador acepta (venta) o propone (intercambio) #}
+            {% if estado == 'pendiente' and esComprador and esIntercambio %}
+            {# INTERCAMBIO: comprador propone producto + dinero extra #}
             <div class="card action-card mb-3">
               <div class="card-header border-0 pb-0 pt-3 px-3">
                 <span class="fw-bold">
-                  <i class="bi bi-hand-thumbs-up me-1 text-primary"></i>
-                  {{ esIntercambio ? 'Proponer intercambio' : 'Aceptar transacción' }}
+                  <i class="bi bi-arrow-left-right me-1 text-primary"></i>Proponer intercambio
                 </span>
               </div>
               <div class="card-body px-3 pb-3 pt-2">
-                <form action="{{ txAction }}" method="POST" id="form-aceptar">
+                <form action="{{ txAction }}" method="POST">
                   <input type="hidden" name="transaccion_id" value="{{ transaccion.id }}">
                   <input type="hidden" name="chat_id"        value="{{ chatId }}">
-                  <input type="hidden" name="estado"         value="aceptada">
-
-                  {# Product to offer (exchange / mixed) #}
-                  {% if esIntercambio %}
+                  <input type="hidden" name="estado"         value="propuesta_intercambio">
                   <div class="mb-3">
                     <label class="form-label fw-semibold" style="font-size:.83rem;">
-                      <i class="bi bi-arrow-left-right me-1"></i>Tu producto a cambio <span class="text-danger">*</span>
+                      <i class="bi bi-box-seam me-1"></i>Tu producto a cambio <span class="text-danger">*</span>
                     </label>
                     <select name="producto_ofrecido_id" id="sel-producto-ofrecido" class="form-select form-select-sm" required>
                       <option value="">Cargando tus productos…</option>
@@ -309,10 +319,37 @@
                       <span id="titulo-producto-ofrecido" class="fw-semibold" style="font-size:.82rem;"></span>
                     </div>
                   </div>
-                  {% endif %}
+                  <div class="mb-3">
+                    <label for="dinero_extra" class="form-label fw-semibold" style="font-size:.83rem;">
+                      <i class="bi bi-cash-coin me-1"></i>Dinero extra <span style="color:var(--c-muted);font-weight:400;">(opcional)</span>
+                    </label>
+                    <div class="input-group input-group-sm">
+                      <input type="number" id="dinero_extra" name="dinero_extra" class="form-control"
+                             min="0" step="0.01" placeholder="0.00" value="0">
+                      <span class="input-group-text">€</span>
+                    </div>
+                    <div class="form-text">Añade dinero si tu producto vale menos que el del vendedor.</div>
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-sm w-100">
+                    <i class="bi bi-arrow-left-right me-1"></i>Enviar propuesta
+                  </button>
+                </form>
+              </div>
+            </div>
 
-                  {# Payment method (venta or mixto) #}
-                  {% if transaccion.tipo != 'intercambio' %}
+            {% elseif estado == 'pendiente' and esComprador %}
+            {# VENTA: comprador acepta y elige método de pago #}
+            <div class="card action-card mb-3">
+              <div class="card-header border-0 pb-0 pt-3 px-3">
+                <span class="fw-bold">
+                  <i class="bi bi-hand-thumbs-up me-1 text-primary"></i>Aceptar transacción
+                </span>
+              </div>
+              <div class="card-body px-3 pb-3 pt-2">
+                <form action="{{ txAction }}" method="POST" id="form-aceptar">
+                  <input type="hidden" name="transaccion_id" value="{{ transaccion.id }}">
+                  <input type="hidden" name="chat_id"        value="{{ chatId }}">
+                  <input type="hidden" name="estado"         value="aceptada">
                   <div class="mb-3">
                     <label class="form-label fw-semibold" style="font-size:.83rem;">
                       Método de pago <span class="text-danger">*</span>
@@ -337,10 +374,9 @@
                       <i class="bi bi-credit-card-2-front" style="color:#635bff;font-size:1rem;"></i>
                       <span class="mp-stripe-label">Tarjeta · Stripe</span>
                       <span class="ms-auto" style="color:var(--c-muted);font-size:.75rem;">
-                        🔒 {{ stripeDisponible ? precioProducto|number_format(2) ~ ' €' : 'Min. 0,50 €' }}
+                        🔒 {{ stripeDisponible ? importeStripe|number_format(2) ~ ' €' : 'Min. 0,50 €' }}
                       </span>
                     </label>
-
                     {% if stripeDisponible %}
                     <div id="stripe-payment-block" class="mt-2 p-3 rounded" style="border:1.5px solid rgba(99,91,255,.3);">
                       <div class="d-flex justify-content-between align-items-center mb-2">
@@ -358,8 +394,6 @@
                     </div>
                     {% endif %}
                   </div>
-                  {% endif %}
-
                   <div class="mb-3">
                     <label for="direccion_envio" class="form-label fw-semibold" style="font-size:.83rem;">
                       <i class="bi bi-geo-alt me-1"></i>Dirección de envío
@@ -368,7 +402,6 @@
                     <input type="text" id="direccion_envio" name="direccion_envio"
                            class="form-control form-control-sm" placeholder="Escribe tu dirección…" autocomplete="off">
                   </div>
-
                   <div class="mb-3">
                     <label for="notas_comprador" class="form-label fw-semibold" style="font-size:.83rem;">
                       Notas <span style="color:var(--c-muted);font-weight:400;">(opcional)</span>
@@ -377,10 +410,9 @@
                               class="form-control form-control-sm" rows="2"
                               maxlength="300" placeholder="Instrucciones especiales…"></textarea>
                   </div>
-
                   <button type="submit" id="btn-aceptar-transaccion" class="btn btn-success btn-sm w-100">
                     <i class="bi bi-hand-thumbs-up me-1" id="btn-aceptar-icon"></i>
-                    <span id="btn-aceptar-texto">{{ esIntercambio ? 'Proponer intercambio' : 'Aceptar y confirmar' }}</span>
+                    <span id="btn-aceptar-texto">Aceptar y confirmar</span>
                   </button>
                 </form>
               </div>
@@ -392,13 +424,160 @@
               <div class="card-body text-center py-4">
                 <i class="bi bi-hourglass-split d-block" style="font-size:2rem;color:#ffc107;margin-bottom:.6rem;"></i>
                 <p class="small mb-0" style="color:var(--c-muted);">
-                  Esperando a que el comprador
-                  {{ esIntercambio ? 'proponga un producto a cambio' : 'acepte y elija cómo pagar' }}.
+                  {% if esIntercambio %}
+                  Esperando a que el comprador proponga un producto a cambio.
+                  {% else %}
+                  Esperando a que el comprador acepte y elija cómo pagar.
+                  {% endif %}
                 </p>
               </div>
             </div>
 
-            {# ACEPTADA → comprador confirma pago #}
+            {# PROPUESTA_INTERCAMBIO → vendedor acepta o rechaza #}
+            {% elseif estado == 'propuesta_intercambio' and esVendedor %}
+            <div class="card action-card mb-3">
+              <div class="card-header border-0 pb-0 pt-3 px-3">
+                <span class="fw-bold">
+                  <i class="bi bi-arrow-left-right me-1 text-primary"></i>Propuesta del comprador
+                </span>
+              </div>
+              <div class="card-body px-3 pb-3 pt-2">
+                {% for det in intercambioDetalle %}
+                <div class="d-flex align-items-center gap-2 mb-2 p-2 rounded" style="background:var(--c-bg);">
+                  {% if det.imagen %}
+                  <img src="{{ BASE }}/{{ det.imagen|e }}" style="width:44px;height:44px;border-radius:var(--r-sm);object-fit:cover;"
+                       onerror="this.src='{{ BASE }}/public/img/default.jpg'">
+                  {% endif %}
+                  <div>
+                    <div class="fw-semibold" style="font-size:.85rem;">{{ det.titulo|default('Producto eliminado')|e }}</div>
+                    {% if det.precio %}<div class="text-muted" style="font-size:.75rem;">{{ det.precio|number_format(2) }} €</div>{% endif %}
+                  </div>
+                </div>
+                {% endfor %}
+                {% if transaccion.dinero_extra > 0 %}
+                <div class="alert alert-info py-2 px-3 mb-3" style="font-size:.83rem;">
+                  <i class="bi bi-cash-coin me-1"></i>
+                  El comprador añade <strong>{{ transaccion.dinero_extra|number_format(2) }} €</strong> de dinero extra.
+                </div>
+                {% endif %}
+                <div class="d-flex gap-2">
+                  <form action="{{ txAction }}" method="POST" class="flex-grow-1">
+                    <input type="hidden" name="transaccion_id" value="{{ transaccion.id }}">
+                    <input type="hidden" name="chat_id"        value="{{ chatId }}">
+                    <input type="hidden" name="estado"         value="aceptada">
+                    <button type="submit" class="btn btn-success btn-sm w-100">
+                      <i class="bi bi-check-circle me-1"></i>Aceptar
+                    </button>
+                  </form>
+                  <form action="{{ txAction }}" method="POST" class="flex-grow-1">
+                    <input type="hidden" name="transaccion_id" value="{{ transaccion.id }}">
+                    <input type="hidden" name="chat_id"        value="{{ chatId }}">
+                    <input type="hidden" name="estado"         value="pendiente">
+                    <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                      <i class="bi bi-x-circle me-1"></i>Rechazar
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            {# PROPUESTA_INTERCAMBIO → comprador espera respuesta #}
+            {% elseif estado == 'propuesta_intercambio' and esComprador %}
+            <div class="card mb-3" style="border-color:var(--c-primary);">
+              <div class="card-body text-center py-4">
+                <i class="bi bi-hourglass-split d-block text-primary" style="font-size:2rem;margin-bottom:.6rem;"></i>
+                <p class="small fw-semibold mb-1">Propuesta enviada</p>
+                <p class="small mb-0" style="color:var(--c-muted);">Esperando a que el vendedor acepte o rechace tu propuesta.</p>
+                {% if transaccion.dinero_extra > 0 %}
+                <div class="mt-2" style="font-size:.8rem;color:var(--c-muted);">
+                  Dinero extra incluido: <strong>{{ transaccion.dinero_extra|number_format(2) }} €</strong>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+
+            {# ACEPTADA → comprador confirma pago (intercambio: necesita método) #}
+            {% elseif estado == 'aceptada' and esComprador and esIntercambio and not transaccion.metodo_pago %}
+            <div class="card action-card mb-3">
+              <div class="card-header border-0 pb-0 pt-3 px-3">
+                <span class="fw-bold">
+                  <i class="bi bi-credit-card me-1 text-primary"></i>Confirmar método de pago
+                </span>
+              </div>
+              <div class="card-body px-3 pb-3 pt-2">
+                {% if transaccion.dinero_extra > 0 %}
+                <div class="alert alert-info py-2 px-3 mb-3" style="font-size:.83rem;">
+                  <i class="bi bi-cash-coin me-1"></i>
+                  Importe a pagar: <strong>{{ transaccion.dinero_extra|number_format(2) }} €</strong>
+                </div>
+                {% else %}
+                <p class="small mb-3" style="color:var(--c-muted);">Intercambio sin dinero extra. Elige cómo coordinar la entrega.</p>
+                {% endif %}
+                <form action="{{ txAction }}" method="POST" id="form-aceptar">
+                  <input type="hidden" name="transaccion_id" value="{{ transaccion.id }}">
+                  <input type="hidden" name="chat_id"        value="{{ chatId }}">
+                  <input type="hidden" name="estado"         value="pago_pendiente">
+                  <div class="mb-3">
+                    <label class="form-label fw-semibold" style="font-size:.83rem;">
+                      Método de pago <span class="text-danger">*</span>
+                    </label>
+                    {% set metodos = {
+                      'efectivo':      ['bi-cash-coin',  'Efectivo al entregar'],
+                      'transferencia': ['bi-bank',       'Transferencia bancaria'],
+                      'bizum':         ['bi-phone',      'Bizum'],
+                      'paypal':        ['bi-paypal',     'PayPal'],
+                      'otro':          ['bi-three-dots', 'Otro método']
+                    } %}
+                    {% for val, m in metodos %}
+                    <label class="mp-option" style="font-size:.83rem;">
+                      <input type="radio" name="metodo_pago" value="{{ val }}" class="form-check-input" required>
+                      <i class="bi {{ m[0] }}" style="color:var(--c-muted);font-size:1rem;"></i>
+                      {{ m[1] }}
+                    </label>
+                    {% endfor %}
+                    <label class="mp-option mp-stripe-opt {{ not stripeDisponible ? 'opacity-50' : '' }}" style="font-size:.83rem;">
+                      <input type="radio" name="metodo_pago" value="stripe" id="mp-stripe" class="form-check-input"
+                             required {{ not stripeDisponible ? 'disabled' : '' }}>
+                      <i class="bi bi-credit-card-2-front" style="color:#635bff;font-size:1rem;"></i>
+                      <span class="mp-stripe-label">Tarjeta · Stripe</span>
+                      <span class="ms-auto" style="color:var(--c-muted);font-size:.75rem;">
+                        🔒 {{ stripeDisponible ? importeStripe|number_format(2) ~ ' €' : 'Min. 0,50 €' }}
+                      </span>
+                    </label>
+                    {% if stripeDisponible %}
+                    <div id="stripe-payment-block" class="mt-2 p-3 rounded" style="border:1.5px solid rgba(99,91,255,.3);">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-semibold" style="font-size:.82rem;"><i class="bi bi-credit-card me-1"></i>Datos de tarjeta</span>
+                        <small style="color:var(--c-muted);">Visa · MC · Amex</small>
+                      </div>
+                      <div id="stripe-card-element"></div>
+                      <div id="stripe-error-msg" class="mt-2 d-none text-danger" style="font-size:.8rem;">
+                        <i class="bi bi-exclamation-circle me-1"></i><span id="stripe-error-text"></span>
+                      </div>
+                      <div class="mt-2" style="font-size:.72rem;color:var(--c-muted);">
+                        <i class="bi bi-shield-lock-fill text-success me-1"></i>Cifrado TLS · Procesado por Stripe
+                      </div>
+                      <input type="hidden" name="stripe_payment_intent_id" id="stripe-pi-id">
+                    </div>
+                    {% endif %}
+                  </div>
+                  <div class="mb-3">
+                    <label for="direccion_envio" class="form-label fw-semibold" style="font-size:.83rem;">
+                      <i class="bi bi-geo-alt me-1"></i>Dirección de envío
+                      <span style="color:var(--c-muted);font-weight:400;">(opcional)</span>
+                    </label>
+                    <input type="text" id="direccion_envio" name="direccion_envio"
+                           class="form-control form-control-sm" placeholder="Escribe tu dirección…" autocomplete="off">
+                  </div>
+                  <button type="submit" id="btn-aceptar-transaccion" class="btn btn-primary btn-sm w-100">
+                    <i class="bi bi-check-circle me-1" id="btn-aceptar-icon"></i>
+                    <span id="btn-aceptar-texto">Confirmar pago</span>
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            {# ACEPTADA → comprador confirma pago (venta normal) #}
             {% elseif estado == 'aceptada' and esComprador %}
             <div class="card action-card mb-3">
               <div class="card-body text-center py-3 px-3">
@@ -560,12 +739,19 @@
             <div class="card-body text-center py-4">
               <i class="bi bi-bag-check d-block" style="font-size:2rem;color:var(--c-muted);opacity:.5;margin-bottom:.6rem;"></i>
               <p class="small mb-3" style="color:var(--c-muted);">Cuando estés listo, inicia la transacción.</p>
+              {% if esMixtoProducto %}
+              {# Producto mixto: el vendedor elige si vende o intercambia #}
+              <button class="btn btn-success btn-sm w-100" data-bs-toggle="modal" data-bs-target="#modalTipoTransaccion">
+                <i class="bi bi-bag-check me-1"></i>Iniciar transacción
+              </button>
+              {% else %}
               <form action="{{ BASE }}/controllers/chat_start_transaction.php" method="POST">
                 <input type="hidden" name="chat_id" value="{{ chatId }}">
                 <button class="btn btn-success btn-sm w-100">
                   <i class="bi bi-bag-check me-1"></i>Iniciar transacción
                 </button>
               </form>
+              {% endif %}
             </div>
           </div>
 
@@ -671,6 +857,38 @@
 </div>
 {% endif %}
 
+{% if esMixtoProducto and not transaccion %}
+<div class="modal fade" id="modalTipoTransaccion" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold"><i class="bi bi-bag-check text-success me-2"></i>Iniciar transacción</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="small mb-4" style="color:var(--c-muted);">Este producto acepta venta e intercambio. ¿Cómo quieres realizar la transacción?</p>
+        <div class="d-grid gap-2">
+          <form action="{{ BASE }}/controllers/chat_start_transaction.php" method="POST">
+            <input type="hidden" name="chat_id"      value="{{ chatId }}">
+            <input type="hidden" name="tipo_elegido" value="venta">
+            <button type="submit" class="btn btn-success w-100">
+              <i class="bi bi-tag me-2"></i>Vender — cobrar el precio del producto
+            </button>
+          </form>
+          <form action="{{ BASE }}/controllers/chat_start_transaction.php" method="POST">
+            <input type="hidden" name="chat_id"      value="{{ chatId }}">
+            <input type="hidden" name="tipo_elegido" value="intercambio">
+            <button type="submit" class="btn btn-outline-primary w-100">
+              <i class="bi bi-arrow-left-right me-2"></i>Intercambiar — recibir un producto a cambio
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
 <div class="modal fade" id="modalConfirmarEntrega" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -721,6 +939,73 @@
 {% for toast in chatToasts|default([]) %}
 <script>document.addEventListener('DOMContentLoaded',()=>mostrarToast('{{ toast[1]|e('js') }}','{{ toast[0]|e('js') }}'));</script>
 {% endfor %}
+<script>
+const CHAT_ID       = {{ chatId }};
+const USUARIO_ACTUAL = {{ usuarioActual }};
+</script>
+<script>
+(function () {
+  const POLL_MS = 3000;
+
+  function lastMsgId() {
+    const nodes = document.querySelectorAll('#chat-box [data-id]');
+    if (!nodes.length) return 0;
+    return parseInt(nodes[nodes.length - 1].dataset.id, 10) || 0;
+  }
+
+  function isAtBottom(box) {
+    return box.scrollHeight - box.scrollTop - box.clientHeight < 60;
+  }
+
+  function buildMsgHtml(msg) {
+    if (msg.tipo === 'sistema') {
+      return `<div class="msg-sistema" data-id="${msg.id}">
+        <span class="bubble"><i class="bi bi-info-circle me-1"></i>${msg.contenido_clean}</span>
+      </div>`;
+    }
+    const align  = msg.es_mio ? 'justify-content-end' : 'justify-content-start';
+    const bubble = msg.es_mio ? 'bubble-out' : 'bubble-in';
+    const nameEl = msg.es_mio ? `<div class="small mb-1 text-end" style="color:var(--c-muted);">${escHtml(msg.sender_name)} · ${escHtml(msg.fecha_envio)}</div>`
+                               : `<div class="small mb-1" style="color:var(--c-muted);">${escHtml(msg.sender_name)} · ${escHtml(msg.fecha_envio)}</div>`;
+    const status = msg.es_mio ? `<div class="small mt-1 text-end" style="color:var(--c-muted);">${msg.leido ? '✓✓ Leído' : '✓ Enviado'}</div>` : '';
+    return `<div class="mb-2 d-flex ${align}" data-id="${msg.id}">
+      <div style="max-width:80%;">
+        ${nameEl}
+        <div class="px-3 py-2 ${bubble}">${msg.contenido_html}</div>
+        ${status}
+      </div>
+    </div>`;
+  }
+
+  function escHtml(str) {
+    return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function poll(box) {
+    if (document.hidden) return;
+    const sinceId = lastMsgId();
+    fetch(`${BASE}/api/chat_poll.php?chat_id=${CHAT_ID}&since_id=${sinceId}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!data?.ok || !data.messages.length) return;
+        const atBottom = isAtBottom(box);
+        const empty = box.querySelector('.text-center.py-5');
+        if (empty) empty.remove();
+        data.messages.forEach(msg => {
+          box.insertAdjacentHTML('beforeend', buildMsgHtml(msg));
+        });
+        if (atBottom) box.scrollTop = box.scrollHeight;
+      })
+      .catch(() => {});
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const box = document.getElementById('chat-box');
+    if (!box) return;
+    setInterval(() => poll(box), POLL_MS);
+  });
+})();
+</script>
 
 {% if mostrarModalValoracion and transaccion %}
 <script src="{{ asset('js/rating.js') }}"
@@ -737,9 +1022,28 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
-  // Auto-scroll chat to bottom
+  // Auto-scroll chat to bottom on load
   const box = document.getElementById('chat-box');
   if (box) box.scrollTop = box.scrollHeight;
+
+  // Send message via AJAX (avoids full page reload)
+  const chatForm = document.querySelector('.chat-input-area form');
+  const textarea = chatForm?.querySelector('textarea[name="mensaje"]');
+  if (chatForm && textarea) {
+    chatForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const text = textarea.value.trim();
+      if (!text) return;
+      textarea.value = '';
+      textarea.disabled = true;
+      fetch(`${BASE}/public/views/chat.php?id=${CHAT_ID}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `mensaje=${encodeURIComponent(text)}`
+      })
+      .finally(() => { textarea.disabled = false; textarea.focus(); });
+    });
+  }
 
   // Address autocomplete
   if (typeof initAddressAutocomplete === 'function') {
@@ -780,7 +1084,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  {% if esIntercambio and esComprador %}
+  {% if esIntercambio and esComprador and transaccion and transaccion.estado == 'pendiente' %}
   // Exchange product loader
   const sel = document.getElementById('sel-producto-ofrecido');
   if (sel) {
@@ -832,7 +1136,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (stripeBlock && formAceptar && btnAceptar) {
     const STRIPE_PK      = '{{ stripeKey|e }}';
     const TRANSACCION_ID = {{ transaccion ? transaccion.id|default(0) : 0 }};
-    const PRECIO         = {{ precioProducto|default(0) }};
+    const PRECIO         = {{ importeStripe|default(0) }};
 
     const stripe      = Stripe(STRIPE_PK);
     const elements    = stripe.elements();

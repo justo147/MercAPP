@@ -304,7 +304,7 @@ function renderProducts(products) {
                     <h2 class="card-title text-truncate small" title="${p.titulo}">${p.titulo}</h2>
 
                     <p class="card-text fw-bold text-primary mb-3">
-                        ${p.precio} €
+                        ${p.tipo_transaccion === 'intercambio' ? '<span class="badge bg-info text-dark"><i class="bi bi-arrow-left-right me-1"></i>Intercambio</span>' : p.precio ? parseFloat(p.precio).toFixed(2) + ' €' : '<span class="text-muted" style="font-weight:400;font-size:.9em;">Precio no indicado</span>'}
                     </p>
 
                     <a href="detail_product.php?id=${p.id}" 
@@ -486,11 +486,37 @@ document.addEventListener("DOMContentLoaded", async () => {
         loadMoreProducts();
     });
 
-    const navbarInput = document.getElementById("navbar-search");
-    navbarInput?.addEventListener("input", e => {
-        searchQuery = e.target.value.trim();
-        resetAndSearch();
-    });
+    // Conectar ambos inputs (desktop + móvil) con debounce
+    let searchDebounce = null;
+    function bindSearchInput(input) {
+        if (!input) return;
+        input.addEventListener("input", e => {
+            clearTimeout(searchDebounce);
+            searchDebounce = setTimeout(() => {
+                searchQuery = e.target.value.trim();
+                // Sincronizar el otro input
+                const other = input.id === "navbar-search"
+                    ? document.getElementById("navbar-search-mobile")
+                    : document.getElementById("navbar-search");
+                if (other) other.value = searchQuery;
+                resetAndSearch();
+            }, 300);
+        });
+        // Evitar recarga completa si ya estamos en el home
+        input.closest("form")?.addEventListener("submit", e => {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            clearTimeout(searchDebounce);
+            searchQuery = input.value.trim();
+            const other = input.id === "navbar-search"
+                ? document.getElementById("navbar-search-mobile")
+                : document.getElementById("navbar-search");
+            if (other) other.value = searchQuery;
+            resetAndSearch();
+        });
+    }
+    bindSearchInput(document.getElementById("navbar-search"));
+    bindSearchInput(document.getElementById("navbar-search-mobile"));
 
     document.getElementById("filtro-categoria")?.addEventListener("change", e => {
         searchCategoria = e.target.value;

@@ -27,10 +27,11 @@
 11. [API REST](#api-rest)
 12. [Vistas](#vistas)
 13. [Diseño y UX](#diseño-y-ux)
-14. [Instalación local (XAMPP)](#instalación-local-xampp)
-15. [Variables de entorno](#variables-de-entorno)
-16. [Tests](#tests)
-17. [Convenciones de código](#convenciones-de-código)
+14. [Emails transaccionales](#emails-transaccionales)
+15. [Instalación local (XAMPP)](#instalación-local-xampp)
+16. [Variables de entorno](#variables-de-entorno)
+17. [Tests](#tests)
+18. [Convenciones de código](#convenciones-de-código)
 
 ---
 
@@ -55,26 +56,29 @@ El frontend ha sido rediseñado completamente usando **Twig 3** como motor de pl
 - **Chat** entre comprador y vendedor con mensajes de sistema y seguimiento de transacción
 - **Seguir usuarios**: feed personalizado con novedades de seguidos y sugerencias de usuarios a seguir
 - **Valoraciones** tras la entrega (fiabilidad, comunicación, puntualidad)
-- Notificaciones in-app con badge y polling cada 30 s (mensajes, coincidencias, valoraciones, moderación)
+- Notificaciones in-app con badge y polling cada 30 s (mensajes, coincidencias, valoraciones, moderación) — **clicables**: cada notificación redirige al chat o producto correspondiente
+- **Chat en tiempo real** mediante polling por endpoint dedicado (`api/chat_poll.php`) — los mensajes nuevos aparecen sin recargar la página
 - Modo oscuro persistente con antiparpadeo — sin flash al cargar la página
 - hCaptcha en registro para protección anti-bots
 
 ### Transacciones
-- Flujo guiado de 6 estados con transiciones por rol (comprador / vendedor)
+- Flujo guiado con transiciones por rol (comprador / vendedor)
 - Tipos de transacción: **venta**, **intercambio** (trueque de productos) y **mixto** (producto + dinero)
 - Elección de método de pago: efectivo, transferencia, Bizum, PayPal, otro o **tarjeta de crédito/débito vía Stripe**
 - Pago con tarjeta integrado mediante **Stripe.js v3** + PaymentIntent (flujo seguro PCI-compliant)
-- Intercambio de productos: el comprador propone su producto desde sus activos; ambas partes ven los artículos cruzados
+- **Flujo de propuesta de intercambio**: el comprador propone su producto + dinero extra opcional; el vendedor acepta o rechaza la propuesta antes de continuar
+- En productos **mixtos**, el vendedor elige al iniciar si la transacción será de venta o intercambio
 - Dirección de envío con autocomplete Nominatim
 - Número de seguimiento de paquete
-- Email de confirmación al completar la entrega
+- Email de confirmación profesional al completar la entrega (con resumen del pedido, rol, precio y fecha)
 
 ### Administración
 - Dashboard con estadísticas globales (usuarios, productos, transacciones, valoraciones)
 - Gestión de usuarios: cambio de rol, suspensión, eliminación
 - Gestión de productos: activar / pausar / eliminar
-- Gestión de reportes: revisar, aceptar, rechazar
+- Gestión de reportes: revisar, aceptar, rechazar — con badges de estado visibles en modo claro y oscuro
 - Exportación de usuarios y transacciones a **CSV** (compatible con Excel)
+- Panel completamente compatible con **modo oscuro** — tablas, cabeceras y formularios adaptados
 
 ---
 
@@ -144,7 +148,8 @@ MercApp/
 │   ├── db.php                  # Clase Database → PDO
 │   ├── twig.php                # ⭐ Entorno Twig (globals, filtros, funciones)
 │   ├── flash.php               # Helpers setFlash() / hasFlash()
-│   └── mail_config.php         # PHPMailer SMTP
+│   ├── mail_config.php         # PHPMailer SMTP
+│   └── mail_templates.php      # ⭐ Plantillas HTML profesionales para emails
 │
 ├── controllers/
 │   ├── handlers/               # 14 procesadores de formularios (POST)
@@ -210,7 +215,9 @@ MercApp/
 │   ├── 001_transacciones_realistas.sql
 │   ├── 002_rate_limiting_intercambio.sql
 │   ├── 003_productos_coordenadas.sql
-│   └── 004_stripe_payment_intent.sql
+│   ├── 004_stripe_payment_intent.sql
+│   ├── 005_propuesta_intercambio.sql
+│   └── 006_notificaciones_url.sql
 │
 ├── docs/                       # PHPDoc generado automáticamente
 │
@@ -243,7 +250,7 @@ MercApp/
 | `Deseos` | Wishlist con etiquetas, categoría y estado deseado |
 | `Chat` | Conversaciones producto-comprador-vendedor |
 | `Mensajes` | Mensajes de chat (`usuario_id = NULL` → mensaje de sistema) |
-| `Notificaciones` | Tipos: `mensaje`, `coincidencia`, `valoracion`, `moderacion` |
+| `Notificaciones` | Tipos: `mensaje`, `coincidencia`, `valoracion`, `moderacion` — campo `referencia_url` para enlace directo |
 | `Reportes` | Reportes de contenido con estado (pendiente / revisado / rechazado) |
 | `Seguidores` | Relación many-to-many de seguimiento entre usuarios |
 | `LoginIntentos` | Rate limiting: bloqueo por IP tras 5 intentos fallidos en 15 min |
@@ -270,6 +277,8 @@ Las migraciones son archivos SQL incrementales para actualizar una base de datos
 | `002_rate_limiting_intercambio.sql` | Crea la tabla `LoginIntentos` para rate limiting y añade la tabla `Intercambio_Detalle` |
 | `003_productos_coordenadas.sql` | Añade columnas `lat` y `lon` a `Productos` para búsqueda por proximidad |
 | `004_stripe_payment_intent.sql` | Añade `stripe_payment_intent_id`, `numero_seguimiento`, `fecha_aceptacion`, `fecha_pago_confirmado`, `fecha_envio` y `fecha_entrega` a `Transacciones` |
+| `005_propuesta_intercambio.sql` | Añade el estado `propuesta_intercambio` al ENUM de `Transacciones` para el flujo de negociación de intercambios |
+| `006_notificaciones_url.sql` | Añade la columna `referencia_url` a `Notificaciones` para enlazar cada notificación a su recurso (chat o producto) |
 
 ### Cómo aplicar una migración
 
@@ -286,8 +295,12 @@ Las migraciones son archivos SQL incrementales para actualizar una base de datos
 
 ```
 pendiente
-   │  Comprador acepta + elige método de pago + dirección de envío
-   │  (en intercambios: propone también su producto a cambio)
+   │  Comprador inicia → elige método de pago y dirección de envío (venta)
+   │  En intercambio: comprador propone su producto + dinero extra opcional
+   ▼
+propuesta_intercambio  (solo en tipo intercambio)
+   │  Vendedor acepta la propuesta     →  aceptada
+   │  Vendedor rechaza la propuesta    →  pendiente  (comprador puede reproponerla)
    ▼
 aceptada
    │  Comprador informa que ha pagado
@@ -299,17 +312,20 @@ pago_pendiente
 enviado
    │  Comprador confirma recepción del paquete
    ▼
-entregado  ✅  (estado final positivo)
+entregado  ✅  (estado final positivo — envía email de confirmación a ambas partes)
 
 Cualquier estado  →  cancelada  ❌  (estado final negativo)
 ```
 
 | Transición | Actor | Datos extra |
 |-----------|-------|-------------|
-| `pendiente → aceptada` | Comprador | `metodo_pago`, `direccion_envio`, `notas_comprador`, `producto_ofrecido_id` (intercambio) |
-| `aceptada → pago_pendiente` | Comprador | — |
+| `pendiente → propuesta_intercambio` | Comprador | `producto_ofrecido_id`, `dinero_extra` |
+| `propuesta_intercambio → aceptada` | Vendedor | — |
+| `propuesta_intercambio → pendiente` | Vendedor | — (rechaza; limpia `Intercambio_Detalle`) |
+| `pendiente → aceptada` | Comprador (venta) | `metodo_pago`, `direccion_envio`, `notas_comprador` |
+| `aceptada → pago_pendiente` | Comprador | — (o Stripe automáticamente) |
 | `pago_pendiente → enviado` | Vendedor | `numero_seguimiento` (opcional) |
-| `enviado → entregado` | Comprador | — (envía email de confirmación a ambas partes) |
+| `enviado → entregado` | Comprador | — (email HTML profesional a comprador y vendedor) |
 | `* → cancelada` | Cualquiera | El producto vuelve a estado `activo` |
 
 ### Tipos de transacción
@@ -349,7 +365,8 @@ La vista de chat (`chat.php`) usa un **layout de dos columnas** en escritorio:
 
 | Estado | Comprador ve | Vendedor ve |
 |--------|-------------|-------------|
-| `pendiente` | Formulario de aceptación (pago + dirección + producto si es intercambio) | "Esperando al comprador" |
+| `pendiente` | Formulario de aceptación (pago + dirección) *o* formulario de propuesta de intercambio | "Esperando al comprador" |
+| `propuesta_intercambio` | "Esperando respuesta del vendedor" | Detalle de la propuesta + botones Aceptar / Rechazar |
 | `aceptada` | Botón "Ya he pagado" | "Esperando confirmación de pago" |
 | `pago_pendiente` | "Pago notificado" / confirmación Stripe | Formulario de nº seguimiento + "Confirmar envío" |
 | `enviado` | Botón "He recibido el producto" | "Esperando confirmación" |
@@ -415,14 +432,16 @@ Todos los endpoints devuelven `Content-Type: application/json` y requieren sesi�
 | `api/mis_transacciones.php` | GET | Historial completo de transacciones |
 | `api/chat_unread_count.php` | GET | Número de mensajes no leídos |
 | `api/chat_mark_all_read.php` | POST | Marca todos los mensajes no leídos como leídos |
+| `api/chat_poll.php` | GET `?chat_id=X&since_id=Y` | Polling de mensajes nuevos — devuelve solo los mensajes posteriores al `since_id` indicado |
 | `api/stripe_create_payment.php` | POST | Crea un PaymentIntent de Stripe y devuelve el `client_secret` |
 
 ### Notificaciones
 
 | Endpoint | Método | Descripción |
 |----------|--------|-------------|
-| `api/notificaciones.php` | GET | Notificaciones no leídas (máx. 15) |
+| `api/notificaciones.php` | GET | Notificaciones no leídas (máx. 15) — incluye `referencia_url` para enlace directo |
 | `api/notificaciones.php` | POST `accion=mark_all` | Marca todas como leídas |
+| `api/notificaciones.php` | POST `id=X` | Marca una notificación concreta como leída |
 
 ### Usuario y preferencias
 
@@ -524,6 +543,20 @@ El script de antiparpadeo se ejecuta **inline en `<head>`** antes de pintar la p
 - **Contadores de caracteres** en campos con `maxlength`
 - **Banner offline** — detecta `navigator.onLine` y muestra aviso rojo automáticamente
 - **Skeleton loaders** en home, perfil y panel de administración
+
+---
+
+## Emails transaccionales
+
+Los tres correos que envía MercApp usan plantillas HTML profesionales definidas en `config/mail_templates.php`. Todos comparten el mismo layout base (cabecera verde MercApp, cuerpo blanco, pie de aviso automático) con CSS 100 % inline para máxima compatibilidad con clientes de correo.
+
+| Función | Asunto | Trigger |
+|---------|--------|---------|
+| `mailVerificacion($nombre, $url)` | "Confirma tu cuenta en MercApp" | Registro de nuevo usuario |
+| `mailRecuperarContrasena($nombre, $url)` | "Recuperar contraseña — MercApp" | Solicitud de restablecimiento |
+| `mailTransaccionCompletada($nombre, $rol, $producto, $precio, $fecha)` | "Transacción completada — {producto}" | Comprador confirma entrega |
+
+El email de transacción incluye una tabla resumen con el nombre del producto, el rol del destinatario (comprador / vendedor), el importe y la fecha. Se envía a ambas partes de la transacción.
 
 ---
 

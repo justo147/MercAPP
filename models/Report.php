@@ -33,8 +33,8 @@ class Report
      */
     public function create($usuarioId, $productoId, $motivo)
     {
-        $sql = "INSERT INTO reportes (usuario_reportador, producto_id, motivo, fecha, estado, admin_id)
-                VALUES (:usuario_reportador, :producto_id, :motivo, NOW(), 'pendiente', NULL)";
+        $sql = "INSERT INTO reportes (usuario_reportador, producto_id, motivo, fecha, estado)
+                VALUES (:usuario_reportador, :producto_id, :motivo, NOW(), 'pendiente')";
 
         $stmt = $this->conn->prepare($sql);
 

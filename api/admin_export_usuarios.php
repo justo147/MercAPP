@@ -12,11 +12,9 @@ $db   = new Database();
 $conn = $db->getConnection();
 
 $stmt = $conn->query(
-    "SELECT u.id, u.nombre, u.email, u.fecha_registro, u.rol,
-            ep.nombre AS estado
-     FROM Usuario u
-     LEFT JOIN EstadoUsuario ep ON ep.id = u.estado_id
-     ORDER BY u.id ASC"
+    "SELECT id, nombre, email, fecha_registro, rol, estado
+     FROM Usuario
+     ORDER BY id ASC"
 );
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

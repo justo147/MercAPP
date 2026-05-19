@@ -67,6 +67,89 @@ class Transaction
         return $this->conn->lastInsertId();
     }
 
+    /**
+     * Comprador propone un intercambio: guarda producto + dinero extra y pasa a propuesta_intercambio.
+     * Reemplaza cualquier propuesta anterior.
+     */
+    public function proponerIntercambio($id, $productoOfrecidoId, $dineroExtra)
+    {
+        $this->conn->prepare("DELETE FROM Intercambio_Detalle WHERE transaccion_id = :tid")
+                   ->execute([':tid' => $id]);
+
+        $this->conn->prepare(
+            "INSERT INTO Intercambio_Detalle (transaccion_id, producto_id, tipo_item)
+             VALUES (:tid, :pid, 'producto')"
+        )->execute([':tid' => $id, ':pid' => $productoOfrecidoId]);
+
+        $stmt = $this->conn->prepare(
+            "UPDATE Transacciones
+             SET estado = 'propuesta_intercambio', dinero_extra = :extra
+             WHERE id = :id"
+        );
+        return $stmt->execute([':extra' => max(0, floatval($dineroExtra)), ':id' => $id]);
+    }
+
+    /** Vendedor acepta la propuesta → aceptada (buyer still needs to provide payment method). */
+    public function aceptarPropuestaIntercambio($id)
+    {
+        $stmt = $this->conn->prepare(
+            "UPDATE Transacciones SET estado = 'aceptada', fecha_aceptacion = NOW() WHERE id = :id"
+        );
+        return $stmt->execute([':id' => $id]);
+    }
+
+    /** Vendedor rechaza la propuesta → vuelve a pendiente y limpia el Intercambio_Detalle. */
+    public function rechazarPropuestaIntercambio($id)
+    {
+        $this->conn->prepare("DELETE FROM Intercambio_Detalle WHERE transaccion_id = :tid")
+                   ->execute([':tid' => $id]);
+        $stmt = $this->conn->prepare(
+            "UPDATE Transacciones SET estado = 'pendiente', dinero_extra = 0 WHERE id = :id"
+        );
+        return $stmt->execute([':id' => $id]);
+    }
+
+    /** Comprador confirma el pago de un intercambio (con metodo_pago y dirección). */
+    public function confirmarPagoIntercambio($id, $metodoPago, $direccionEnvio, $notas)
+    {
+        $stmt = $this->conn->prepare(
+            "UPDATE Transacciones
+             SET estado               = 'pago_pendiente',
+                 metodo_pago          = :metodo_pago,
+                 direccion_envio      = :direccion_envio,
+                 notas_comprador      = :notas,
+                 fecha_pago_confirmado = NOW()
+             WHERE id = :id"
+        );
+        return $stmt->execute([
+            ':metodo_pago'     => $metodoPago,
+            ':direccion_envio' => $direccionEnvio ?: null,
+            ':notas'           => $notas ?: null,
+            ':id'              => $id,
+        ]);
+    }
+
+    /** Confirmar pago con Stripe desde estado aceptada (intercambio con dinero extra). */
+    public function confirmarPagoConStripe($id, $direccionEnvio, $notas, $paymentIntentId)
+    {
+        $stmt = $this->conn->prepare(
+            "UPDATE Transacciones
+             SET estado                   = 'pago_pendiente',
+                 metodo_pago              = 'stripe',
+                 stripe_payment_intent_id = :pi_id,
+                 direccion_envio          = :dir,
+                 notas_comprador          = :notas,
+                 fecha_pago_confirmado    = NOW()
+             WHERE id = :id"
+        );
+        return $stmt->execute([
+            ':pi_id' => $paymentIntentId,
+            ':dir'   => $direccionEnvio ?: null,
+            ':notas' => $notas ?: null,
+            ':id'    => $id,
+        ]);
+    }
+
     /** Añade un producto ofrecido por el comprador al detalle de intercambio. */
     public function addIntercambioProducto($transaccionId, $productoId)
     {
@@ -207,7 +290,7 @@ class Transaction
     {
         $sql  = "SELECT * FROM Transacciones
                  WHERE producto_id = :producto_id
-                   AND estado IN ('pendiente','aceptada','pago_pendiente','enviado')
+                   AND estado IN ('pendiente','propuesta_intercambio','aceptada','pago_pendiente','enviado')
                  ORDER BY id DESC
                  LIMIT 1";
         $stmt = $this->conn->prepare($sql);

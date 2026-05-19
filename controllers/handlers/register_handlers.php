@@ -117,11 +117,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // ENVIAR EMAIL DE VERIFICACIÓN
             // ===============================
             require __DIR__ . '/../../config/mail_config.php';
+            require_once __DIR__ . '/../../config/mail_templates.php';
             $verifyUrl = "{$BASE}/public/views/verify_email.php?token={$verifyToken}&email=" . urlencode($email);
-            $subject = "Confirma tu correo en MercaAPP";
-            $body = "Bienvenido {$name}, confirma tu correo: {$verifyUrl}";
 
-            sendMail($email, $name, $subject, $body);
+            sendMail($email, $name, "Confirma tu cuenta en MercApp", mailVerificacion($name, $verifyUrl));
 
             // ===============================
             // MENSAJE DE ÉXITO Y REDIRECCIÓN
