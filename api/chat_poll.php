@@ -68,5 +68,12 @@ foreach ($rows as $row) {
     }
 }
 
+$txStmt = $conn->prepare(
+    "SELECT t.estado FROM Chat c LEFT JOIN Transacciones t ON t.id = c.transaccion_id WHERE c.id = :cid"
+);
+$txStmt->execute([':cid' => $chatId]);
+$txRow = $txStmt->fetch(PDO::FETCH_ASSOC);
+$transaccionData = ($txRow && $txRow['estado'] !== null) ? ['estado' => $txRow['estado']] : null;
+
 header('Content-Type: application/json');
-echo json_encode(['ok' => true, 'messages' => $messages]);
+echo json_encode(['ok' => true, 'messages' => $messages, 'transaccion' => $transaccionData]);

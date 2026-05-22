@@ -61,8 +61,9 @@
 {% block content %}
 {% set txAction = BASE ~ '/controllers/chat_update_transaction.php' %}
 {% if transaccion %}{% set estado = transaccion.estado %}{% else %}{% set estado = '' %}{% endif %}
-{% set esFinalizado   = estado in ['cancelada'] %}
-{% set esIntercambio  = transaccion and transaccion.tipo == 'intercambio' %}
+{% set esFinalizado    = estado in ['cancelada', 'entregado'] %}
+{% set esChatBloqueado = estado == 'entregado' %}
+{% set esIntercambio   = transaccion and transaccion.tipo in ['intercambio', 'mixto'] %}
 {% set esMixtoProducto = tipoTransaccionProducto == 'mixto' %}
 
 <div style="max-width:1080px;margin:0 auto;">
@@ -146,7 +147,7 @@
         </div>
 
         <div class="chat-input-area">
-          {% if esFinalizado %}
+          {% if esChatBloqueado %}
           <p class="text-center small mb-0" style="color:var(--c-muted);">
             <i class="bi bi-lock me-1"></i>Chat cerrado — la transacción ha finalizado.
           </p>
@@ -346,7 +347,7 @@
                 </span>
               </div>
               <div class="card-body px-3 pb-3 pt-2">
-                <form action="{{ txAction }}" method="POST" id="form-aceptar">
+                <form action="{{ txAction }}" method="POST" id="form-aceptar" data-transaccion-id="{{ transaccion.id }}">
                   <input type="hidden" name="transaccion_id" value="{{ transaccion.id }}">
                   <input type="hidden" name="chat_id"        value="{{ chatId }}">
                   <input type="hidden" name="estado"         value="aceptada">
@@ -378,7 +379,7 @@
                       </span>
                     </label>
                     {% if stripeDisponible %}
-                    <div id="stripe-payment-block" class="mt-2 p-3 rounded" style="border:1.5px solid rgba(99,91,255,.3);">
+                    <div id="stripe-payment-block" class="mt-2 p-3 rounded" data-importe="{{ importeStripe }}" style="border:1.5px solid rgba(99,91,255,.3);">
                       <div class="d-flex justify-content-between align-items-center mb-2">
                         <span class="fw-semibold" style="font-size:.82rem;"><i class="bi bi-credit-card me-1"></i>Datos de tarjeta</span>
                         <small style="color:var(--c-muted);">Visa · MC · Amex</small>
@@ -513,7 +514,7 @@
                 {% else %}
                 <p class="small mb-3" style="color:var(--c-muted);">Intercambio sin dinero extra. Elige cómo coordinar la entrega.</p>
                 {% endif %}
-                <form action="{{ txAction }}" method="POST" id="form-aceptar">
+                <form action="{{ txAction }}" method="POST" id="form-aceptar" data-transaccion-id="{{ transaccion.id }}">
                   <input type="hidden" name="transaccion_id" value="{{ transaccion.id }}">
                   <input type="hidden" name="chat_id"        value="{{ chatId }}">
                   <input type="hidden" name="estado"         value="pago_pendiente">
@@ -545,7 +546,7 @@
                       </span>
                     </label>
                     {% if stripeDisponible %}
-                    <div id="stripe-payment-block" class="mt-2 p-3 rounded" style="border:1.5px solid rgba(99,91,255,.3);">
+                    <div id="stripe-payment-block" class="mt-2 p-3 rounded" data-importe="{{ importeStripe }}" style="border:1.5px solid rgba(99,91,255,.3);">
                       <div class="d-flex justify-content-between align-items-center mb-2">
                         <span class="fw-semibold" style="font-size:.82rem;"><i class="bi bi-credit-card me-1"></i>Datos de tarjeta</span>
                         <small style="color:var(--c-muted);">Visa · MC · Amex</small>
@@ -940,21 +941,183 @@
 <script>document.addEventListener('DOMContentLoaded',()=>mostrarToast('{{ toast[1]|e('js') }}','{{ toast[0]|e('js') }}'));</script>
 {% endfor %}
 <script>
-const CHAT_ID       = {{ chatId }};
+const CHAT_ID        = {{ chatId }};
 const USUARIO_ACTUAL = {{ usuarioActual }};
+const STRIPE_PK      = '{{ stripeKey|e('js') }}';
+</script>
+<script>
+function initPanelJs() {
+  document.querySelectorAll('.mp-option').forEach(label => {
+    if (label.dataset.mpInit) return;
+    label.dataset.mpInit = '1';
+    const radio = label.querySelector('input[type="radio"]');
+    if (!radio) return;
+    radio.addEventListener('change', () => {
+      document.querySelectorAll('.mp-option').forEach(l => l.classList.remove('selected'));
+      if (radio.checked) label.classList.add('selected');
+    });
+  });
+
+  const selProd = document.getElementById('sel-producto-ofrecido');
+  if (selProd && !selProd.dataset.loaded) {
+    selProd.dataset.loaded = '1';
+    fetch(`${BASE}/api/mis_productos_activos.php`)
+      .then(r => r.json())
+      .then(res => {
+        const prods = res.data || [];
+        if (!prods.length) {
+          selProd.innerHTML = '<option value="">No tienes productos activos para ofrecer</option>';
+          return;
+        }
+        selProd.innerHTML = '<option value="">— Selecciona un producto —</option>';
+        prods.forEach(p => {
+          const o = document.createElement('option');
+          o.value = p.id;
+          o.textContent = p.titulo + (p.precio ? ' (' + parseFloat(p.precio).toFixed(2) + ' €)' : '');
+          o.dataset.imagen = p.imagen || '';
+          selProd.appendChild(o);
+        });
+      })
+      .catch(() => { selProd.innerHTML = '<option value="">Error al cargar productos</option>'; });
+    selProd.addEventListener('change', () => {
+      const opt  = selProd.options[selProd.selectedIndex];
+      const prev = document.getElementById('preview-producto-ofrecido');
+      const img  = document.getElementById('img-producto-ofrecido');
+      const tit  = document.getElementById('titulo-producto-ofrecido');
+      if (!prev || !img || !tit) return;
+      if (opt?.value && opt.dataset.imagen) {
+        img.src = `${BASE}/${opt.dataset.imagen}`; tit.textContent = opt.textContent;
+        prev.classList.remove('d-none');
+      } else {
+        prev.classList.add('d-none');
+      }
+    });
+  }
+
+  const stripeBlock = document.getElementById('stripe-payment-block');
+  const formAceptar = document.getElementById('form-aceptar');
+  if (stripeBlock && formAceptar && !formAceptar.dataset.stripeInit) {
+    formAceptar.dataset.stripeInit = '1';
+    const importe = parseFloat(stripeBlock.dataset.importe || '0');
+    const txId    = parseInt(formAceptar.dataset.transaccionId || '0', 10);
+    ensureStripe(() => setupStripe(stripeBlock, formAceptar, importe, txId));
+  }
+
+  if (typeof initAddressAutocomplete === 'function') {
+    const dir = document.getElementById('direccion_envio');
+    if (dir && !dir.dataset.acInit) {
+      dir.dataset.acInit = '1';
+      initAddressAutocomplete('direccion_envio', `${BASE}/api/normalize_address.php`);
+    }
+  }
+}
+
+function ensureStripe(cb) {
+  if (window.Stripe) { cb(); return; }
+  const s = document.createElement('script');
+  s.src = 'https://js.stripe.com/v3/';
+  s.onload = cb;
+  document.head.appendChild(s);
+}
+
+function setupStripe(stripeBlock, formAceptar, importe, txId) {
+  const errMsg     = document.getElementById('stripe-error-msg');
+  const errTxt     = document.getElementById('stripe-error-text');
+  const btnAceptar = document.getElementById('btn-aceptar-transaccion');
+  const btnTexto   = document.getElementById('btn-aceptar-texto');
+  const btnIcon    = document.getElementById('btn-aceptar-icon');
+  const piInput    = document.getElementById('stripe-pi-id');
+  if (!errMsg || !piInput) return;
+
+  const textoNormal = btnTexto ? btnTexto.textContent.trim() : 'Confirmar';
+  const claseNormal = btnAceptar?.classList.contains('btn-success') ? 'btn-success' : 'btn-primary';
+
+  const stripe = Stripe(STRIPE_PK);
+  const els    = stripe.elements();
+  const cardEl = els.create('card', {
+    style: {
+      base: {
+        fontFamily: 'system-ui, sans-serif', fontSize: '15px',
+        color: document.documentElement.getAttribute('data-theme') === 'dark' ? '#e0e0e0' : '#212529',
+        '::placeholder': { color: '#adb5bd' }
+      },
+      invalid: { color: '#dc3545' }
+    },
+    hidePostalCode: true
+  });
+  cardEl.mount('#stripe-card-element');
+  cardEl.on('change', e => {
+    if (e.error) { errTxt.textContent = e.error.message; errMsg.classList.remove('d-none'); }
+    else errMsg.classList.add('d-none');
+  });
+
+  const mpStripe = document.getElementById('mp-stripe');
+  if (mpStripe) {
+    document.querySelectorAll('input[name="metodo_pago"]').forEach(r => {
+      r.addEventListener('change', () => {
+        if (r.value === 'stripe' && r.checked) {
+          stripeBlock.style.display = 'block';
+          if (btnTexto)   btnTexto.textContent = `Pagar ${importe.toFixed(2).replace('.', ',')} € con tarjeta`;
+          if (btnIcon)    btnIcon.className = 'bi bi-lock-fill me-1';
+          if (btnAceptar) btnAceptar.className = btnAceptar.className.replace(/btn-(success|primary)/, 'btn-primary');
+        } else if (r.checked) {
+          stripeBlock.style.display = 'none';
+          if (btnTexto)   btnTexto.textContent = textoNormal;
+          if (btnIcon)    btnIcon.className = 'bi bi-hand-thumbs-up me-1';
+          if (btnAceptar) btnAceptar.className = btnAceptar.className.replace(/btn-(success|primary)/, claseNormal);
+        }
+      });
+    });
+  }
+
+  formAceptar.addEventListener('submit', async e => {
+    const mpS = document.getElementById('mp-stripe');
+    if (!mpS?.checked) return;
+    e.preventDefault();
+    if (btnAceptar) btnAceptar.disabled = true;
+    if (btnTexto)   btnTexto.textContent = 'Procesando pago…';
+    if (btnIcon)    btnIcon.className = 'spinner-border spinner-border-sm me-1';
+    errMsg.classList.add('d-none');
+    try {
+      const r = await fetch(`${BASE}/api/stripe_create_payment.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `transaccion_id=${txId}`
+      });
+      if (!r.ok) { const er = await r.json().catch(() => ({})); throw new Error(er.error || 'Error al iniciar el pago'); }
+      const { client_secret } = await r.json();
+      const { paymentIntent, error } = await stripe.confirmCardPayment(client_secret, { payment_method: { card: cardEl } });
+      if (error) throw new Error(error.message);
+      if (paymentIntent.status !== 'succeeded') throw new Error('El pago no pudo completarse.');
+      piInput.value = paymentIntent.id;
+      formAceptar.submit();
+    } catch (err) {
+      errTxt.textContent = err.message;
+      errMsg.classList.remove('d-none');
+      if (btnAceptar) btnAceptar.disabled = false;
+      if (btnTexto)   btnTexto.textContent = `Pagar ${importe.toFixed(2).replace('.', ',')} € con tarjeta`;
+      if (btnIcon)    btnIcon.className = 'bi bi-lock-fill me-1';
+    }
+  });
+}
 </script>
 <script>
 (function () {
   const POLL_MS = 3000;
+  let currentEstado = '{{ transaccion ? transaccion.estado|e('js') : '' }}';
+  let refreshing    = false;
 
   function lastMsgId() {
     const nodes = document.querySelectorAll('#chat-box [data-id]');
-    if (!nodes.length) return 0;
-    return parseInt(nodes[nodes.length - 1].dataset.id, 10) || 0;
+    return nodes.length ? parseInt(nodes[nodes.length - 1].dataset.id, 10) || 0 : 0;
   }
 
   function isAtBottom(box) {
     return box.scrollHeight - box.scrollTop - box.clientHeight < 60;
+  }
+
+  function escHtml(str) {
+    return String(str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
   function buildMsgHtml(msg) {
@@ -965,44 +1128,69 @@ const USUARIO_ACTUAL = {{ usuarioActual }};
     }
     const align  = msg.es_mio ? 'justify-content-end' : 'justify-content-start';
     const bubble = msg.es_mio ? 'bubble-out' : 'bubble-in';
-    const nameEl = msg.es_mio ? `<div class="small mb-1 text-end" style="color:var(--c-muted);">${escHtml(msg.sender_name)} · ${escHtml(msg.fecha_envio)}</div>`
-                               : `<div class="small mb-1" style="color:var(--c-muted);">${escHtml(msg.sender_name)} · ${escHtml(msg.fecha_envio)}</div>`;
-    const status = msg.es_mio ? `<div class="small mt-1 text-end" style="color:var(--c-muted);">${msg.leido ? '✓✓ Leído' : '✓ Enviado'}</div>` : '';
+    const nameEl = msg.es_mio
+      ? `<div class="small mb-1 text-end" style="color:var(--c-muted);">${escHtml(msg.sender_name)} · ${escHtml(msg.fecha_envio)}</div>`
+      : `<div class="small mb-1" style="color:var(--c-muted);">${escHtml(msg.sender_name)} · ${escHtml(msg.fecha_envio)}</div>`;
+    const status = msg.es_mio
+      ? `<div class="small mt-1 text-end" style="color:var(--c-muted);">${msg.leido ? '✓✓ Leído' : '✓ Enviado'}</div>`
+      : '';
     return `<div class="mb-2 d-flex ${align}" data-id="${msg.id}">
-      <div style="max-width:80%;">
-        ${nameEl}
+      <div style="max-width:80%;">${nameEl}
         <div class="px-3 py-2 ${bubble}">${msg.contenido_html}</div>
         ${status}
       </div>
     </div>`;
   }
 
-  function escHtml(str) {
-    return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  async function refreshTxPanel() {
+    if (refreshing) return;
+    refreshing = true;
+    try {
+      const resp = await fetch(window.location.href);
+      if (!resp.ok) return;
+      const html  = await resp.text();
+      const doc   = new DOMParser().parseFromString(html, 'text/html');
+      const nuevo = doc.querySelector('.tx-panel');
+      const cur   = document.querySelector('.tx-panel');
+      if (nuevo && cur) {
+        cur.innerHTML = nuevo.innerHTML;
+        if (typeof initPanelJs === 'function') initPanelJs();
+      }
+    } catch(e) {}
+    finally { refreshing = false; }
   }
 
-  function poll(box) {
+  async function poll(box) {
     if (document.hidden) return;
     const sinceId = lastMsgId();
-    fetch(`${BASE}/api/chat_poll.php?chat_id=${CHAT_ID}&since_id=${sinceId}`)
-      .then(r => r.ok ? r.json() : null)
-      .then(data => {
-        if (!data?.ok || !data.messages.length) return;
-        const atBottom = isAtBottom(box);
+    try {
+      const resp = await fetch(`${BASE}/api/chat_poll.php?chat_id=${CHAT_ID}&since_id=${sinceId}`);
+      if (!resp.ok) return;
+      const data = await resp.json();
+      if (!data?.ok) return;
+
+      if (data.messages?.length) {
+        const atBot = isAtBottom(box);
         const empty = box.querySelector('.text-center.py-5');
         if (empty) empty.remove();
-        data.messages.forEach(msg => {
-          box.insertAdjacentHTML('beforeend', buildMsgHtml(msg));
-        });
-        if (atBottom) box.scrollTop = box.scrollHeight;
-      })
-      .catch(() => {});
+        data.messages.forEach(m => box.insertAdjacentHTML('beforeend', buildMsgHtml(m)));
+        if (atBot) box.scrollTop = box.scrollHeight;
+      }
+
+      if (data.transaccion?.estado && data.transaccion.estado !== currentEstado) {
+        currentEstado = data.transaccion.estado;
+        if (currentEstado === 'entregado') {
+          window.location.reload();
+        } else {
+          await refreshTxPanel();
+        }
+      }
+    } catch(e) {}
   }
 
   document.addEventListener('DOMContentLoaded', () => {
     const box = document.getElementById('chat-box');
-    if (!box) return;
-    setInterval(() => poll(box), POLL_MS);
+    if (box) setInterval(() => poll(box), POLL_MS);
   });
 })();
 </script>
@@ -1021,12 +1209,9 @@ const USUARIO_ACTUAL = {{ usuarioActual }};
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-
-  // Auto-scroll chat to bottom on load
   const box = document.getElementById('chat-box');
   if (box) box.scrollTop = box.scrollHeight;
 
-  // Send message via AJAX (avoids full page reload)
   const chatForm = document.querySelector('.chat-input-area form');
   const textarea = chatForm?.querySelector('textarea[name="mensaje"]');
   if (chatForm && textarea) {
@@ -1045,12 +1230,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Address autocomplete
-  if (typeof initAddressAutocomplete === 'function') {
-    initAddressAutocomplete('direccion_envio', `${BASE}/api/normalize_address.php`);
-  }
-
-  // Report modal
   const radios = document.querySelectorAll('input[name="reporte_motivo_preset"]');
   const custom  = document.getElementById('motivo-custom');
   const final   = document.getElementById('reporte-motivo-final');
@@ -1074,155 +1253,12 @@ document.addEventListener('DOMContentLoaded', () => {
     custom.addEventListener('input', syncReport);
   }
 
-  // Payment method option highlight
-  document.querySelectorAll('.mp-option').forEach(label => {
-    const radio = label.querySelector('input[type="radio"]');
-    if (!radio) return;
-    radio.addEventListener('change', () => {
-      document.querySelectorAll('.mp-option').forEach(l => l.classList.remove('selected'));
-      if (radio.checked) label.classList.add('selected');
-    });
-  });
-
-  {% if esIntercambio and esComprador and transaccion and transaccion.estado == 'pendiente' %}
-  // Exchange product loader
-  const sel = document.getElementById('sel-producto-ofrecido');
-  if (sel) {
-    fetch(`${BASE}/api/mis_productos_activos.php`).then(r => r.json()).then(res => {
-      const productos = res.data || [];
-      if (!productos.length) {
-        sel.innerHTML = '<option value="">No tienes productos activos para ofrecer</option>';
-        return;
-      }
-      sel.innerHTML = '<option value="">— Selecciona un producto —</option>';
-      productos.forEach(p => {
-        const opt = document.createElement('option');
-        opt.value = p.id;
-        opt.textContent = p.titulo + (p.precio ? ' (' + parseFloat(p.precio).toFixed(2) + ' €)' : '');
-        opt.dataset.imagen = p.imagen || '';
-        sel.appendChild(opt);
-      });
-    }).catch(() => {
-      sel.innerHTML = '<option value="">Error al cargar productos</option>';
-    });
-
-    sel.addEventListener('change', () => {
-      const opt   = sel.options[sel.selectedIndex];
-      const prev  = document.getElementById('preview-producto-ofrecido');
-      const img   = document.getElementById('img-producto-ofrecido');
-      const tit   = document.getElementById('titulo-producto-ofrecido');
-      if (opt && opt.value && opt.dataset.imagen) {
-        img.src = `${BASE}/${opt.dataset.imagen}`;
-        tit.textContent = opt.textContent;
-        prev.classList.remove('d-none');
-      } else {
-        prev.classList.add('d-none');
-      }
-    });
-  }
-  {% endif %}
-
-  {% if stripeDisponible %}
-  // Stripe Elements
-  const stripeBlock = document.getElementById('stripe-payment-block');
-  const errMsg      = document.getElementById('stripe-error-msg');
-  const errTxt      = document.getElementById('stripe-error-text');
-  const btnAceptar  = document.getElementById('btn-aceptar-transaccion');
-  const btnTexto    = document.getElementById('btn-aceptar-texto');
-  const btnIcon     = document.getElementById('btn-aceptar-icon');
-  const piInput     = document.getElementById('stripe-pi-id');
-  const formAceptar = document.getElementById('form-aceptar');
-
-  if (stripeBlock && formAceptar && btnAceptar) {
-    const STRIPE_PK      = '{{ stripeKey|e }}';
-    const TRANSACCION_ID = {{ transaccion ? transaccion.id|default(0) : 0 }};
-    const PRECIO         = {{ importeStripe|default(0) }};
-
-    const stripe      = Stripe(STRIPE_PK);
-    const elements    = stripe.elements();
-    const cardElement = elements.create('card', {
-      style: {
-        base: {
-          fontFamily: 'system-ui, sans-serif',
-          fontSize: '15px',
-          color: document.documentElement.getAttribute('data-theme') === 'dark' ? '#e0e0e0' : '#212529',
-          '::placeholder': { color: '#adb5bd' }
-        },
-        invalid: { color: '#dc3545' }
-      },
-      hidePostalCode: true
-    });
-    cardElement.mount('#stripe-card-element');
-    cardElement.on('change', e => {
-      if (e.error) { errTxt.textContent = e.error.message; errMsg.classList.remove('d-none'); }
-      else { errMsg.classList.add('d-none'); }
-    });
-
-    const mpStripeRadio = document.getElementById('mp-stripe');
-    if (mpStripeRadio) {
-      document.querySelectorAll('input[name="metodo_pago"]').forEach(radio => {
-        radio.addEventListener('change', () => {
-          if (radio.value === 'stripe' && radio.checked) {
-            stripeBlock.style.display = 'block';
-            btnTexto.textContent = `Pagar ${PRECIO.toFixed(2).replace('.', ',')} € con tarjeta`;
-            btnIcon.className = 'bi bi-lock-fill me-1';
-            btnAceptar.classList.replace('btn-success', 'btn-primary');
-          } else if (radio.checked) {
-            stripeBlock.style.display = 'none';
-            btnTexto.textContent = '{{ esIntercambio ? 'Proponer intercambio' : 'Aceptar y confirmar' }}';
-            btnIcon.className = 'bi bi-hand-thumbs-up me-1';
-            btnAceptar.classList.replace('btn-primary', 'btn-success');
-          }
-        });
-      });
-    }
-
-    formAceptar.addEventListener('submit', async e => {
-      if (!mpStripeRadio || !mpStripeRadio.checked) return;
-      e.preventDefault();
-      btnAceptar.disabled = true;
-      btnTexto.textContent = 'Procesando pago…';
-      btnIcon.className = 'spinner-border spinner-border-sm me-1';
-      errMsg.classList.add('d-none');
-      try {
-        const resp = await fetch(`${BASE}/api/stripe_create_payment.php`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: `transaccion_id=${TRANSACCION_ID}`
-        });
-        if (!resp.ok) {
-          const err = await resp.json().catch(() => ({}));
-          throw new Error(err.error || 'Error al iniciar el pago');
-        }
-        const { client_secret } = await resp.json();
-        const { paymentIntent, error } = await stripe.confirmCardPayment(client_secret, {
-          payment_method: { card: cardElement }
-        });
-        if (error) throw new Error(error.message);
-        if (paymentIntent.status !== 'succeeded') throw new Error('El pago no pudo completarse.');
-        piInput.value = paymentIntent.id;
-        formAceptar.submit();
-      } catch (err) {
-        errTxt.textContent = err.message;
-        errMsg.classList.remove('d-none');
-        btnAceptar.disabled = false;
-        btnTexto.textContent = `Pagar ${PRECIO.toFixed(2).replace('.', ',')} € con tarjeta`;
-        btnIcon.className = 'bi bi-lock-fill me-1';
-      }
-    });
-  }
-  {% endif %}
-
-  // Show rating modal automatically if needed
   {% if mostrarModalValoracion %}
   const modalVal = document.getElementById('modalValoracion');
-  if (modalVal) {
-    setTimeout(() => {
-      const m = bootstrap.Modal.getOrCreateInstance(modalVal);
-      m.show();
-    }, 800);
-  }
+  if (modalVal) setTimeout(() => bootstrap.Modal.getOrCreateInstance(modalVal).show(), 800);
   {% endif %}
+
+  initPanelJs();
 });
 </script>
 {% endblock %}

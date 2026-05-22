@@ -184,6 +184,7 @@ $stripeErrors = [
     'stripe_pago_fallido' => 'El pago con tarjeta no fue completado o no es válido.',
     'stripe_error'        => 'Error de comunicación con Stripe. Inténtalo de nuevo.',
     'metodo_pago'         => 'Debes seleccionar un método de pago.',
+    'producto_ofrecido'   => 'El producto seleccionado no es válido o no te pertenece.',
 ];
 $errCode = $_GET['error'] ?? '';
 if (isset($stripeErrors[$errCode])) {

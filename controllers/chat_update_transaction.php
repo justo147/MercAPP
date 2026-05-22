@@ -160,6 +160,17 @@ switch ($nuevoEstado) {
             exit;
         }
 
+        // Verificar que el producto ofrecido pertenece al comprador y está activo
+        $productoOfrecido = $productModel->getById($productoOfrecidoId);
+        if (
+            !$productoOfrecido ||
+            intval($productoOfrecido['usuario_id']) !== $usuarioActual ||
+            $productoOfrecido['estado_publicacion'] !== 'activo'
+        ) {
+            header("Location: {$BASE}/public/views/chat.php?id={$chatId}&error=producto_ofrecido");
+            exit;
+        }
+
         $transactionModel->proponerIntercambio($transaccionId, $productoOfrecidoId, $dineroExtra);
 
         $msgPropuesta = "El comprador ha propuesto un intercambio.";
@@ -361,6 +372,11 @@ switch ($nuevoEstado) {
     case 'cancelada':
         $transactionModel->cancelar($transaccionId);
         $productModel->cambiarEstadoPublicacion($productoId, "activo");
+        // Limpiar propuesta de intercambio pendiente si la había
+        if (in_array($estadoActual, ['propuesta_intercambio', 'pendiente'])) {
+            $conn->prepare("DELETE FROM Intercambio_Detalle WHERE transaccion_id = :tid")
+                 ->execute([':tid' => $transaccionId]);
+        }
         $messageModel->enviarMensajeSistema(
             $chatId,
             "La transacción ha sido cancelada. El producto vuelve a estar disponible."
