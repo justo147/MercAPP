@@ -139,7 +139,6 @@ h1, h2, h3, h4, h5, h6 {
 .app-navbar .brand {
   display: flex;
   align-items: center;
-  gap: .5rem;
   font-weight: 700;
   font-size: 1.15rem;
   color: var(--c-primary);
@@ -148,7 +147,7 @@ h1, h2, h3, h4, h5, h6 {
   text-decoration: none;
 }
 .app-navbar .brand:hover { color: var(--c-primary-dark); }
-.app-navbar .brand img  { height: 32px; width: auto; }
+.app-navbar .brand img  { height: 55px; width: auto; }
 
 /* Search */
 .app-navbar .search-wrap {
