@@ -135,19 +135,27 @@
 ## DIAPOSITIVA 8 — MÁQUINA DE ESTADOS DE TRANSACCIONES
 
 **Contenido visual:**
-- Diagrama de flujo horizontal o vertical:
+- Dos diagramas de flujo (uno para venta, otro para intercambio):
   ```
+  VENTA:
   [pendiente] → [aceptada] → [pago_pendiente] → [enviado] → [entregado ✓]
       ↓              ↓              ↓               ↓
   [cancelada ✗] ←─────────────────────────────────────
+
+  INTERCAMBIO:
+  [pendiente] → [propuesta_intercambio] → [aceptada] → [pago_pendiente] → ...
+      ↓                  ↓ (rechazada)
+  [cancelada ✗]      [pendiente]
   ```
 - Debajo de cada flecha: quién realiza la acción (Comprador / Vendedor)
-- Colores: azul=activo, verde=completado, rojo=cancelado
+- Colores: azul=activo, verde=completado, rojo=cancelado, naranja=propuesta pendiente
 
 **Lo que se dice:**
-> "Uno de los elementos más complejos del proyecto es la máquina de estados de las transacciones. Cada transacción pasa por 6 estados posibles."
+> "Uno de los elementos más complejos del proyecto es la máquina de estados de las transacciones. En una venta normal hay 6 estados posibles."
 >
 > "El comprador es quien acepta e informa del pago. El vendedor confirma el envío y añade el número de seguimiento. El comprador confirma la recepción. En cualquier momento, cualquiera de los dos puede cancelar."
+>
+> "En el flujo de intercambio puro hay un estado adicional: propuesta_intercambio. El comprador propone qué producto ofrece a cambio, y el vendedor puede aceptar o rechazar antes de comprometerse. Esto permite negociar sin obligarse de entrada."
 >
 > "Hay un flujo especial con Stripe: si el comprador paga con tarjeta, la transacción salta directamente de pendiente a pago_pendiente, porque el pago ya está verificado en el servidor."
 
@@ -192,6 +200,8 @@
 > "La vista del chat tiene un diseño de dos columnas. A la izquierda el hilo de mensajes, donde los mensajes del sistema aparecen centrados para distinguirlos de los mensajes humanos. A la derecha, un panel sticky con el timeline vertical de la transacción."
 >
 > "El panel es contextual: solo muestra la acción que corresponde al estado actual y al rol del usuario. Si eres el comprador en estado 'enviado', ves el botón de confirmar entrega. Si eres el vendedor, ves el estado pero no puedes hacer esa acción."
+>
+> "Una mejora importante es que el panel se actualiza automáticamente sin recargar la página. Cada 3 segundos el navegador comprueba si el estado de la transacción ha cambiado, y si es así reemplaza el panel lateral con el nuevo contenido renderizado por el servidor. Así ambas partes ven los cambios en tiempo casi real."
 
 ---
 
@@ -237,12 +247,14 @@
   1. Registrar usuario y verificar email
   2. Publicar un producto con imágenes
   3. Buscar con filtros y proximidad
-  4. Iniciar chat y proponer transacción
-  5. Aceptar transacción (elegir método de pago)
-  6. Pagar con Stripe (tarjeta de test)
-  7. Vendedor marca como enviado
-  8. Comprador confirma entrega + valoración
-  9. Ver panel de admin
+  4. Iniciar chat y proponer transacción de intercambio
+  5. Comprador selecciona producto a ofrecer → propuesta_intercambio
+  6. Vendedor acepta la propuesta → aceptada (sin recargar)
+  7. Aceptar transacción (elegir método de pago)
+  8. Pagar con Stripe (tarjeta de test)
+  9. Vendedor marca como enviado
+  10. Comprador confirma entrega + valoración
+  11. Ver panel de admin
 
 **Lo que se dice:**
 > "Vamos a hacer una demostración en vivo del flujo completo de una transacción. Tenemos dos usuarios ya preparados: uno como vendedor y otro como comprador."
@@ -271,6 +283,7 @@
 - Dificultad: implementar la máquina de estados con validaciones de rol
 - Dificultad: integrar Stripe de forma segura (verificación server-side)
 - Dificultad: el chat en tiempo real sin WebSockets
+- Dificultad: actualizar el panel de transacción sin recargar la página (DOMParser + polling)
 - Dificultad: la conversión de imágenes a WebP
 - Aprendizaje: arquitectura MVC desde cero sin framework
 - Aprendizaje: seguridad web (SQL injection, XSS, bcrypt)
@@ -281,6 +294,8 @@
 > "El mayor reto técnico fue diseñar la máquina de estados de las transacciones. Tuvimos que asegurarnos de que cada transición fuera válida, que el actor correcto la ejecutara, y que los datos extra se guardaran en el momento apropiado."
 >
 > "La integración con Stripe nos enseñó algo importante sobre seguridad: nunca confiar solo en el cliente. Aunque el navegador diga que el pago fue correcto, el servidor debe verificarlo de forma independiente con la API de Stripe."
+>
+> "Un reto interesante fue conseguir que el panel de transacción se actualizara sin recargar la página. La solución fue extender el polling existente para que también devolviera el estado de la transacción y, cuando detectaba un cambio, descargaba la página en segundo plano y extraía solo el div del panel con DOMParser para reemplazarlo. Así aprovechamos el renderizado del servidor sin el coste de una recarga completa."
 
 ---
 
@@ -347,6 +362,7 @@ o
 - "Prepared statements" (al hablar de seguridad)
 - "Máquina de estados" (para las transacciones)
 - "Polling HTTP" (para el chat)
+- "DOMParser / actualización parcial del DOM" (para las actualizaciones sin recarga)
 - "PaymentIntent" (para Stripe)
 - "Haversine" (para la búsqueda por proximidad)
 - "Bcrypt / password_hash" (para contraseñas)

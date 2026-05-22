@@ -1022,10 +1022,105 @@ En la vista, los mensajes con `usuario_id = NULL` se muestran centrados con fond
 
 ## El chat bloqueado
 
-Cuando la transacción está en `entregado` o `cancelada`, el chat se bloquea:
+Solo cuando la transacción llega a `entregado` el chat se bloquea:
 - El input de escribir desaparece
 - Aparece un mensaje: "La transacción ha finalizado. Este chat está cerrado."
-- El endpoint de enviar mensajes rechaza nuevos mensajes del estado de la transacción
+- El endpoint de enviar mensajes rechaza nuevos mensajes
+
+Si la transacción se **cancela**, el chat permanece abierto para que ambas partes puedan seguir comunicándose y, si lo desean, proponer una nueva transacción.
+
+## Actualizaciones del panel de transacción en tiempo real
+
+El mismo ciclo de polling de 3 segundos que comprueba mensajes nuevos también detecta cambios en el estado de la transacción — sin necesidad de recargar la página.
+
+### ¿Por qué sin recarga?
+
+Cuando el **vendedor** acepta una propuesta de intercambio, el **comprador** ve el cambio en el panel lateral en máximo 3 segundos, sin tener que pulsar F5. Y al revés: cuando el comprador avanza el estado (paga, confirma entrega), el vendedor lo ve igual de rápido.
+
+### Cómo funciona
+
+**1. El endpoint `api/chat_poll.php` devuelve el estado de la transacción**
+
+```php
+$txStmt = $conn->prepare(
+    "SELECT t.estado FROM Chat c
+     LEFT JOIN Transacciones t ON t.id = c.transaccion_id
+     WHERE c.id = :cid"
+);
+$txStmt->execute([':cid' => $chatId]);
+$txRow = $txStmt->fetch(PDO::FETCH_ASSOC);
+
+// Incluido en la respuesta JSON junto con los mensajes nuevos
+echo json_encode([
+    'ok'          => true,
+    'messages'    => $messages,
+    'transaccion' => $txRow ? ['estado' => $txRow['estado']] : null
+]);
+```
+
+**2. El JavaScript detecta el cambio de estado y actúa**
+
+```javascript
+if (data.transaccion?.estado && data.transaccion.estado !== currentEstado) {
+    currentEstado = data.transaccion.estado;
+    if (currentEstado === 'entregado') {
+        window.location.reload(); // recarga completa para el modal de valoración
+    } else {
+        await refreshTxPanel();  // actualización parcial para el resto de estados
+    }
+}
+```
+
+**3. `refreshTxPanel()` — actualización parcial del DOM**
+
+```javascript
+async function refreshTxPanel() {
+    const resp = await fetch(window.location.href);
+    const html = await resp.text();
+    const doc  = new DOMParser().parseFromString(html, 'text/html');
+    const nuevo = doc.querySelector('.tx-panel');
+    const cur   = document.querySelector('.tx-panel');
+    if (nuevo && cur) {
+        cur.innerHTML = nuevo.innerHTML; // reemplaza solo el panel
+        initPanelJs();                   // reactiva los event listeners
+    }
+}
+```
+
+Técnica: se descarga la página completa, se extrae con `DOMParser` solo el div `.tx-panel` y se reemplaza el actual. El servidor renderiza la vista correcta (Twig + PHP decide qué botones mostrar según el estado) y el cliente solo actualiza esa zona del DOM.
+
+**4. `initPanelJs()` — inicialización idempotente**
+
+Tras reemplazar el HTML del panel, los event listeners desaparecen (el DOM es nuevo). `initPanelJs()` los re-registra, pero usa flags `dataset.*` para evitar doble registro si el DOM no cambió:
+
+```javascript
+function initPanelJs() {
+    document.querySelectorAll('.mp-option').forEach(label => {
+        if (label.dataset.mpInit) return; // ya inicializado → saltar
+        label.dataset.mpInit = '1';
+        // ... registrar listener de highlight al seleccionar método de pago
+    });
+    // igual para Stripe, autocomplete de dirección, etc.
+}
+```
+
+**5. `ensureStripe()` — carga dinámica de Stripe.js**
+
+Cuando la transacción llega a estado `aceptada` y se muestra el campo de tarjeta, Stripe.js puede que aún no esté cargado (si la página inicial no lo necesitaba). `ensureStripe()` lo carga solo cuando hace falta:
+
+```javascript
+function ensureStripe(cb) {
+    if (window.Stripe) { cb(); return; } // ya cargado
+    const s  = document.createElement('script');
+    s.src    = 'https://js.stripe.com/v3/';
+    s.onload = cb;
+    document.head.appendChild(s);
+}
+```
+
+**¿Por qué la recarga completa en `entregado`?**
+
+El modal de valoración se controla desde PHP (`$mostrarModalValoracion = true` en `chat.php`). Para que aparezca correctamente, el estado de la sesión y la transacción deben re-evaluarse en el servidor. Una actualización parcial del DOM no puede reproducir esa lógica, así que se hace una recarga completa solo en ese caso.
 
 ## El contador de no leídos en el navbar
 
@@ -1057,11 +1152,13 @@ Piénsalo como un semáforo: solo puede estar en rojo, amarillo o verde. No pued
 
 En MercApp, las transacciones funcionan igual.
 
-## Los 6 estados
+## Los estados
+
+En transacciones de tipo **venta** o **mixto**, hay 6 estados posibles:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    ESTADOS DE TRANSACCIÓN                     │
+│              FLUJO VENTA / MIXTO (6 estados)                 │
 ├─────────────────────────────────────────────────────────────┤
 │                                                              │
 │  [pendiente] → [aceptada] → [pago_pendiente] → [enviado]   │
@@ -1073,14 +1170,38 @@ En MercApp, las transacciones funcionan igual.
 └─────────────────────────────────────────────────────────────┘
 ```
 
+En transacciones de tipo **intercambio puro**, se añade el estado `propuesta_intercambio` entre `pendiente` y `aceptada`, porque el vendedor tiene que ver y aceptar el producto que le ofrece el comprador antes de comprometerse:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│           FLUJO INTERCAMBIO PURO (7 estados)                 │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  [pendiente] → [propuesta_intercambio]                      │
+│                        ↓ acepta vendedor                     │
+│                   [aceptada] → [pago_pendiente]             │
+│                        ↓ rechaza vendedor                    │
+│                   [pendiente] (vuelve a negociar)            │
+│                                                              │
+│  pago_pendiente → [enviado] → [entregado ✓]                │
+│  Desde CUALQUIER estado → [cancelada ✗]                     │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
 ### pendiente
 - Estado inicial cuando el comprador abre un chat y pulsa "Proponer transacción"
 - El vendedor ha visto la propuesta pero no ha hecho nada aún
 - El comprador puede cancelar o esperar
 
+### propuesta_intercambio *(solo en intercambio)*
+- El **comprador** ha seleccionado uno de sus productos para ofrecer a cambio y ha especificado el dinero extra (si aplica)
+- El **vendedor** debe revisar la propuesta y decidir: aceptar → pasa a `aceptada`, o rechazar → vuelve a `pendiente`
+- Aparece en el chat un mensaje automático: "El comprador ha propuesto un intercambio. Dinero extra ofrecido: X €."
+
 ### aceptada
-- El **comprador** ha confirmado que quiere seguir adelante
-- Ha indicado: método de pago, dirección de envío, notas, y en caso de trueque, qué producto ofrece
+- El **comprador** (en venta/mixto) o el **vendedor** (en intercambio) ha confirmado que quiere seguir adelante
+- En venta/mixto, el comprador indica: método de pago, dirección de envío y notas
 - El vendedor puede ver toda esta información
 
 ### pago_pendiente
@@ -1107,7 +1228,10 @@ En MercApp, las transacciones funcionan igual.
 
 | Cambio de estado | ¿Quién lo hace? | ¿Qué aporta? |
 |-----------------|----------------|-------------|
-| pendiente → aceptada | Comprador | Método de pago, dirección, notas, producto ofrecido (si es trueque) |
+| pendiente → propuesta_intercambio | Comprador (intercambio) | Producto ofrecido, dinero extra |
+| propuesta_intercambio → aceptada | Vendedor | (acepta el intercambio propuesto) |
+| propuesta_intercambio → pendiente | Vendedor | (rechaza, vuelve a negociar) |
+| pendiente → aceptada | Comprador (venta/mixto) | Método de pago, dirección, notas |
 | aceptada → pago_pendiente | Comprador | (indica que ya pagó) |
 | pendiente → pago_pendiente | Comprador (solo con Stripe) | stripe_payment_intent_id |
 | pago_pendiente → enviado | Vendedor | Número de seguimiento (opcional) |
@@ -1219,12 +1343,34 @@ MercApp soporta tres tipos:
 2. **intercambio**: el comprador ofrece uno de sus propios productos a cambio (trueque puro, sin dinero)
 3. **mixto**: el comprador ofrece un producto MÁS una cantidad de dinero extra para equilibrar el valor
 
+## El flujo de negociación en intercambio
+
+En una transacción de tipo `intercambio`, hay un paso previo de negociación antes de que ambas partes se comprometan:
+
+```
+1. El comprador ve el panel con "Proponer intercambio"
+   → Selecciona uno de sus productos activos
+   → Indica dinero extra (puede ser 0)
+   → Envía la propuesta
+
+2. La transacción pasa a estado: propuesta_intercambio
+   → Se inserta un mensaje de sistema en el chat:
+      "El comprador ha propuesto un intercambio. Dinero extra: X €."
+
+3. El vendedor ve la propuesta en su panel:
+   → [Aceptar intercambio] → estado pasa a aceptada
+   → [Rechazar] → estado vuelve a pendiente (el comprador puede reformular)
+
+4. Una vez en aceptada, el flujo continúa igual que en venta:
+   pago_pendiente → enviado → entregado
+```
+
 ## ¿Cómo ofrece el comprador su producto?
 
-Cuando el comprador acepta una transacción de tipo `intercambio` o `mixto`:
+Cuando el comprador propone un intercambio:
 1. Se le muestra un selector con sus productos activos (obtenidos de `api/mis_productos_activos.php`)
 2. Selecciona el producto que quiere ofrecer
-3. Al enviar el formulario, el `producto_ofrecido_id` se guarda en la tabla `Intercambio_Detalle`
+3. Al enviar el formulario, el `producto_ofrecido_id` y el `dinero_extra` se guardan en la tabla `Intercambio_Detalle` y el estado cambia a `propuesta_intercambio`
 
 ```php
 // api/mis_productos_activos.php
@@ -1966,6 +2112,12 @@ Esto crea la carpeta `vendor/` con todo el código de las librerías. Esta carpe
 **¿El chat es realmente en tiempo real?**
 
 > Técnicamente no es "tiempo real" puro como WhatsApp, que usa WebSockets. Nosotros usamos polling: el navegador pregunta al servidor cada 3 segundos si hay mensajes nuevos. Para el caso de uso de MercApp (dos personas negociando, no un chat masivo), un retardo de hasta 3 segundos es imperceptible en la práctica. Los WebSockets habrían requerido una configuración de servidor más compleja.
+
+---
+
+**¿Cómo veis los cambios del panel de transacción sin recargar la página?**
+
+> El mismo polling de 3 segundos que comprueba mensajes también devuelve el estado actual de la transacción. Si detecta que el estado cambió, hacemos una petición fetch a la misma URL de la página, extraemos solo el div del panel con `DOMParser`, y reemplazamos el HTML del panel actual. Esto nos permite que si el vendedor acepta una propuesta de intercambio, el comprador vea los botones actualizados en segundos sin recargar. Solo en el caso de que la transacción llegue a `entregado` hacemos una recarga completa, porque el modal de valoración lo genera PHP en el servidor.
 
 ---
 
