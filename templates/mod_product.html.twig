@@ -92,8 +92,11 @@
 
           <div class="mb-3">
             <label class="form-label">Ubicación</label>
-            <input type="text" name="ubicacion" class="form-control"
-                   value="{{ producto.ubicacion|e }}" placeholder="Ciudad, dirección…">
+            <input type="text" id="ubicacion" name="ubicacion" class="form-control"
+                   value="{{ producto.ubicacion|e }}" placeholder="Ciudad, dirección…"
+                   autocomplete="off">
+            <input type="hidden" id="lat" name="lat" value="{{ producto.lat|default('')|e }}">
+            <input type="hidden" id="lon" name="lon" value="{{ producto.lon|default('')|e }}">
           </div>
 
           <!-- Current images -->
@@ -145,8 +148,12 @@
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script src="{{ asset('js/modProduct.js') }}"></script>
+<script src="{{ asset('js/address_autocomplete.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+  if (typeof initAddressAutocomplete === 'function') {
+    initAddressAutocomplete('ubicacion', `${BASE}/api/normalize_address.php`, 'lat', 'lon');
+  }
   document.querySelectorAll('[data-counter]').forEach(input => {
     const counter = document.getElementById(input.dataset.counter);
     if (!counter) return;

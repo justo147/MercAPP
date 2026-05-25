@@ -268,7 +268,7 @@ class Product
     public function update($id, $data)
     {
         try {
-            $sql = "UPDATE Productos SET 
+            $sql = "UPDATE Productos SET
                         categoria_id = :categoria_id,
                         titulo = :titulo,
                         descripcion = :descripcion,
@@ -276,7 +276,9 @@ class Product
                         estado_producto_id = :estado_producto_id,
                         tipo_transaccion = :tipo_transaccion,
                         estado_publicacion_id = :estado_publicacion_id,
-                        ubicacion = :ubicacion
+                        ubicacion = :ubicacion,
+                        lat = :lat,
+                        lon = :lon
                     WHERE id = :id";
 
             $stmt = $this->conn->prepare($sql);
@@ -290,6 +292,8 @@ class Product
                 ":tipo_transaccion" => $data["tipo_transaccion"],
                 ":estado_publicacion_id" => $data["estado_publicacion_id"],
                 ":ubicacion" => $data["ubicacion"],
+                ":lat" => $data["lat"] ?? null,
+                ":lon" => $data["lon"] ?? null,
                 ":id" => $id
             ]);
         } catch (PDOException $e) {

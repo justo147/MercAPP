@@ -261,6 +261,8 @@ class ProductController extends Controller
                     $estado_producto_id = intval($_POST['estado_producto_id'] ?? 0);
                     $tipo_transaccion   = trim($_POST['tipo_transaccion']   ?? '');
                     $ubicacion          = trim($_POST['ubicacion']          ?? '');
+                    $lat                = is_numeric($_POST['lat'] ?? '') ? floatval($_POST['lat']) : null;
+                    $lon                = is_numeric($_POST['lon'] ?? '') ? floatval($_POST['lon']) : null;
 
                     $ownerId = $this->conn->prepare("SELECT usuario_id FROM Productos WHERE id = ?");
                     $ownerId->execute([$productId]);
@@ -282,6 +284,8 @@ class ProductController extends Controller
                             'tipo_transaccion'     => $tipo_transaccion,
                             'estado_publicacion_id' => 1,
                             'ubicacion'            => $ubicacion,
+                            'lat'                  => $lat,
+                            'lon'                  => $lon,
                         ];
 
                         if (!$productModel->update($productId, $updateData)) {
