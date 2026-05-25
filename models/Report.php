@@ -33,7 +33,7 @@ class Report
      */
     public function create($usuarioId, $productoId, $motivo)
     {
-        $sql = "INSERT INTO reportes (usuario_reportador, producto_id, motivo, fecha, estado)
+        $sql = "INSERT INTO Reportes (usuario_reportador, producto_id, motivo, fecha, estado)
                 VALUES (:usuario_reportador, :producto_id, :motivo, NOW(), 'pendiente')";
 
         $stmt = $this->conn->prepare($sql);
@@ -50,26 +50,26 @@ class Report
     ============================================================ */
 
     /**
-     * Obtiene todos los reportes.
+     * Obtiene todos los Reportes.
      *
      * @return array
      */
     public function getAll()
     {
-        $sql = "SELECT * FROM reportes ORDER BY fecha DESC";
+        $sql = "SELECT * FROM Reportes ORDER BY fecha DESC";
         $stmt = $this->conn->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
-     * Obtiene los reportes de un producto.
+     * Obtiene los Reportes de un producto.
      *
      * @param int $productoId
      * @return array
      */
     public function getByProduct($productoId)
     {
-        $sql = "SELECT * FROM reportes WHERE producto_id = :producto_id ORDER BY fecha DESC";
+        $sql = "SELECT * FROM Reportes WHERE producto_id = :producto_id ORDER BY fecha DESC";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->execute([':producto_id' => $productoId]);
@@ -78,14 +78,14 @@ class Report
     }
 
     /**
-     * Obtiene los reportes hechos por un usuario.
+     * Obtiene los Reportes hechos por un usuario.
      *
      * @param int $usuarioId
      * @return array
      */
     public function getByUser($usuarioId)
     {
-        $sql = "SELECT * FROM reportes WHERE usuario_reportador = :usuario_id ORDER BY fecha DESC";
+        $sql = "SELECT * FROM Reportes WHERE usuario_reportador = :usuario_id ORDER BY fecha DESC";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->execute([':usuario_id' => $usuarioId]);
@@ -107,7 +107,7 @@ class Report
      */
     public function updateStatus($id, $estado, $adminId = null)
     {
-        $sql = "UPDATE reportes
+        $sql = "UPDATE Reportes
                 SET estado = :estado, admin_id = :admin_id
                 WHERE id = :id";
 
@@ -132,7 +132,7 @@ class Report
      */
     public function delete($id)
     {
-        $sql = "DELETE FROM reportes WHERE id = :id";
+        $sql = "DELETE FROM Reportes WHERE id = :id";
 
         $stmt = $this->conn->prepare($sql);
         return $stmt->execute([':id' => $id]);

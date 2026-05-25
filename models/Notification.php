@@ -33,7 +33,7 @@ class Notification
      */
     public function create($usuarioId, $tipo, $contenido, $url = null)
     {
-        $sql = "INSERT INTO notificaciones (usuario_id, tipo, contenido, referencia_url, fecha, leida)
+        $sql = "INSERT INTO Notificaciones (usuario_id, tipo, contenido, referencia_url, fecha, leida)
                 VALUES (:usuario_id, :tipo, :contenido, :url, NOW(), 0)";
 
         $stmt = $this->conn->prepare($sql);
