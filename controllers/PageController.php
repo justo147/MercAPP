@@ -11,6 +11,7 @@ class PageController extends Controller
 
     public function docs(array $params = []): void
     {
+        $this->requireRole('admin');
         $this->render('docs.html.twig', []);
     }
 

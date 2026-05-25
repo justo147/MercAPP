@@ -32,7 +32,7 @@ pre { background:var(--c-bg); border:1px solid var(--c-border); border-radius:va
   <!-- Iframe -->
   <div id="iframe-content">
     <div class="ratio ratio-16x9">
-      <iframe id="docFrame" src="../../docs/php/index.html" style="border:none;width:100%;height:100%;border-radius:var(--r-md);"></iframe>
+      <iframe id="docFrame" src="{{ BASE }}/docs/php/index.html" style="border:none;width:100%;height:100%;border-radius:var(--r-md);"></iframe>
     </div>
   </div>
 
@@ -197,7 +197,7 @@ document.querySelectorAll('#docTabs .nav-link').forEach(tab => {
     if (tipo === 'api') { iframeCtn.style.display='none'; apiCtn.style.display='block'; }
     else {
       iframeCtn.style.display='block'; apiCtn.style.display='none';
-      const srcs = { php:'../../docs/php/index.html', js:'../../docs/js/index.html', test:'../../docs/tests/index_test.html' };
+      const srcs = { php: BASE+'/docs/php/index.html', js: BASE+'/docs/js/index.html', test: BASE+'/docs/tests/index_test.html' };
       docFrame.src = srcs[tipo] ?? '';
     }
   });

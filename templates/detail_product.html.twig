@@ -77,22 +77,32 @@
 
       <!-- Actions -->
       <div class="d-flex gap-2 mb-3">
+        {% if usuarioLogueado %}
         <button id="favBtn"
                 class="btn btn-outline-danger dp-fav-btn"
                 onclick="toggleFavorito({{ producto.id }})"
                 title="Añadir a favoritos">
           <i class="bi bi-heart fs-5"></i>
         </button>
+        {% else %}
+        <a href="{{ BASE }}/login" class="btn btn-outline-danger dp-fav-btn" title="Inicia sesión para guardar en favoritos">
+          <i class="bi bi-heart fs-5"></i>
+        </a>
+        {% endif %}
 
-        {% if usuarioLogueado and usuarioLogueado != vendedorId %}
+        {% if not usuarioLogueado %}
+        <a href="{{ BASE }}/login"
+           class="btn btn-primary flex-grow-1 d-flex align-items-center justify-content-center gap-2">
+          <i class="bi bi-box-arrow-in-right"></i> Inicia sesión para contactar
+        </a>
+        {% elseif usuarioLogueado != vendedorId %}
         <a href="{{ BASE }}/chat/start?producto_id={{ producto.id }}"
            class="btn btn-primary flex-grow-1 d-flex align-items-center justify-content-center gap-2">
           <i class="bi bi-chat-dots-fill"></i> Contactar con el vendedor
         </a>
         {% else %}
         <button class="btn btn-primary flex-grow-1" disabled>
-          <i class="bi bi-chat-dots-fill me-1"></i>
-          {{ usuarioLogueado == vendedorId ? 'Tu producto' : 'Contactar con el vendedor' }}
+          <i class="bi bi-chat-dots-fill me-1"></i>Tu producto
         </button>
         {% endif %}
       </div>

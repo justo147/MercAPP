@@ -41,14 +41,16 @@ function toggleFavorito(productoId) {
  * para mostrar el icono correcto.
  */
 document.addEventListener("DOMContentLoaded", () => {
+    const favBtn     = document.getElementById("favBtn");
     const productoId = window.productoIdGlobal;
+
+    if (!favBtn || !productoId) return;
 
     fetch(`${BASE}/api/is_favorite.php?producto_id=${productoId}`)
         .then(r => r.text())
         .then(esFav => {
-            document.getElementById("favBtn").innerHTML =
-                esFav == "1"
-                    ? '<i class="bi bi-heart-fill"></i>'
-                    : '<i class="bi bi-heart"></i>';
+            favBtn.innerHTML = esFav == "1"
+                ? '<i class="bi bi-heart-fill"></i>'
+                : '<i class="bi bi-heart"></i>';
         });
 });

@@ -61,19 +61,23 @@
 
         <!-- Actions -->
         <div class="d-flex gap-2 flex-wrap">
-          <a href="{{ BASE }}/chat" class="btn btn-outline-primary btn-sm">
+          <a href="{{ BASE }}/{{ usuarioLogueado ? 'chat' : 'login' }}" class="btn btn-outline-primary btn-sm">
             <i class="bi bi-envelope me-1"></i>Mensajes
-            <span id="badge-mensajes" class="badge bg-danger ms-1" style="display:none;"></span>
+            {% if usuarioLogueado %}<span id="badge-mensajes" class="badge bg-danger ms-1" style="display:none;"></span>{% endif %}
           </a>
 
           {% if not esPropietario %}
-          <button id="btn-follow"
-                  class="btn btn-sm {{ yaSigue ? 'btn-secondary' : 'btn-primary' }}"
-                  data-seguidor="{{ usuarioLogueado }}"
-                  data-seguido="{{ perfilId }}"
-                  data-sigue="{{ yaSigue ? '1' : '0' }}">
-            {{ yaSigue ? 'Siguiendo' : 'Seguir' }}
-          </button>
+            {% if usuarioLogueado %}
+            <button id="btn-follow"
+                    class="btn btn-sm {{ yaSigue ? 'btn-secondary' : 'btn-primary' }}"
+                    data-seguidor="{{ usuarioLogueado }}"
+                    data-seguido="{{ perfilId }}"
+                    data-sigue="{{ yaSigue ? '1' : '0' }}">
+              {{ yaSigue ? 'Siguiendo' : 'Seguir' }}
+            </button>
+            {% else %}
+            <a href="{{ BASE }}/login" class="btn btn-sm btn-primary">Seguir</a>
+            {% endif %}
           {% endif %}
         </div>
       </div>

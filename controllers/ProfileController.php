@@ -6,13 +6,11 @@ class ProfileController extends Controller
 {
     public function show(array $params = []): void
     {
-        $this->requireAuth();
-
         require_once __DIR__ . '/../models/User.php';
 
         $perfilId        = intval($params['id'] ?? 0);
-        $usuarioLogueado = $_SESSION['user_id'];
-        $esPropietario   = ($perfilId === $usuarioLogueado);
+        $usuarioLogueado = $_SESSION['user_id'] ?? null;
+        $esPropietario   = ($usuarioLogueado !== null && $perfilId === $usuarioLogueado);
         $user            = null;
         $yaSigue         = false;
 
@@ -21,7 +19,7 @@ class ProfileController extends Controller
             $stmt->execute([$perfilId]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
 
-            if ($user && !$esPropietario) {
+            if ($user && $usuarioLogueado && !$esPropietario) {
                 $userModel = new User($this->conn);
                 $yaSigue   = $userModel->sigueA($usuarioLogueado, $perfilId);
             }

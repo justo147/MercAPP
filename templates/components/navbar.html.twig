@@ -20,6 +20,8 @@
     <!-- Actions -->
     <div class="nav-actions ms-auto ms-md-0">
 
+      {% if session.user_id %}
+
       <!-- Notifications -->
       <div class="dropdown">
         <button class="nav-icon-btn" id="notif-btn" data-bs-toggle="dropdown"
@@ -117,6 +119,18 @@
           </li>
         </ul>
       </div>
+
+      {% else %}
+
+      <!-- Guest: Login + Register -->
+      <a href="{{ BASE }}/login" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-box-arrow-in-right me-1"></i>Iniciar sesión
+      </a>
+      <a href="{{ BASE }}/register" class="btn btn-primary btn-sm">
+        <i class="bi bi-person-plus me-1"></i>Registrarse
+      </a>
+
+      {% endif %}
 
       <!-- Theme toggle -->
       <button id="themeToggle" class="theme-toggle" aria-label="Cambiar tema" title="Cambiar tema">

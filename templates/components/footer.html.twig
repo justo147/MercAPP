@@ -36,7 +36,7 @@
         <ul>
           <li><a href="{{ BASE }}/help">Centro de ayuda</a></li>
           <li><a href="{{ BASE }}/help#preguntas-frecuentes">FAQ</a></li>
-          <li><a href="{{ BASE }}/docs">Documentación</a></li>
+          {% if session.role == 'admin' %}<li><a href="{{ BASE }}/documentacion">Documentación</a></li>{% endif %}
         </ul>
       </div>
 

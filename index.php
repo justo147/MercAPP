@@ -112,7 +112,7 @@ $router->get('/following',    [PageController::class, 'following']);
 
 // Páginas estáticas
 $router->get('/help', [PageController::class, 'help']);
-$router->get('/docs', [PageController::class, 'docs']);
+$router->get('/documentacion', [PageController::class, 'docs']);
 
 // ── Dispatch ───────────────────────────────────────────────────────────
 

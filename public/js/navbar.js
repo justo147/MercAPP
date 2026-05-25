@@ -218,12 +218,14 @@ document.addEventListener("DOMContentLoaded", () => {
      *
      * @type {number} ID del intervalo, retornado por setInterval.
      */
-    actualizarBadgeMensajes();
-    setInterval(actualizarBadgeMensajes, 5000);
+    // Solo hacer polling si el usuario está logueado (elementos presentes en el DOM)
+    if (document.getElementById("notif-btn")) {
+        actualizarBadgeMensajes();
+        setInterval(actualizarBadgeMensajes, 5000);
 
-    // Notificaciones: primera carga inmediata, polling cada 30s
-    actualizarNotificaciones();
-    setInterval(actualizarNotificaciones, 30000);
+        actualizarNotificaciones();
+        setInterval(actualizarNotificaciones, 30000);
+    }
 
     // Buscador móvil: toggle al pulsar el botón de lupa
     const mobileSearchToggle = document.getElementById('mobileSearchToggle');
