@@ -115,7 +115,7 @@ async function enviarFormulario() {
     }
 
     try {
-        const res = await fetch("register.php", {
+        const res = await fetch(`${BASE}/register`, {
             method: "POST",
             body: formData
         });

@@ -128,6 +128,7 @@ async function cargarUsuarios() {
     const tbody     = document.getElementById("tabla-usuarios");
     const paginador = document.getElementById("paginacion-usuarios");
 
+    if (!tbody) return;
     tbody.innerHTML = spinnerRow(7);
 
     try {
@@ -294,6 +295,7 @@ async function cargarProductos() {
     const tbody     = document.getElementById("tabla-productos");
     const paginador = document.getElementById("paginacion-productos");
 
+    if (!tbody) return;
     tbody.innerHTML = spinnerRow(9);
 
     try {
@@ -408,6 +410,7 @@ async function cargarReportes() {
     const tbody     = document.getElementById("tabla-reportes");
     const paginador = document.getElementById("paginacion-reportes");
 
+    if (!tbody) return;
     tbody.innerHTML = spinnerRow(8);
 
     try {

@@ -307,7 +307,7 @@ function renderProducts(products) {
                         ${p.tipo_transaccion === 'intercambio' ? '<span class="badge bg-info text-dark"><i class="bi bi-arrow-left-right me-1"></i>Intercambio</span>' : p.precio ? parseFloat(p.precio).toFixed(2) + ' €' : '<span class="text-muted" style="font-weight:400;font-size:.9em;">Precio no indicado</span>'}
                     </p>
 
-                    <a href="detail_product.php?id=${p.id}" 
+                    <a href="${BASE}/product/${p.id}"
                        class="btn btn-outline-primary mt-auto w-100">
                         Ver más
                     </a>

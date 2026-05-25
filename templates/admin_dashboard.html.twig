@@ -244,7 +244,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ asset('js/admin.js') }}" defer></script>
+<script src="{{ asset('js/admin.js') }}?v=2" defer></script>
 <script>
 document.querySelectorAll('.export-btn').forEach(btn => {
   btn.addEventListener('click', function() {
