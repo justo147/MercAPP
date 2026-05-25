@@ -54,7 +54,7 @@
         {% for u in siguiendo %}
         {% set nombre = (u.nombre ~ ' ' ~ u.apellidos)|trim|e %}
         <li class="list-group-item d-flex align-items-center gap-2 py-2 px-3" id="sgt-{{ u.id }}">
-          <a href="{{ BASE }}/public/views/profile.php?id={{ u.id }}" class="flex-shrink-0">
+          <a href="{{ BASE }}/profile/{{ u.id }}" class="flex-shrink-0">
             {% if u.foto_perfil %}
             <img src="{{ BASE }}/{{ u.foto_perfil|e }}" alt="{{ nombre }}"
                  style="width:36px;height:36px;border-radius:50%;object-fit:cover;"
@@ -69,7 +69,7 @@
             {% endif %}
           </a>
           <div class="flex-grow-1 min-w-0">
-            <a href="{{ BASE }}/public/views/profile.php?id={{ u.id }}"
+            <a href="{{ BASE }}/profile/{{ u.id }}"
                class="text-body text-decoration-none small fw-semibold text-truncate d-block">{{ nombre }}</a>
           </div>
           <button class="btn btn-sm btn-outline-secondary fw-unfollow-btn flex-shrink-0"
@@ -92,7 +92,7 @@
         {% for s in sugerencias %}
         {% set sNombre = (s.nombre ~ ' ' ~ s.apellidos)|trim|e %}
         <div class="d-flex align-items-center gap-2 px-3 py-2 border-bottom" id="sug-{{ s.id }}">
-          <a href="{{ BASE }}/public/views/profile.php?id={{ s.id }}" class="flex-shrink-0">
+          <a href="{{ BASE }}/profile/{{ s.id }}" class="flex-shrink-0">
             {% if s.foto_perfil %}
             <img src="{{ BASE }}/{{ s.foto_perfil|e }}" alt="{{ sNombre }}"
                  style="width:36px;height:36px;border-radius:50%;object-fit:cover;"
@@ -107,7 +107,7 @@
             {% endif %}
           </a>
           <div class="flex-grow-1 min-w-0">
-            <a href="{{ BASE }}/public/views/profile.php?id={{ s.id }}"
+            <a href="{{ BASE }}/profile/{{ s.id }}"
                class="text-body text-decoration-none small fw-semibold text-truncate d-block">{{ sNombre }}</a>
             <span class="text-muted" style="font-size:.7rem;">
               <i class="bi bi-box-seam me-1"></i>{{ s.total_productos }} producto{{ s.total_productos != 1 ? 's' : '' }}
@@ -177,7 +177,7 @@ function renderProduct(p) {
   const img = p.imagenes?.length ? `${BASE}/${p.imagenes[0].url}` : DEF;
   const col = document.createElement('div');
   col.className = 'col-6 col-md-4';
-  col.innerHTML = `<a href="${BASE}/public/views/detail_product.php?id=${p.id}" class="text-decoration-none">
+  col.innerHTML = `<a href="${BASE}/product/${p.id}" class="text-decoration-none">
     <div class="product-card">
       <img src="${img}" alt="${esc(p.titulo)}" style="width:100%;height:170px;object-fit:cover;"
            onerror="this.onerror=null;this.src='${DEF}'">
@@ -225,7 +225,7 @@ document.querySelectorAll('.fw-follow-btn').forEach(btn => {
   btn.addEventListener('click', function() {
     const seguido = this.dataset.id; this.disabled=true;
     this.innerHTML='<span class="spinner-border spinner-border-sm"></span>';
-    fetch(`${BASE}/controllers/follow.php`,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`seguidor=${FW_USER_ID}&seguido=${seguido}`})
+    fetch(`${BASE}/follow`,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`seguidor=${FW_USER_ID}&seguido=${seguido}`})
       .then(r=>r.json()).then(data => { if(data.success) window.location.reload(); else { this.disabled=false; this.innerHTML='<i class="bi bi-person-plus-fill me-1"></i>Seguir'; } })
       .catch(() => { this.disabled=false; this.innerHTML='<i class="bi bi-person-plus-fill me-1"></i>Seguir'; });
   });
@@ -248,7 +248,7 @@ document.getElementById('btnUnfollowConfirm').addEventListener('click', () => {
   const seguido = btn.dataset.id;
   btn.disabled = true;
   unfollowModal.hide();
-  fetch(`${BASE}/controllers/unfollow.php`,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`seguidor=${FW_USER_ID}&seguido=${seguido}`})
+  fetch(`${BASE}/unfollow`,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`seguidor=${FW_USER_ID}&seguido=${seguido}`})
     .then(r=>r.json()).then(data => { if(data.success) window.location.reload(); else btn.disabled=false; })
     .catch(() => { btn.disabled=false; });
 });

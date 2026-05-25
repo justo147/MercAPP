@@ -3,13 +3,13 @@
  */
 function toggleFavorito(productoId) {
 
-    fetch(`${BASE}/controllers/handlers/is_favorite_handle.php?producto_id=${productoId}`)
+    fetch(`${BASE}/api/is_favorite.php?producto_id=${productoId}`)
         .then(r => r.text())
         .then(esFav => {
 
             if (esFav == "1") {
                 // Eliminar de favoritos
-                fetch(`${BASE}/controllers/handlers/remove_favorite_handle.php`, {
+                fetch(`${BASE}/api/remove_favorite.php`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/x-www-form-urlencoded"
@@ -22,7 +22,7 @@ function toggleFavorito(productoId) {
 
             } else {
                 // Añadir a favoritos
-                fetch(`${BASE}/controllers/handlers/add_favorite_handle.php`, {
+                fetch(`${BASE}/api/add_favorite.php`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/x-www-form-urlencoded"
@@ -43,7 +43,7 @@ function toggleFavorito(productoId) {
 document.addEventListener("DOMContentLoaded", () => {
     const productoId = window.productoIdGlobal;
 
-    fetch(`${BASE}/controllers/handlers/is_favorite_handle.php?producto_id=${productoId}`)
+    fetch(`${BASE}/api/is_favorite.php?producto_id=${productoId}`)
         .then(r => r.text())
         .then(esFav => {
             document.getElementById("favBtn").innerHTML =

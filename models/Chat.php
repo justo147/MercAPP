@@ -49,8 +49,8 @@ class Chat
             FROM Chat c
             LEFT JOIN Productos p   ON c.producto_id = p.id
             LEFT JOIN Imagenes_prod img ON img.id_producto = p.id AND img.orden = 0
-            LEFT JOIN Usuario uc    ON uc.id = c.usuario_comprador
-            LEFT JOIN Usuario uv    ON uv.id = c.usuario_vendedor
+            LEFT JOIN usuario uc    ON uc.id = c.usuario_comprador
+            LEFT JOIN usuario uv    ON uv.id = c.usuario_vendedor
             WHERE c.id = :id";
 
         $stmt = $this->conn->prepare($sql);
@@ -237,8 +237,8 @@ public function getChatsByUser(int $userId, string $filtro = '')
         FROM Chat c
         JOIN Productos p     ON p.id = c.producto_id
         LEFT JOIN Imagenes_prod img ON img.id_producto = p.id AND img.orden = 0
-        LEFT JOIN Usuario uc ON uc.id = c.usuario_comprador
-        LEFT JOIN Usuario uv ON uv.id = c.usuario_vendedor
+        LEFT JOIN usuario uc ON uc.id = c.usuario_comprador
+        LEFT JOIN usuario uv ON uv.id = c.usuario_vendedor
         LEFT JOIN Transacciones t ON t.id = c.transaccion_id
         WHERE (c.usuario_comprador = :uid OR c.usuario_vendedor = :uid)
     ";

@@ -13,7 +13,7 @@
     <i class="bi bi-heart"></i>
     <h3>Sin favoritos</h3>
     <p>Guarda productos que te interesen para encontrarlos fácilmente.</p>
-    <a href="{{ BASE }}/public/views/home.php" class="btn btn-primary">
+    <a href="{{ BASE }}/home" class="btn btn-primary">
       <i class="bi bi-search me-1"></i>Explorar productos
     </a>
   </div>
@@ -22,7 +22,7 @@
     {% for p in favoritos %}
     {% set imgSrc = p.imagen ? BASE ~ '/' ~ p.imagen : BASE ~ '/public/img/default.jpg' %}
     <div class="col-6 col-md-4 col-lg-3">
-      <a href="{{ BASE }}/public/views/detail_product.php?id={{ p.id }}" class="text-decoration-none">
+      <a href="{{ BASE }}/product/{{ p.id }}" class="text-decoration-none">
         <div class="product-card">
           <div style="position:relative;">
             <img src="{{ imgSrc|e }}" alt="{{ p.titulo|e }}"

@@ -326,11 +326,20 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @media (max-width: 767px) {
+  .app-navbar { height: auto; }
   .navbar-mobile-toggle { display: flex; }
   .app-navbar .search-wrap { display: none; }
-  .app-navbar .search-wrap.show { display: block; width: 100%; }
-  .app-navbar .navbar-inner { flex-wrap: wrap; height: auto; padding: .5rem 1rem; }
+  .app-navbar .search-wrap.show { display: block; width: 100%; padding: 0 1rem .6rem; }
+  .app-navbar .navbar-inner { flex-wrap: nowrap; height: auto; padding: .4rem .75rem; gap: .4rem; }
+  .app-navbar .brand img { height: 40px; }
+  .app-navbar .brand { font-size: 1rem; }
+  .app-navbar .nav-actions { gap: .1rem; }
   .app-navbar .nav-actions .nav-label { display: none; }
+  .nav-icon-btn { width: 34px; height: 34px; font-size: 1rem; }
+  .app-dropdown-toggle { padding: .2rem .4rem; }
+  .nav-avatar { width: 30px; height: 30px; }
+  .nav-avatar-placeholder { width: 30px; height: 30px; font-size: .9rem; }
+  .theme-toggle { width: 34px; height: 34px; }
 }
 
 /* ── Dropdown Menu ────────────────────────────────────────── */
@@ -387,7 +396,9 @@ h1, h2, h3, h4, h5, h6 {
   border-color: var(--c-primary) !important;
   color: var(--c-primary) !important;
 }
-.btn-outline-primary:hover {
+.btn-outline-primary:hover,
+.btn-outline-primary.active,
+.btn-outline-primary:active {
   background: var(--c-primary) !important;
   color: #fff !important;
 }

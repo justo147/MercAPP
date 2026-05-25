@@ -16,27 +16,27 @@
       <div class="col-6 col-md-2">
         <h6>Explorar</h6>
         <ul>
-          <li><a href="{{ BASE }}/public/views/home.php">Inicio</a></li>
-          <li><a href="{{ BASE }}/public/views/home.php">Categorías</a></li>
-          <li><a href="{{ BASE }}/public/views/upload_product.php">Vender</a></li>
+          <li><a href="{{ BASE }}/home">Inicio</a></li>
+          <li><a href="{{ BASE }}/home">Categorías</a></li>
+          <li><a href="{{ BASE }}/product/upload">Vender</a></li>
         </ul>
       </div>
 
       <div class="col-6 col-md-2">
         <h6>Cuenta</h6>
         <ul>
-          <li><a href="{{ BASE }}/public/views/profile.php?id={{ session.user_id }}">Mi perfil</a></li>
-          <li><a href="{{ BASE }}/public/views/my_favorites.php">Favoritos</a></li>
-          <li><a href="{{ BASE }}/public/views/my_transactions.php">Transacciones</a></li>
+          <li><a href="{{ BASE }}/profile/{{ session.user_id }}">Mi perfil</a></li>
+          <li><a href="{{ BASE }}/favorites">Favoritos</a></li>
+          <li><a href="{{ BASE }}/transactions">Transacciones</a></li>
         </ul>
       </div>
 
       <div class="col-6 col-md-2">
         <h6>Ayuda</h6>
         <ul>
-          <li><a href="{{ BASE }}/public/views/help.php">Centro de ayuda</a></li>
-          <li><a href="{{ BASE }}/public/views/help.php#preguntas-frecuentes">FAQ</a></li>
-          <li><a href="{{ BASE }}/public/views/docs.php">Documentación</a></li>
+          <li><a href="{{ BASE }}/help">Centro de ayuda</a></li>
+          <li><a href="{{ BASE }}/help#preguntas-frecuentes">FAQ</a></li>
+          <li><a href="{{ BASE }}/docs">Documentación</a></li>
         </ul>
       </div>
 

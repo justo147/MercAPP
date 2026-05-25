@@ -70,29 +70,43 @@
 
 ---
 
-## DIAPOSITIVA 5 — ARQUITECTURA MVC
+## DIAPOSITIVA 5 — ARQUITECTURA MVC + FRONT CONTROLLER
 
 **Contenido visual:**
-- Diagrama de tres capas vertical:
+- Diagrama de flujo vertical:
   ```
-  [VISTA — Templates Twig]
-         ↕
-  [CONTROLADOR — PHP handlers]
-         ↕
+  Petición HTTP (cualquier URL)
+         │
+         ▼
+  .htaccess  →  index.php  (Front Controller)
+         │
+         ▼
+  core/Router.php  →  controllers/*.php
+         │                (8 controladores de clase)
+         ▼
   [MODELO — Clases PHP + PDO]
-         ↕
+         │
+         ▼
   [BASE DE DATOS — MySQL]
+         │
+         ▼
+  [VISTA — Templates Twig  templates/]
   ```
 - A la derecha: estructura de carpetas simplificada
-  - `templates/` → Vistas
-  - `controllers/` → Controladores
+  - `core/` → Router + Controller base
+  - `controllers/` → 8 controladores de clase
   - `models/` → Modelos
+  - `templates/` → Vistas Twig
   - `api/` → Endpoints JSON
 
 **Lo que se dice:**
-> "La arquitectura sigue el patrón MVC. Las vistas son plantillas Twig en la carpeta templates. Los controladores son scripts PHP que procesan los formularios y llaman a los modelos. Los modelos encapsulan toda la lógica de negocio y el acceso a la base de datos mediante PDO."
+> "La arquitectura implementa el patrón Front Controller sobre MVC. Todas las peticiones HTTP pasan por un único punto de entrada, index.php, que carga el entorno y define todas las rutas."
 >
-> "Además, tenemos una capa de API REST en la carpeta api/, con endpoints JSON que el frontend consume mediante fetch para funcionalidades como el chat en tiempo real o la búsqueda con filtros."
+> "Un router propio en core/Router.php analiza la URL, extrae parámetros como el id de un producto o de un chat, e instancia el controlador correspondiente. Hay ocho controladores de clase: uno para autenticación, uno para el home, uno para productos, uno para el chat, y así sucesivamente."
+>
+> "Las vistas siguen siendo plantillas Twig en la carpeta templates. Los modelos encapsulan el acceso a la base de datos con PDO. La capa api/ contiene los endpoints JSON para el chat en tiempo real, la búsqueda con filtros y otras llamadas AJAX."
+>
+> "Las URLs son limpias: /login, /product/5, /chat/3 — sin extensiones .php ni rutas internas expuestas al usuario."
 
 ---
 
@@ -280,17 +294,21 @@
 - 3-4 puntos en cada columna
 
 **Sugerencias de contenido:**
+- Dificultad: implementar el patrón Front Controller con router propio desde cero
 - Dificultad: implementar la máquina de estados con validaciones de rol
 - Dificultad: integrar Stripe de forma segura (verificación server-side)
 - Dificultad: el chat en tiempo real sin WebSockets
 - Dificultad: actualizar el panel de transacción sin recargar la página (DOMParser + polling)
 - Dificultad: la conversión de imágenes a WebP
-- Aprendizaje: arquitectura MVC desde cero sin framework
+- Aprendizaje: arquitectura Front Controller + MVC sin framework
+- Aprendizaje: diseño de URLs limpias y routing con parámetros dinámicos
 - Aprendizaje: seguridad web (SQL injection, XSS, bcrypt)
 - Aprendizaje: trabajar con APIs externas (Stripe, Nominatim)
 - Aprendizaje: trabajo en equipo con Git y resolución de conflictos
 
 **Lo que se dice:**
+> "Uno de los retos más interesantes fue refactorizar la arquitectura para implementar el patrón Front Controller. Partíamos de un esquema donde cada página era un archivo PHP diferente accesible directamente en la URL. Tuvimos que diseñar un router propio, migrar toda la lógica a controladores de clase y configurar mod_rewrite para que todas las peticiones pasaran por un único index.php."
+>
 > "El mayor reto técnico fue diseñar la máquina de estados de las transacciones. Tuvimos que asegurarnos de que cada transición fuera válida, que el actor correcto la ejecutara, y que los datos extra se guardaran en el momento apropiado."
 >
 > "La integración con Stripe nos enseñó algo importante sobre seguridad: nunca confiar solo en el cliente. Aunque el navegador diga que el pago fue correcto, el servidor debe verificarlo de forma independiente con la API de Stripe."

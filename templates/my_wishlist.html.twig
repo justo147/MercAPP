@@ -76,7 +76,7 @@ function renderMatchGrid(productos) {
   const DEF = `${BASE}/public/img/default.jpg`;
   return `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.75rem;">` + productos.map(p => {
     const img = p.imagen ? `${BASE}/${esc(p.imagen)}` : DEF;
-    return `<a href="${BASE}/public/views/detail_product.php?id=${p.id}" class="text-decoration-none text-body" target="_blank"
+    return `<a href="${BASE}/product/${p.id}" class="text-decoration-none text-body" target="_blank"
                style="border-radius:var(--r-md);overflow:hidden;border:1px solid var(--c-border);display:block;">
       <img src="${img}" alt="${esc(p.titulo)}" style="width:100%;height:110px;object-fit:cover;"
            onerror="this.src='${DEF}'">

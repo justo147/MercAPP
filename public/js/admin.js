@@ -179,8 +179,11 @@ function crearFilaUsuario(u) {
                 <button class="btn btn-sm btn-outline-warning" onclick="cambiarEstadoUsuario(${u.id},'suspendido')" title="Suspender">
                     <i class="bi bi-pause-circle"></i>
                 </button>
-                <button class="btn btn-sm btn-outline-danger" onclick="cambiarEstadoUsuario(${u.id},'eliminado')" title="Eliminar">
-                    <i class="bi bi-trash"></i>
+                <button class="btn btn-sm btn-outline-danger" onclick="cambiarEstadoUsuario(${u.id},'eliminado')" title="Marcar como eliminado">
+                    <i class="bi bi-person-slash"></i>
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="eliminarUsuarioPermanente(${u.id},'${esc(u.nombre)} ${esc(u.apellidos||'')}')" title="Eliminar permanentemente de la BD">
+                    <i class="bi bi-trash3-fill"></i>
                 </button>
                 <button class="btn btn-sm btn-outline-primary" onclick="cambiarRol(${u.id},'admin')" title="Hacer admin">
                     <i class="bi bi-shield-plus"></i>
@@ -253,6 +256,34 @@ window.cambiarRol = function (id, nuevoRol) {
                 }
             } catch {
                 adminToast("Error de conexión.");
+            }
+        }
+    });
+};
+
+window.eliminarUsuarioPermanente = function (id, nombre) {
+    adminConfirm({
+        titulo:   `⚠️ Eliminar permanentemente a ${nombre.trim() || '#' + id}`,
+        mensaje:  `Esta acción <strong>no se puede deshacer</strong>.<br>Se borrarán de la base de datos el usuario, todos sus productos, imágenes, chats, transacciones y notificaciones.`,
+        btnTexto: "Eliminar para siempre",
+        btnClass: "btn-danger",
+        onConfirm: async () => {
+            try {
+                const res  = await fetch(`${BASE}/api/admin_delete_user.php`, {
+                    method:  "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body:    JSON.stringify({ id })
+                });
+                const json = await res.json();
+                if (json.success) {
+                    cargarUsuarios();
+                    cargarEstadisticas();
+                    adminToast(`Usuario #${id} eliminado permanentemente.`, "success");
+                } else {
+                    adminToast("Error: " + json.error, "error");
+                }
+            } catch {
+                adminToast("Error de conexión.", "error");
             }
         }
     });

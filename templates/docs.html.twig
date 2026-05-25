@@ -75,8 +75,8 @@ pre { background:var(--c-bg); border:1px solid var(--c-border); border-radius:va
         <tbody>
           {{ m.apiRow('GET','/api/chat_messages.php','Mensajes de un chat (polling).','<code>chat_id</code>, <code>after_id</code>') }}
           {{ m.apiRow('GET','/api/chat_unread_count.php','Nº total de mensajes no leídos.','—') }}
-          {{ m.apiRow('POST','/controllers/chat_start_transaction.php','Inicia una transacción (estado: <em>pendiente</em>).','<code>chat_id</code>') }}
-          {{ m.apiRow('POST','/controllers/chat_update_transaction.php','Avanza el estado de la transacción.','<code>transaccion_id</code>, <code>estado</code>, <code>chat_id</code>') }}
+          {{ m.apiRow('POST','/chat/start-transaction','Inicia una transacción (estado: <em>pendiente</em>).','<code>chat_id</code>') }}
+          {{ m.apiRow('POST','/chat/update-transaction','Avanza el estado de la transacción.','<code>transaccion_id</code>, <code>estado</code>, <code>chat_id</code>') }}
           {{ m.apiRow('GET','/api/mis_transacciones.php','Historial paginado de transacciones.','<code>page</code>, <code>limit</code>, <code>rol</code>, <code>estado</code>') }}
           {{ m.apiRow('POST','/api/chat_mark_all_read.php','Marca todos los mensajes como leídos.','—') }}
           {{ m.apiRow('POST','/api/stripe_create_payment.php','Crea un PaymentIntent de Stripe.','<code>transaccion_id</code>') }}

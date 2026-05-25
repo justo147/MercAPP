@@ -85,7 +85,7 @@
         </button>
 
         {% if usuarioLogueado and usuarioLogueado != vendedorId %}
-        <a href="{{ BASE }}/controllers/chat_start.php?producto_id={{ producto.id }}"
+        <a href="{{ BASE }}/chat/start?producto_id={{ producto.id }}"
            class="btn btn-primary flex-grow-1 d-flex align-items-center justify-content-center gap-2">
           <i class="bi bi-chat-dots-fill"></i> Contactar con el vendedor
         </a>
@@ -131,7 +131,7 @@
     </h5>
     <div class="d-flex align-items-center gap-3">
 
-      <a href="{{ BASE }}/public/views/profile.php?id={{ vendedorId }}" class="flex-shrink-0">
+      <a href="{{ BASE }}/profile/{{ vendedorId }}" class="flex-shrink-0">
         {% if vendedor.foto_perfil %}
         <img src="{{ BASE }}/{{ vendedor.foto_perfil|e }}"
              alt="Foto del vendedor"
@@ -145,7 +145,7 @@
 
       <div class="flex-grow-1">
         <div class="fw-semibold">
-          <a href="{{ BASE }}/public/views/profile.php?id={{ vendedorId }}"
+          <a href="{{ BASE }}/profile/{{ vendedorId }}"
              style="color:var(--c-text);text-decoration:none;">
             {{ vendedor.nombre|e }} {{ vendedor.apellidos|e }}
           </a>
@@ -184,7 +184,7 @@
       {% for s in productosSugeridos %}
       {% set sImg = s.imagenes[0].url is defined ? BASE ~ '/' ~ s.imagenes[0].url : BASE ~ '/public/img/default.jpg' %}
       {% set sPrecio = s.precio and s.precio > 0 ? s.precio|number_format(2) ~ ' €' : 'Gratis' %}
-      <a href="{{ BASE }}/public/views/detail_product.php?id={{ s.id }}"
+      <a href="{{ BASE }}/product/{{ s.id }}"
          class="dp-sug-card text-decoration-none text-body">
         <img src="{{ sImg|e }}"
              alt="{{ s.titulo|e }}"
@@ -237,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const orig = btn.innerHTML;
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
-    const url = sigue ? `${BASE}/controllers/unfollow.php` : `${BASE}/controllers/follow.php`;
+    const url = sigue ? `${BASE}/unfollow` : `${BASE}/follow`;
     fetch(url, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
                  body:`seguidor=${btn.dataset.seguidor}&seguido=${btn.dataset.seguido}` })
     .then(r=>r.json()).then(data=>{

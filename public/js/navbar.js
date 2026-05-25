@@ -225,4 +225,25 @@ document.addEventListener("DOMContentLoaded", () => {
     actualizarNotificaciones();
     setInterval(actualizarNotificaciones, 30000);
 
+    // Buscador móvil: toggle al pulsar el botón de lupa
+    const mobileSearchToggle = document.getElementById('mobileSearchToggle');
+    const mobileSearch       = document.getElementById('mobileSearch');
+
+    if (mobileSearchToggle && mobileSearch) {
+        mobileSearchToggle.addEventListener('click', () => {
+            const isOpen = mobileSearch.classList.toggle('show');
+            mobileSearchToggle.setAttribute('aria-expanded', isOpen);
+            if (isOpen) {
+                const input = mobileSearch.querySelector('input[type="search"]');
+                if (input) input.focus();
+            }
+        });
+
+        // Cerrar al hacer submit (navega a /home?q=...)
+        mobileSearch.querySelector('form')?.addEventListener('submit', () => {
+            mobileSearch.classList.remove('show');
+            mobileSearchToggle.setAttribute('aria-expanded', 'false');
+        });
+    }
+
 });

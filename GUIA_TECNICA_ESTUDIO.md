@@ -9,7 +9,7 @@
 
 1. [¿Qué es MercApp y cómo está organizado?](#1-qué-es-mercapp-y-cómo-está-organizado)
 2. [El servidor — cómo funciona XAMPP y Apache](#2-el-servidor--cómo-funciona-xampp-y-apache)
-3. [La arquitectura MVC — cómo está dividido el código](#3-la-arquitectura-mvc--cómo-está-dividido-el-código)
+3. [La arquitectura Front Controller + MVC — cómo está dividido el código](#3-la-arquitectura-mvc--cómo-está-dividido-el-código)
 4. [La base de datos — MySQL y PDO](#4-la-base-de-datos--mysql-y-pdo)
 5. [Las tablas de la base de datos — explicadas una a una](#5-las-tablas-de-la-base-de-datos--explicadas-una-a-una)
 6. [El motor de plantillas Twig — cómo se generan las páginas](#6-el-motor-de-plantillas-twig--cómo-se-generan-las-páginas)
@@ -57,17 +57,26 @@ Piensa en el proyecto como si fuera una empresa con departamentos:
 ```
 MercApp/
 │
-├── api/                  → El departamento de información
-│                           Contesta preguntas rápidas en formato JSON
+├── index.php             → La recepción de la empresa
+│                           Toda visita pasa por aquí primero.
+│                           Decide quién atiende cada petición.
+│
+├── core/                 → La infraestructura central
+│   ├── Router.php        → El directorio telefónico: "esta URL la atiende este controlador"
+│   └── Controller.php    → El manual del empleado: reglas comunes para todos los controladores
+│
+├── controllers/          → Los departamentos especializados
+│                           Cada clase PHP atiende un área concreta:
+│                           AuthController (login/registro), ProductController
+│                           (productos), ChatController (mensajes), etc.
+│
+├── api/                  → El departamento de información rápida
+│                           Contesta preguntas en formato JSON
 │                           (¿hay mensajes nuevos?, ¿qué productos hay?)
 │
 ├── config/               → La sala de control
 │                           Aquí está la configuración de todo:
 │                           conexión a BD, configuración de email, etc.
-│
-├── controllers/          → El departamento de operaciones
-│                           Procesa los formularios (registro, login,
-│                           publicar producto, enviar mensaje...)
 │
 ├── models/               → El departamento de datos
 │                           Clases PHP que saben cómo leer y escribir
@@ -86,6 +95,7 @@ MercApp/
 ├── tests/                → Control de calidad
 │
 ├── bd.sql                → El plano completo de la base de datos
+├── .htaccess             → Le dice a Apache: "todo pasa por index.php"
 └── .env                  → Contraseñas y configuración secreta
 ```
 
@@ -106,19 +116,23 @@ Vamos a seguir el recorrido de una petición paso a paso:
 
 ```
 1. El usuario escribe en el navegador:
-   http://localhost/MercApp/
+   http://localhost/MercApp/product/5
 
 2. El navegador envía una petición a Apache
-   (como enviar un pedido en un restaurante)
 
-3. Apache recibe la petición y busca qué archivo PHP ejecutar
+3. Apache lee el archivo .htaccess y redirige la petición a index.php
+   (esto se llama "Front Controller" — un único punto de entrada)
 
-4. PHP ejecuta el archivo, que puede:
-   - Leer datos de MySQL (consultar la carta del restaurante)
-   - Procesar información
-   - Generar HTML para devolver al navegador
+4. index.php carga el entorno (Twig, base de datos, rutas) y llama al Router
 
-5. El navegador recibe el HTML y lo muestra al usuario
+5. El Router analiza la URL "/product/5" y encuentra que coincide con la
+   ruta "/product/{id}" → llama a ProductController::detail() con id=5
+
+6. El controlador lee de MySQL los datos del producto y llama a Twig
+
+7. Twig genera el HTML y se lo devuelve al navegador
+
+8. El navegador lo muestra al usuario
 ```
 
 ## ¿Por qué se llama "local"?
@@ -127,7 +141,7 @@ Porque el servidor está en nuestro propio ordenador. La dirección `localhost` 
 
 ---
 
-# 3. LA ARQUITECTURA MVC — CÓMO ESTÁ DIVIDIDO EL CÓDIGO
+# 3. LA ARQUITECTURA FRONT CONTROLLER + MVC — CÓMO ESTÁ DIVIDIDO EL CÓDIGO
 
 ## ¿Qué significa MVC?
 
@@ -202,54 +216,79 @@ Ejemplo simplificado de `home.html.twig`:
 
 **Lo importante:** La vista NO accede a la base de datos. Solo muestra lo que le dan.
 
+## El Front Controller y el Router — `index.php` + `core/`
+
+MercApp usa el patrón **Front Controller**: hay un único archivo de entrada (`index.php`) que recibe todas las peticiones. El archivo `.htaccess` le dice a Apache que redirija cualquier URL que no sea un archivo estático hacia `index.php`.
+
+Dentro de `index.php` hay un **Router** (`core/Router.php`) que:
+1. Lee la URL de la petición (por ejemplo `/product/5`)
+2. La compara con la lista de rutas definidas
+3. Extrae los parámetros de la URL (en este caso `id = 5`)
+4. Crea el controlador correspondiente y llama al método adecuado
+
 ## El Controlador — `controllers/`
 
-Los controladores son scripts PHP que:
-1. Reciben los datos del formulario o la URL
-2. Validan esos datos
-3. Llaman al modelo correspondiente
-4. Redirigen o muestran la vista con los resultados
+Los controladores son **clases PHP** que heredan de `Controller` (en `core/Controller.php`). Cada clase agrupa las acciones de un área:
 
-Ejemplo simplificado de cómo funciona la página de inicio:
+- `AuthController` → login, registro, logout, verificación de email, recuperación de contraseña
+- `ProductController` → ver producto, publicar, editar, eliminar, reportar
+- `ChatController` → lista de chats, chat individual, iniciar transacción, actualizar estado
+- `ProfileController` → ver perfil, seguir/dejar de seguir usuarios
+- `AccountController` → ajustes de cuenta y foto de perfil
+- `AdminController` → panel de administración
+- `PageController` → favoritos, transacciones, lista de deseos, siguiendo, ayuda, docs
+
+Ejemplo simplificado de un controlador:
 
 ```php
-// index.php (simplificado)
-require_once 'config/bootstrap.php';
-$conn = Database::getConnection();
+class HomeController extends Controller {
+    public function index(): void {
+        $this->requireAuth();  // redirige a /login si no hay sesión
 
-$productModel = new Product($conn);
-$productos = $productModel->getActiveProducts(12, 0);
+        $productModel = new Product($this->conn);
+        $productos = $productModel->getActiveProducts(12, 0);
 
-// Renderiza la vista pasándole los productos
-echo $twig->render('home.html.twig', [
-    'productos' => $productos,
-    'usuario'   => $_SESSION ?? null
-]);
+        $this->render('home.html.twig', [
+            'productos' => $productos,
+        ]);
+    }
+}
 ```
+
+La clase base `Controller` proporciona tres helpers fundamentales:
+- `render($template, $datos)` → renderiza una plantilla Twig
+- `redirect($url)` → redirige y termina la ejecución
+- `requireAuth()` → comprueba que hay sesión activa; si no, redirige a login
 
 ## El flujo completo con un ejemplo real
 
 Cuando un usuario publica un producto:
 
 ```
-1. Usuario rellena el formulario en templates/upload_product.html.twig
+1. Usuario visita /product/upload
+   → Apache → .htaccess → index.php → Router → ProductController::upload()
+
+2. El controlador (GET):
+   - Comprueba que el usuario está logueado (requireAuth)
+   - Carga las categorías desde el modelo
+   - Renderiza templates/upload_product.html.twig
    (Vista)
 
-2. Hace clic en "Publicar" → el navegador envía los datos a:
-   controllers/handlers/upload_product_handler.php
-   (Controlador)
+3. Usuario rellena el formulario y hace clic en "Publicar"
+   → navegador envía POST a /product/upload
+   → Router → ProductController::upload() de nuevo
 
-3. El controlador:
-   - Comprueba que el usuario está logueado
+4. El controlador (POST):
    - Valida que los campos no estén vacíos
    - Procesa las imágenes (las convierte a WebP)
    - Llama al modelo: $product->create($datos)
    (Controlador llama al Modelo)
 
-4. El modelo inserta el producto en MySQL
+5. El modelo inserta el producto en MySQL
    (Modelo accede a la BD)
 
-5. El controlador redirige a la página del producto recién creado
+6. El controlador redirige a /product/5
+   (URL limpia, sin extensión .php)
 ```
 
 ---
@@ -680,7 +719,7 @@ if (!isset($_SESSION['user_id'])) {
 **Paso 1:** El usuario rellena el formulario en `templates/register.html.twig`
 - Nombre, email, contraseña, confirmar contraseña
 
-**Paso 2:** El formulario envía los datos a `controllers/handlers/register_handler.php`
+**Paso 2:** El formulario envía los datos vía POST a la ruta `/register` → `AuthController::register()`
 
 **Paso 3:** El controlador valida:
 - ¿El email ya existe en la BD? → Error
@@ -717,7 +756,7 @@ $mail->send();
 ## La verificación del email
 
 Cuando el usuario hace clic en el enlace del email:
-1. El enlace lleva a `controllers/handlers/verify_handler.php?token=XXXXXXXX`
+1. El enlace lleva a `/verify-email?token=XXXXXXXX` → `AuthController::verifyEmail()`
 2. El controlador busca el token en la BD
 3. Si existe y no ha expirado → actualiza `email_verificado = 1`
 4. Si no existe o expiró → muestra error
@@ -728,7 +767,7 @@ Hasta verificar, si el usuario intenta acceder a páginas protegidas, es redirig
 
 **Paso 1:** Usuario introduce email y contraseña en `templates/login.html.twig`
 
-**Paso 2:** El controlador `controllers/handlers/login_handler.php`:
+**Paso 2:** El formulario envía POST a `/login` → `AuthController::login()`:
 
 **Paso 2a — Rate limiting:** Comprueba cuántos intentos fallidos ha habido:
 ```php

@@ -1,0 +1,12 @@
+RewriteEngine On
+RewriteBase /~d24justo/MercApp/
+
+# Bloquear acceso directo a controllers/ (seguridad)
+RewriteRule ^controllers/ - [F,L]
+
+# Servir ficheros y directorios estáticos directamente (css, js, img, uploads...)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Todo lo demás va al front controller
+RewriteRule ^(.*)$ index.php [QSA,L]

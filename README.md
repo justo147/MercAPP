@@ -25,7 +25,7 @@
 9. [Pago con tarjeta — Stripe](#pago-con-tarjeta--stripe)
 10. [Chat y panel de transacción](#chat-y-panel-de-transacción)
 11. [API REST](#api-rest)
-12. [Vistas](#vistas)
+12. [Rutas](#rutas)
 13. [Diseño y UX](#diseño-y-ux)
 14. [Emails transaccionales](#emails-transaccionales)
 15. [Instalación local (XAMPP)](#instalación-local-xampp)
@@ -102,18 +102,27 @@ El frontend ha sido rediseñado completamente usando **Twig 3** como motor de pl
 
 ## Arquitectura
 
-El proyecto sigue una **arquitectura MVC ligera** sin framework, ejecutada sobre XAMPP. Las vistas PHP delegan todo el HTML a **Twig**, actuando únicamente como controladores finos.
+El proyecto implementa el patrón **Front Controller + MVC** sin framework, ejecutado sobre XAMPP. Todas las peticiones pasan por un único punto de entrada (`index.php`) con un router propio que las despacha a controladores de clase.
 
 ```
 Petición HTTP
      │
      ▼
-public/views/*.php          ← Controladores finos: lógica + $twig->render()
+.htaccess                   ← mod_rewrite envía todo a index.php
      │
-     ├─► controllers/        ← Handlers de formularios y lógica de negocio
-     │         │
-     │         ▼
-     │       models/         ← Clases de acceso a datos (PDO)
+     ▼
+index.php                   ← Front Controller: carga Twig, DB, define rutas
+     │
+     ▼
+core/Router.php             ← Extrae parámetros de la URL y despacha
+     │
+     ▼
+controllers/*.php           ← Controladores de clase (uno por dominio)
+     │                         AuthController, HomeController, ProductController,
+     │                         ChatController, ProfileController, AccountController,
+     │                         AdminController, PageController
+     │
+     ├─► models/             ← Clases de acceso a datos (PDO)
      │         │
      │         ▼
      │       config/db.php   ← Conexión PDO (Database)
@@ -133,7 +142,8 @@ public/views/*.php          ← Controladores finos: lógica + $twig->render()
 - Twig escapa automáticamente el output HTML (`|e`). Nunca usar `|raw` con datos de usuario.
 - `intval()` / `trim()` al recibir cualquier input en PHP.
 - Los modelos reciben `PDO $conn` por constructor (inyección de dependencias manual).
-- `$BASE` (ruta base `/MercApp`) disponible en cualquier archivo tras `require_once config/bootstrap.php`. También expuesto como global Twig y como `const BASE` en JS desde `base.html.twig`.
+- `$BASE` (ruta base p. ej. `/~usuario/MercApp`) disponible como global Twig y como `const BASE` en JS desde `base.html.twig`.
+- Las rutas con parámetros dinámicos (`/product/{id}`) se definen **después** de las rutas literales (`/product/upload`) para evitar colisiones.
 
 ---
 
@@ -151,12 +161,19 @@ MercApp/
 │   ├── mail_config.php         # PHPMailer SMTP
 │   └── mail_templates.php      # ⭐ Plantillas HTML profesionales para emails
 │
+├── core/
+│   ├── Router.php              # Router: GET/POST, rutas con {parámetros}
+│   └── Controller.php          # Clase base abstracta (render, redirect, requireAuth)
+│
 ├── controllers/
-│   ├── handlers/               # 14 procesadores de formularios (POST)
-│   ├── chat_start_transaction.php
-│   ├── chat_update_transaction.php
-│   ├── follow.php / unfollow.php
-│   └── logout.php
+│   ├── AuthController.php      # login, register, logout, verify-email, forgot/reset password
+│   ├── HomeController.php      # landing, home (feed)
+│   ├── ProductController.php   # detail, upload, edit, delete, report
+│   ├── ChatController.php      # list, detail, start, startTransaction, updateTransaction
+│   ├── ProfileController.php   # show, follow, unfollow
+│   ├── AccountController.php   # detail (ajustes de cuenta)
+│   ├── AdminController.php     # index (panel admin)
+│   └── PageController.php      # favorites, transactions, wishlist, following, help, docs
 │
 ├── models/
 │   ├── User.php
@@ -199,7 +216,6 @@ MercApp/
 │   └── verify_email.html.twig
 │
 ├── public/
-│   ├── views/                  # Controladores finos PHP (delegan HTML a Twig)
 │   ├── js/                     # Scripts JavaScript
 │   │   ├── theme.js            # Toggle data-theme en <html>, sin parpadeo
 │   │   ├── ux.js               # Toasts, spinners, offline banner…
@@ -224,7 +240,8 @@ MercApp/
 ├── bd.sql                      # Schema completo ← fuente de verdad
 ├── ejemplo-pruebas.sql         # Datos de prueba
 ├── composer.json
-├── index.php                   # Entry point → redirecciona a login
+├── .htaccess                   # mod_rewrite: todo a index.php; bloquea /controllers/
+├── index.php                   # Front Controller: Twig, DB, router, todas las rutas
 └── .env                        # Variables de entorno (no committear)
 ```
 
@@ -468,33 +485,43 @@ Todos los endpoints devuelven `Content-Type: application/json` y requieren sesi�
 
 ---
 
-## Vistas
+## Rutas
 
-Todas las vistas PHP actúan como controladores finos: ejecutan la lógica, consultan los modelos y llaman a `$twig->render('template.html.twig', $datos)`. El HTML reside íntegramente en `templates/`.
+El router en `index.php` mapea URLs limpias a métodos de controlador. El HTML de cada página reside en `templates/`.
 
-| Vista (PHP) | Template Twig | Descripción |
-|-------------|---------------|-------------|
-| `landing_page.php` | — | Página de inicio pública |
-| `auth/login.php` | `auth/login.html.twig` | Inicio de sesión |
-| `auth/register.php` | `auth/register.html.twig` | Registro con hCaptcha |
-| `verify_email.php` | `verify_email.html.twig` | Verificación de email por token |
-| `forgot_pass.php` | `forgot_pass.html.twig` | Solicitar recuperación de contraseña |
-| `reset_password.php` | `reset_password.html.twig` | Restablecer contraseña con token |
-| `home.php` | `home.html.twig` | Feed principal con búsqueda, filtros y scroll infinito |
-| `detail_product.php` | `detail_product.html.twig` | Detalle de producto con galería, sugeridos y valoraciones |
-| `upload_product.php` | `upload_product.html.twig` | Publicar nuevo producto con autocomplete de ubicación |
-| `mod_product.php` | `mod_product.html.twig` | Editar producto propio |
-| `profile.php` | `profile.html.twig` | Perfil público con reputación, seguidores y productos |
-| `detail_account.php` | `detail_account.html.twig` | Ajustes de cuenta (datos personales y foto) |
-| `my_transactions.php` | `my_transactions.html.twig` | Historial de transacciones (compras y ventas) |
-| `my_favorites.php` | `my_favorites.html.twig` | Productos guardados como favoritos |
-| `my_wishlist.php` | `my_wishlist.html.twig` | Lista de deseos con matching en catálogo |
-| `chat_list.php` | `chat_list.html.twig` | Lista de chats con filtros |
-| `chat.php` | `chat.html.twig` | Chat individual — layout dos columnas: mensajes izquierda, panel de transacción con timeline derecha |
-| `followers_products.php` | `followers_products.html.twig` | Feed de seguidos + sugerencias |
-| `admin_dashboard.php` | `admin_dashboard.html.twig` | Panel de administración completo |
-| `docs.php` | `docs.html.twig` | Documentación técnica (PHPDoc, JSDoc, Tests, API) |
-| `help.php` | `help.html.twig` | Preguntas frecuentes y ayuda |
+| Método | URL | Controlador | Template Twig |
+|--------|-----|-------------|---------------|
+| GET | `/` | `HomeController::landing` | — (redirige a `/login`) |
+| GET | `/home` | `HomeController::index` | `home.html.twig` |
+| GET/POST | `/login` | `AuthController::login` | `auth/login.html.twig` |
+| GET/POST | `/register` | `AuthController::register` | `auth/register.html.twig` |
+| GET | `/logout` | `AuthController::logout` | — (redirige) |
+| GET | `/pending-verification` | `AuthController::pendingVerification` | `auth/pending_verification.html.twig` |
+| GET | `/verify-email` | `AuthController::verifyEmail` | `verify_email.html.twig` |
+| GET/POST | `/forgot-password` | `AuthController::forgotPassword` | `forgot_pass.html.twig` |
+| GET/POST | `/reset-password` | `AuthController::resetPassword` | `reset_password.html.twig` |
+| GET | `/product/upload` | `ProductController::upload` | `upload_product.html.twig` |
+| POST | `/product/upload` | `ProductController::upload` | — (procesa y redirige) |
+| GET | `/product/{id}` | `ProductController::detail` | `detail_product.html.twig` |
+| GET/POST | `/product/{id}/edit` | `ProductController::edit` | `mod_product.html.twig` |
+| GET | `/product/delete` | `ProductController::delete` | — (redirige) |
+| POST | `/report` | `ProductController::report` | — (JSON/redirige) |
+| GET | `/chat` | `ChatController::list` | `chat_list.html.twig` |
+| GET/POST | `/chat/{id}` | `ChatController::detail` | `chat.html.twig` |
+| GET | `/chat/start` | `ChatController::start` | — (redirige a `/chat/{id}`) |
+| POST | `/chat/start-transaction` | `ChatController::startTransaction` | — (JSON) |
+| POST | `/chat/update-transaction` | `ChatController::updateTransaction` | — (JSON/HTML parcial) |
+| GET | `/profile/{id}` | `ProfileController::show` | `profile.html.twig` |
+| POST | `/follow` | `ProfileController::follow` | — (JSON) |
+| POST | `/unfollow` | `ProfileController::unfollow` | — (JSON) |
+| GET/POST | `/account` | `AccountController::detail` | `detail_account.html.twig` |
+| GET | `/favorites` | `PageController::favorites` | `my_favorites.html.twig` |
+| GET | `/transactions` | `PageController::transactions` | `my_transactions.html.twig` |
+| GET | `/wishlist` | `PageController::wishlist` | `my_wishlist.html.twig` |
+| GET | `/following` | `PageController::following` | `followers_products.html.twig` |
+| GET | `/admin` | `AdminController::index` | `admin_dashboard.html.twig` |
+| GET | `/help` | `PageController::help` | `help.html.twig` |
+| GET | `/docs` | `PageController::docs` | `docs.html.twig` |
 
 ---
 

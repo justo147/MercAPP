@@ -235,8 +235,8 @@ class Transaction
                 FROM Transacciones t
                 JOIN Productos p            ON p.id = t.producto_id
                 LEFT JOIN Imagenes_prod img ON img.id_producto = p.id AND img.orden = 1
-                JOIN Usuario uc             ON uc.id = t.comprador_id
-                JOIN Usuario uv             ON uv.id = t.vendedor_id
+                JOIN usuario uc             ON uc.id = t.comprador_id
+                JOIN usuario uv             ON uv.id = t.vendedor_id
                 LEFT JOIN Chat c            ON c.transaccion_id = t.id
                 WHERE {$where}
                 ORDER BY t.fecha_transaccion DESC

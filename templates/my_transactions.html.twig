@@ -86,7 +86,7 @@ function renderTarjeta(tx) {
     ? `<span class="badge text-bg-secondary" style="font-size:.7rem;"><i class="bi bi-bag me-1"></i>Compra</span>`
     : `<span class="badge text-bg-dark"      style="font-size:.7rem;"><i class="bi bi-tag me-1"></i>Venta</span>`;
   const precio = tx.precio_final > 0 ? `<span class="fw-semibold">${parseFloat(tx.precio_final).toFixed(2)} €</span>` : '';
-  const chatLink = tx.chat_id ? `<a href="${BASE}/public/views/chat.php?id=${tx.chat_id}" class="btn btn-sm btn-outline-primary"><i class="bi bi-chat-dots me-1"></i>Ver chat</a>` : '';
+  const chatLink = tx.chat_id ? `<a href="${BASE}/chat/${tx.chat_id}" class="btn btn-sm btn-outline-primary"><i class="bi bi-chat-dots me-1"></i>Ver chat</a>` : '';
   return `
   <div class="card mb-3">
     <div class="card-body d-flex gap-3 align-items-start">
@@ -130,7 +130,7 @@ function cargarTx() {
       const hayFiltros = txState.rol || txState.estadoFiltro;
       lista.innerHTML = hayFiltros
         ? `<div class="empty-state"><i class="bi bi-funnel"></i><h3>Sin resultados</h3><p>Ninguna transacción coincide con estos filtros.</p><button class="btn btn-outline-secondary btn-sm" onclick="document.querySelector('[data-val=\\'\\']').click();document.getElementById('filtro-estado').value='';cargarTx()"><i class="bi bi-x-circle me-1"></i>Quitar filtros</button></div>`
-        : `<div class="empty-state"><i class="bi bi-bag"></i><h3>Sin transacciones</h3><p>Aquí verás el historial de tus compras y ventas.</p><a href="${BASE}/public/views/home.php" class="btn btn-primary btn-sm"><i class="bi bi-search me-1"></i>Explorar productos</a></div>`;
+        : `<div class="empty-state"><i class="bi bi-bag"></i><h3>Sin transacciones</h3><p>Aquí verás el historial de tus compras y ventas.</p><a href="${BASE}/home" class="btn btn-primary btn-sm"><i class="bi bi-search me-1"></i>Explorar productos</a></div>`;
       document.getElementById('tx-paginacion').innerHTML = '';
       return;
     }

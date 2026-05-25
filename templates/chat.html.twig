@@ -59,7 +59,7 @@
 {% endblock %}
 
 {% block content %}
-{% set txAction = BASE ~ '/controllers/chat_update_transaction.php' %}
+{% set txAction = BASE ~ '/chat/update-transaction' %}
 {% if transaccion %}{% set estado = transaccion.estado %}{% else %}{% set estado = '' %}{% endif %}
 {% set esFinalizado    = estado in ['cancelada', 'entregado'] %}
 {% set esChatBloqueado = estado == 'entregado' %}
@@ -78,7 +78,7 @@
       <div class="min-w-0">
         <h5 class="mb-0 fw-bold text-truncate" style="color:var(--c-text);">{{ chat.producto_titulo|default('Producto')|e }}</h5>
         <div class="d-flex align-items-center flex-wrap gap-2 mt-1">
-          <a href="{{ BASE }}/public/views/detail_product.php?id={{ chat.producto_id }}" class="small">
+          <a href="{{ BASE }}/product/{{ chat.producto_id }}" class="small">
             <i class="bi bi-box-arrow-up-right me-1"></i>Ver producto
           </a>
           {% if transaccion %}
@@ -91,7 +91,7 @@
       </div>
     </div>
     <div class="d-flex gap-2 flex-shrink-0">
-      <a href="{{ BASE }}/public/views/chat_list.php" class="btn btn-sm btn-outline-secondary">
+      <a href="{{ BASE }}/chat" class="btn btn-sm btn-outline-secondary">
         <i class="bi bi-arrow-left me-1"></i><span class="d-none d-sm-inline">Mis chats</span>
       </a>
       {% if chat.producto_id %}
@@ -746,7 +746,7 @@
                 <i class="bi bi-bag-check me-1"></i>Iniciar transacción
               </button>
               {% else %}
-              <form action="{{ BASE }}/controllers/chat_start_transaction.php" method="POST">
+              <form action="{{ BASE }}/chat/start-transaction" method="POST">
                 <input type="hidden" name="chat_id" value="{{ chatId }}">
                 <button class="btn btn-success btn-sm w-100">
                   <i class="bi bi-bag-check me-1"></i>Iniciar transacción
@@ -777,7 +777,7 @@
 <div class="modal fade" id="modalReporte" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <form method="POST" action="{{ BASE }}/public/views/chat.php?id={{ chatId }}">
+      <form method="POST" action="{{ BASE }}/chat/{{ chatId }}">
         <div class="modal-header border-0 pb-0">
           <h5 class="modal-title text-danger"><i class="bi bi-flag-fill me-2"></i>Reportar producto</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -869,14 +869,14 @@
       <div class="modal-body">
         <p class="small mb-4" style="color:var(--c-muted);">Este producto acepta venta e intercambio. ¿Cómo quieres realizar la transacción?</p>
         <div class="d-grid gap-2">
-          <form action="{{ BASE }}/controllers/chat_start_transaction.php" method="POST">
+          <form action="{{ BASE }}/chat/start-transaction" method="POST">
             <input type="hidden" name="chat_id"      value="{{ chatId }}">
             <input type="hidden" name="tipo_elegido" value="venta">
             <button type="submit" class="btn btn-success w-100">
               <i class="bi bi-tag me-2"></i>Vender — cobrar el precio del producto
             </button>
           </form>
-          <form action="{{ BASE }}/controllers/chat_start_transaction.php" method="POST">
+          <form action="{{ BASE }}/chat/start-transaction" method="POST">
             <input type="hidden" name="chat_id"      value="{{ chatId }}">
             <input type="hidden" name="tipo_elegido" value="intercambio">
             <button type="submit" class="btn btn-outline-primary w-100">
@@ -1221,7 +1221,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!text) return;
       textarea.value = '';
       textarea.disabled = true;
-      fetch(`${BASE}/public/views/chat.php?id=${CHAT_ID}`, {
+      fetch(`${BASE}/chat/${CHAT_ID}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `mensaje=${encodeURIComponent(text)}`

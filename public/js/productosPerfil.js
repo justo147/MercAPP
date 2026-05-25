@@ -216,7 +216,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </button>
                   </div>
                 ` : `
-                  <a href="../../controllers/chat_start.php?producto_id=${prod.id}" class="btn btn-sm btn-primary w-100">Contactar</a>
+                  <a href="${BASE}/chat/start?producto_id=${prod.id}" class="btn btn-sm btn-primary w-100">Contactar</a>
                 `}
               </div>
 

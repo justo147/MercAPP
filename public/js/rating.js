@@ -169,7 +169,7 @@
                 comentario
             });
 
-            fetch(`${BASE}/public/views/chat.php?id=${CHAT_ID}`, {
+            fetch(`${BASE}/chat/${CHAT_ID}`, {
                 method:  'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body:    body.toString()

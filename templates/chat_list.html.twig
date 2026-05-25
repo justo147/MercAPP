@@ -43,7 +43,7 @@
     {% else %}
     <h3>Todavía sin chats</h3>
     <p>Cuando contactes con un vendedor aparecerá aquí.</p>
-    <a href="{{ BASE }}/public/views/home.php" class="btn btn-primary">
+    <a href="{{ BASE }}/home" class="btn btn-primary">
       <i class="bi bi-search me-1"></i> Explorar productos
     </a>
     {% endif %}
@@ -66,7 +66,7 @@
     } %}
     {% set badge = estado ? badgeMap[estado] ?? ['',''] : ['',''] %}
 
-    <a href="{{ BASE }}/public/views/chat.php?id={{ chat.chat_id }}"
+    <a href="{{ BASE }}/chat/{{ chat.chat_id }}"
        class="chat-list-item {{ noLeidos > 0 ? 'unread' : '' }}"
        style="border-bottom:1px solid var(--c-border);{{ noLeidos > 0 ? 'border-left:3px solid var(--c-primary);' : '' }}">
 
