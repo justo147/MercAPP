@@ -90,7 +90,11 @@
         </a>
         {% endif %}
 
-        {% if not usuarioLogueado %}
+        {% if producto.estado_publicacion == 'vendido' %}
+        <button class="btn btn-secondary flex-grow-1" disabled>
+          <i class="bi bi-check-circle me-1"></i>Producto vendido
+        </button>
+        {% elseif not usuarioLogueado %}
         <a href="{{ BASE }}/login"
            class="btn btn-primary flex-grow-1 d-flex align-items-center justify-content-center gap-2">
           <i class="bi bi-box-arrow-in-right"></i> Inicia sesión para contactar

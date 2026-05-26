@@ -190,7 +190,7 @@ function buscarCoincidencias(PDO $conn, array $deseo, int $usuarioId): array
         JOIN Categorias c         ON c.id  = p.categoria_id
         JOIN EstadoProducto ep    ON ep.id = p.estado_producto_id
         JOIN EstadoPublicacion epu ON epu.id = p.estado_publicacion_id
-        JOIN Usuario u            ON u.id  = p.usuario_id
+        JOIN usuario u            ON u.id  = p.usuario_id
         LEFT JOIN Imagenes_prod img ON img.id_producto = p.id AND img.orden = 1
         WHERE epu.nombre = 'activo'
           AND p.usuario_id != :uid

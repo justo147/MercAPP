@@ -47,6 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
    * @type {string}
    */
   let searchQueryPerfil = "";
+  let filtroEstado      = "todos";
 
 
   /* ============================================================
@@ -88,6 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
     url.searchParams.set("id", userId);
     url.searchParams.set("page", page);
     url.searchParams.set("limit", limit);
+    url.searchParams.set("estado", filtroEstado);
 
     if (searchQueryPerfil) {
       url.searchParams.set("q", searchQueryPerfil);
@@ -152,8 +154,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
           const idCarrusel = "carousel_" + prod.id;
 
+          const vendido = prod.estado_publicacion === 'vendido';
+
           col.innerHTML = `
-            <div class="card h-100 border rounded-3 shadow-sm">
+            <div class="card h-100 border rounded-3 shadow-sm position-relative${vendido ? ' opacity-75' : ''}">
+
+              ${vendido ? `
+                <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+                     style="z-index:2;pointer-events:none;">
+                  <span class="badge fs-6 px-3 py-2"
+                        style="background:rgba(0,0,0,.55);color:#fff;border-radius:8px;transform:rotate(-15deg);">
+                    <i class="bi bi-check-circle me-1"></i>Vendido
+                  </span>
+                </div>` : ''}
 
               <a href="${BASE}/product/${prod.id}" id="${idCarrusel}" class="carousel carousel-dark slide" data-bs-ride="carousel">
                 <div class="carousel-inner">
@@ -161,7 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <div class="carousel-item ${i === 0 ? "active" : ""}">
                       <img src="${BASE}/${img.url}" class="d-block w-100"
                         alt="Imagen ${i + 1} de ${prod.titulo}"
-                        style="height: 200px; object-fit: cover; border-bottom: 1px solid #ddd;"
+                        style="height: 200px; object-fit: cover; border-bottom: 1px solid #ddd;${vendido ? 'filter:grayscale(.5);' : ''}"
                         onerror="this.onerror=null;this.src='${DEFAULT_IMG}'">
                     </div>
                   `).join("")}
@@ -184,9 +197,9 @@ document.addEventListener("DOMContentLoaded", () => {
                   ${prod.tipo_transaccion === 'intercambio' ? '<span class="badge bg-info text-dark me-2"><i class="bi bi-arrow-left-right me-1"></i>Intercambio</span>' : prod.precio ? `<span class="badge bg-success me-2">€${parseFloat(prod.precio).toFixed(2)}</span>` : ''}
                   <span class="badge bg-primary me-2">${prod.estado_producto}</span>
                   <span class="badge ${
-                    prod.estado_publicacion === 'activo' ? 'bg-success' :
+                    prod.estado_publicacion === 'activo'  ? 'bg-success' :
                     prod.estado_publicacion === 'pausado' ? 'bg-warning text-dark' :
-                    'bg-secondary'
+                    'bg-dark'
                   }">${prod.estado_publicacion}</span>
                 </div>
 
@@ -206,14 +219,24 @@ document.addEventListener("DOMContentLoaded", () => {
               <div class="card-footer border-0">
                 ${ES_PROPIETARIO ? `
                   <div class="d-flex justify-content-between">
-                    <a href="${BASE}/product/${prod.id}/edit" class="btn btn-sm btn-warning">Editar</a>
-                    <button 
-                          class="btn btn-sm btn-outline-danger"
-                          data-bs-toggle="modal"
-                          data-bs-target="#modalEliminarProducto"
-                          data-product-id="${prod.id}">
-                          Eliminar
-                    </button>
+                    ${vendido
+                      ? `<span class="text-muted small"><i class="bi bi-check-circle me-1"></i>Vendido</span>
+                         <button
+                           class="btn btn-sm btn-outline-danger"
+                           data-bs-toggle="modal"
+                           data-bs-target="#modalEliminarProducto"
+                           data-product-id="${prod.id}">
+                           Eliminar
+                         </button>`
+                      : `<a href="${BASE}/product/${prod.id}/edit" class="btn btn-sm btn-warning">Editar</a>
+                         <button
+                           class="btn btn-sm btn-outline-danger"
+                           data-bs-toggle="modal"
+                           data-bs-target="#modalEliminarProducto"
+                           data-product-id="${prod.id}">
+                           Eliminar
+                         </button>`
+                    }
                   </div>
                 ` : `
                   <a href="${BASE}/chat/start?producto_id=${prod.id}" class="btn btn-sm btn-primary w-100">Contactar</a>
@@ -295,6 +318,14 @@ document.addEventListener("DOMContentLoaded", () => {
     searchQueryPerfil = e.target.value.trim();
     page = 1;
     cargarProductos();
+  });
+
+  document.querySelectorAll('input[name="filtro-estado"]').forEach(radio => {
+    radio.addEventListener("change", e => {
+      filtroEstado = e.target.value;
+      page = 1;
+      cargarProductos();
+    });
   });
 
 

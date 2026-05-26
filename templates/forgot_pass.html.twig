@@ -12,10 +12,7 @@
   </div>
 
   {% if mensaje %}
-  <div class="alert alert-info d-flex align-items-center gap-2 mb-3 py-2" role="alert">
-    <i class="bi bi-info-circle-fill flex-shrink-0"></i>
-    <span style="font-size:.88rem;">{{ mensaje }}</span>
-  </div>
+    {{ mensaje|raw }}
   {% endif %}
 
   <form method="post">

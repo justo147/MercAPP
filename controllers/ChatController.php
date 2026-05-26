@@ -557,6 +557,21 @@ class ChatController extends Controller
             case 'entregado':
                 $transactionModel->marcarEntregado($transaccionId);
                 $productModel->cambiarEstadoPublicacion($productoId, 'vendido');
+
+                // Si es intercambio, marcar también el producto ofrecido por el comprador
+                if (in_array($transaccion['tipo'] ?? '', ['intercambio', 'mixto'])) {
+                    $stmtOfrecido = $this->conn->prepare(
+                        "SELECT producto_id FROM Intercambio_Detalle
+                         WHERE transaccion_id = :tid AND tipo_item = 'producto'
+                         LIMIT 1"
+                    );
+                    $stmtOfrecido->execute([':tid' => $transaccionId]);
+                    $productoOfrecidoId = $stmtOfrecido->fetchColumn();
+                    if ($productoOfrecidoId) {
+                        $productModel->cambiarEstadoPublicacion((int)$productoOfrecidoId, 'vendido');
+                    }
+                }
+
                 $messageModel->enviarMensajeSistema($chatId, "¡El comprador ha confirmado la entrega! Transacción completada con éxito.");
 
                 $stmtUsers = $this->conn->prepare("SELECT u.email, u.nombre, u.id FROM usuario u WHERE u.id IN (:cid, :vid)");
@@ -567,13 +582,43 @@ class ChatController extends Controller
                 $stmtProd->execute([':pid' => $productoId]);
                 $prodRow        = $stmtProd->fetch(PDO::FETCH_ASSOC);
                 $productoTitulo = $prodRow['titulo'] ?? 'producto';
-                $precioProd     = $prodRow['precio'] ? number_format((float) $prodRow['precio'], 2, ',', '.') . ' €' : 'Trueque';
                 $fechaTrans     = date('d/m/Y');
+                $tipoTrans      = $transaccion['tipo'] ?? 'venta';
+
+                // Para intercambios: obtener el producto ofrecido y el dinero extra
+                $productoOfrecido = null;
+                $dineroExtra      = null;
+                if (in_array($tipoTrans, ['intercambio', 'mixto'])) {
+                    $stmtDet = $this->conn->prepare(
+                        "SELECT p.titulo, id.cantidad_dinero
+                         FROM Intercambio_Detalle id
+                         LEFT JOIN Productos p ON p.id = id.producto_id
+                         WHERE id.transaccion_id = :tid AND id.tipo_item = 'producto'
+                         LIMIT 1"
+                    );
+                    $stmtDet->execute([':tid' => $transaccionId]);
+                    $detalle = $stmtDet->fetch(PDO::FETCH_ASSOC);
+                    $productoOfrecido = $detalle['titulo'] ?? null;
+
+                    $extra = (float) ($transaccion['dinero_extra'] ?? 0);
+                    if ($extra > 0) {
+                        $dineroExtra = number_format($extra, 2, ',', '.') . ' €';
+                    }
+
+                    $precioProd = null; // en intercambios no hay precio de venta directo
+                } else {
+                    $precioProd = $prodRow['precio']
+                        ? number_format((float) $prodRow['precio'], 2, ',', '.') . ' €'
+                        : null;
+                }
 
                 foreach ($usuarios as $u) {
                     $esCompradorEmail = ($u['id'] == $transaccion['comprador_id']);
                     $rol  = $esCompradorEmail ? 'comprador' : 'vendedor';
-                    $html = mailTransaccionCompletada($u['nombre'], $rol, $productoTitulo, $precioProd, $fechaTrans);
+                    $html = mailTransaccionCompletada(
+                        $u['nombre'], $rol, $productoTitulo, $fechaTrans,
+                        $tipoTrans, $productoOfrecido, $dineroExtra, $precioProd
+                    );
                     sendMail($u['email'], $u['nombre'], "Transacción completada — {$productoTitulo}", $html);
                 }
                 break;

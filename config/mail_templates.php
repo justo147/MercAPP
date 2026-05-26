@@ -124,7 +124,7 @@ function mailRecuperarContrasena(string $nombre, string $resetUrl): string
 
       <div style="background-color:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:20px;margin-bottom:28px;">
         <p style="margin:0;font-size:14px;color:#92400e;line-height:1.5;">
-          <strong>⏱ Este enlace caduca en 1 hora.</strong> Si no solicitaste este cambio, puedes ignorar este correo; tu contraseña seguirá siendo la misma.
+          <strong>⏱ Este enlace caduca en 24 horas.</strong> Si no solicitaste este cambio, puedes ignorar este correo; tu contraseña seguirá siendo la misma.
         </p>
       </div>
 
@@ -158,38 +158,80 @@ HTML;
 /**
  * Email de transacción completada.
  *
- * @param string $nombre       Nombre del destinatario.
- * @param string $rol          'comprador' o 'vendedor'.
- * @param string $producto     Título del producto.
- * @param string $precio       Precio formateado (ej. "35.00 €") o "Trueque".
- * @param string $fecha        Fecha de la transacción formateada.
+ * @param string      $nombre           Nombre del destinatario.
+ * @param string      $rol              'comprador' o 'vendedor'.
+ * @param string      $producto         Título del producto principal (del vendedor).
+ * @param string      $fecha            Fecha de la transacción formateada.
+ * @param string      $tipo             'venta', 'intercambio' o 'mixto'.
+ * @param string|null $productoOfrecido Título del producto que ofreció el comprador (intercambios).
+ * @param string|null $dineroExtra      Importe extra formateado si lo hay (intercambios mixtos).
+ * @param string|null $precio           Precio de venta formateado (solo ventas directas).
  */
-function mailTransaccionCompletada(string $nombre, string $rol, string $producto, string $precio = '', string $fecha = ''): string
-{
-    $esComprador = $rol === 'comprador';
+function mailTransaccionCompletada(
+    string $nombre,
+    string $rol,
+    string $producto,
+    string $fecha = '',
+    string $tipo = 'venta',
+    ?string $productoOfrecido = null,
+    ?string $dineroExtra = null,
+    ?string $precio = null
+): string {
+    $esComprador  = $rol === 'comprador';
+    $esIntercambio = in_array($tipo, ['intercambio', 'mixto']);
 
-    $icono   = $esComprador ? '📦' : '💰';
-    $titulo  = $esComprador ? '¡Tu pedido ha sido confirmado!' : '¡Tu venta se ha completado!';
-    $mensaje = $esComprador
-        ? "Has confirmado la recepción de tu pedido. Esperamos que estés satisfecho/a con tu compra."
-        : "El comprador ha confirmado la entrega. La transacción ha finalizado correctamente.";
+    $icono  = $esIntercambio ? '🔄' : ($esComprador ? '📦' : '💰');
+    $titulo = $esIntercambio
+        ? ($esComprador ? '¡Tu intercambio se ha completado!' : '¡Intercambio completado con éxito!')
+        : ($esComprador ? '¡Tu pedido ha sido confirmado!'   : '¡Tu venta se ha completado!');
+    $mensaje = $esIntercambio
+        ? ($esComprador
+            ? "El intercambio ha finalizado correctamente. Esperamos que estés satisfecho/a."
+            : "El comprador ha confirmado la entrega del intercambio. La transacción ha finalizado.")
+        : ($esComprador
+            ? "Has confirmado la recepción de tu pedido. Esperamos que estés satisfecho/a con tu compra."
+            : "El comprador ha confirmado la entrega. La transacción ha finalizado correctamente.");
 
     $badgeColor = $esComprador ? '#0d6efd' : '#04aa86';
     $badgeLabel = $esComprador ? 'Comprador' : 'Vendedor';
 
-    $precioFila = $precio
-        ? "<tr>
-             <td style='padding:8px 0;font-size:14px;color:#64748b;border-bottom:1px solid #f1f5f9;'>Importe</td>
-             <td style='padding:8px 0;font-size:14px;color:#1a1d27;font-weight:600;border-bottom:1px solid #f1f5f9;text-align:right;'>{$precio}</td>
-           </tr>"
-        : "";
+    $sep = "border-bottom:1px solid #f1f5f9;";
 
-    $fechaFila = $fecha
-        ? "<tr>
-             <td style='padding:8px 0;font-size:14px;color:#64748b;'>Fecha</td>
-             <td style='padding:8px 0;font-size:14px;color:#1a1d27;text-align:right;'>{$fecha}</td>
-           </tr>"
-        : "";
+    // Fila: producto del vendedor
+    $filaProducto = "
+          <tr>
+            <td style='padding:8px 0;font-size:14px;color:#64748b;{$sep}'>Producto</td>
+            <td style='padding:8px 0;font-size:14px;color:#1a1d27;font-weight:600;{$sep}text-align:right;'>{$producto}</td>
+          </tr>";
+
+    // Fila: producto ofrecido por el comprador (solo intercambios)
+    $filaOfrecido = $productoOfrecido ? "
+          <tr>
+            <td style='padding:8px 0;font-size:14px;color:#64748b;{$sep}'>A cambio de</td>
+            <td style='padding:8px 0;font-size:14px;color:#1a1d27;font-weight:600;{$sep}text-align:right;'>🔄 {$productoOfrecido}</td>
+          </tr>" : "";
+
+    // Fila: importe extra (intercambio mixto) o precio venta directa
+    $filaImporte = "";
+    if ($dineroExtra) {
+        $filaImporte = "
+          <tr>
+            <td style='padding:8px 0;font-size:14px;color:#64748b;{$sep}'>Importe extra</td>
+            <td style='padding:8px 0;font-size:14px;color:#1a1d27;font-weight:600;{$sep}text-align:right;'>+ {$dineroExtra}</td>
+          </tr>";
+    } elseif ($precio) {
+        $filaImporte = "
+          <tr>
+            <td style='padding:8px 0;font-size:14px;color:#64748b;{$sep}'>Importe</td>
+            <td style='padding:8px 0;font-size:14px;color:#1a1d27;font-weight:600;{$sep}text-align:right;'>{$precio}</td>
+          </tr>";
+    }
+
+    $fechaFila = $fecha ? "
+          <tr>
+            <td style='padding:8px 0;font-size:14px;color:#64748b;{$sep}'>Fecha</td>
+            <td style='padding:8px 0;font-size:14px;color:#1a1d27;{$sep}text-align:right;'>{$fecha}</td>
+          </tr>" : "";
 
     $content = <<<HTML
       <div style="text-align:center;margin-bottom:28px;">
@@ -211,17 +253,15 @@ function mailTransaccionCompletada(string $nombre, string $rol, string $producto
           Resumen de la transacción
         </p>
         <table width="100%" cellpadding="0" cellspacing="0">
-          <tr>
-            <td style="padding:8px 0;font-size:14px;color:#64748b;border-bottom:1px solid #f1f5f9;">Producto</td>
-            <td style="padding:8px 0;font-size:14px;color:#1a1d27;font-weight:600;border-bottom:1px solid #f1f5f9;text-align:right;">{$producto}</td>
-          </tr>
+          {$filaProducto}
+          {$filaOfrecido}
           <tr>
             <td style="padding:8px 0;font-size:14px;color:#64748b;border-bottom:1px solid #f1f5f9;">Tu rol</td>
             <td style="padding:8px 0;border-bottom:1px solid #f1f5f9;text-align:right;">
               <span style="display:inline-block;background-color:{$badgeColor};color:#fff;font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;">{$badgeLabel}</span>
             </td>
           </tr>
-          {$precioFila}
+          {$filaImporte}
           {$fechaFila}
           <tr>
             <td style="padding:8px 0;font-size:14px;color:#64748b;">Estado</td>

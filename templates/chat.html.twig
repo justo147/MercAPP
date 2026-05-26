@@ -797,7 +797,7 @@
           <div class="mb-2">
             <label for="motivo-custom" class="form-label fw-semibold">Detalle adicional</label>
             <textarea id="motivo-custom" class="form-control" rows="3" maxlength="500"
-                      placeholder="Describe el problema…" disabled></textarea>
+                      placeholder="Describe el problema…"></textarea>
           </div>
           <input type="hidden" name="reporte_motivo" id="reporte-motivo-final">
         </div>
@@ -1238,15 +1238,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const syncReport = () => {
       const sel = document.querySelector('input[name="reporte_motivo_preset"]:checked');
       if (!sel) { btnRep.disabled = true; return; }
+      const txt = custom.value.trim();
       if (sel.value === 'Otro') {
-        const txt = custom.value.trim();
         final.value = txt || 'Otro';
         btnRep.disabled = txt === '';
-        custom.disabled = false;
       } else {
-        final.value = sel.value;
+        final.value = txt ? sel.value + ': ' + txt : sel.value;
         btnRep.disabled = false;
-        custom.disabled = true;
       }
     };
     radios.forEach(r => r.addEventListener('change', syncReport));

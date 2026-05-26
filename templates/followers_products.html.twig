@@ -6,9 +6,17 @@
 
   <!-- Feed -->
   <div class="col-lg-8">
-    <div class="d-flex align-items-center justify-content-between mb-3">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
       <h4 class="fw-bold mb-0"><i class="bi bi-newspaper me-2 text-primary"></i>Novedades</h4>
-      <span id="feed-total" class="text-muted small"></span>
+      <div class="d-flex align-items-center gap-2">
+        <span id="feed-total" class="text-muted small"></span>
+        <select id="filtro-dias" class="form-select form-select-sm" style="width:auto;">
+          <option value="7">Últimos 7 días</option>
+          <option value="30" selected>Últimos 30 días</option>
+          <option value="90">Últimos 3 meses</option>
+          <option value="0">Todo</option>
+        </select>
+      </div>
     </div>
 
     <!-- Skeleton -->
@@ -153,7 +161,7 @@
 {% block scripts %}
 <script>
 const FW_USER_ID = {{ usuarioId }};
-let fwPage = 1, fwLoading = false, fwFirst = true;
+let fwPage = 1, fwLoading = false, fwFirst = true, fwDias = 30;
 const FW_LIMIT = 9;
 const DEF = `${BASE}/public/img/default.jpg`;
 
@@ -195,7 +203,7 @@ function renderProduct(p) {
 function loadProducts() {
   if (fwLoading) return;
   fwLoading = true;
-  fetch(`${BASE}/api/products_following.php?page=${fwPage}&limit=${FW_LIMIT}`)
+  fetch(`${BASE}/api/products_following.php?page=${fwPage}&limit=${FW_LIMIT}&dias=${fwDias}`)
     .then(r => r.json())
     .then(data => {
       const skel  = document.getElementById('feed-skeletons');
@@ -218,6 +226,26 @@ function loadProducts() {
 }
 
 document.getElementById('loadMore').addEventListener('click', () => { fwPage++; loadProducts(); });
+
+document.getElementById('filtro-dias').addEventListener('change', function () {
+  fwDias = parseInt(this.value);
+  fwPage = 1;
+  fwFirst = true;
+  document.getElementById('product-list').innerHTML = '';
+  document.getElementById('feed-total').textContent = '';
+  const skel = document.getElementById('feed-skeletons');
+  if (!skel) {
+    const skels = document.createElement('div');
+    skels.id = 'feed-skeletons';
+    skels.className = 'row g-3';
+    skels.innerHTML = Array.from({length: 6}, () =>
+      '<div class="col-6 col-md-4"><div class="skeleton" style="height:250px;border-radius:var(--r-lg);"></div></div>'
+    ).join('');
+    document.getElementById('product-list').before(skels);
+  }
+  loadProducts();
+});
+
 loadProducts();
 
 // Follow from suggestions

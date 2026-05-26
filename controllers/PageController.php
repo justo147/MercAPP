@@ -79,7 +79,7 @@ class PageController extends Controller
             }
             $stmtSug = $this->conn->prepare("
                 SELECT u.id, u.nombre, u.apellidos, u.foto_perfil, COUNT(p.id) AS total_productos
-                FROM   Usuario u
+                FROM   usuario u
                 JOIN   Productos p          ON p.usuario_id      = u.id
                 JOIN   EstadoPublicacion ep ON ep.id             = p.estado_publicacion_id AND ep.nombre = 'activo'
                 WHERE  u.id != ? $excludeSql

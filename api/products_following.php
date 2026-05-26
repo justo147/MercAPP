@@ -17,7 +17,9 @@ $limit  = isset($_GET['limit']) ? intval($_GET['limit']) : 6;
 $page   = isset($_GET['page']) ? intval($_GET['page']) : 1;
 $offset = ($page - 1) * $limit;
 
-$q = isset($_GET['q']) ? trim($_GET['q']) : "";
+$q    = isset($_GET['q'])    ? trim($_GET['q'])       : "";
+$dias = isset($_GET['dias']) ? intval($_GET['dias'])  : 30;
+$dias = in_array($dias, [7, 30, 90, 0]) ? $dias : 30; // whitelist
 
 try {
     $db = new Database();
@@ -25,8 +27,8 @@ try {
 
     $productModel = new Product($conn);
 
-    $productos = $productModel->getProductsFromFollowing($userId, $limit, $offset, $q);
-    $total     = $productModel->countProductsFromFollowing($userId, $q);
+    $productos = $productModel->getProductsFromFollowing($userId, $limit, $offset, $q, $dias);
+    $total     = $productModel->countProductsFromFollowing($userId, $q, $dias);
 
     echo json_encode([
         "success"   => true,

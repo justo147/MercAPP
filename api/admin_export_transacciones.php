@@ -18,8 +18,8 @@ $stmt = $conn->query(
             t.fecha_aceptacion, t.fecha_envio, t.fecha_entrega
      FROM Transacciones t
      JOIN Productos p    ON p.id = t.producto_id
-     JOIN Usuario uc     ON uc.id = t.comprador_id
-     JOIN Usuario uv     ON uv.id = t.vendedor_id
+     JOIN usuario uc     ON uc.id = t.comprador_id
+     JOIN usuario uv     ON uv.id = t.vendedor_id
      ORDER BY t.id DESC"
 );
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);

@@ -75,6 +75,12 @@ function validationForm() {
     if (pass1.value.trim() === "") {
         showError(pass1, 'La contraseña es obligatoria');
         valid = false;
+    } else {
+        const { cumplidos } = evaluarPassword(pass1.value);
+        if (cumplidos < CRITERIOS.length) {
+            showError(pass1, 'La contraseña no cumple todos los requisitos');
+            valid = false;
+        }
     }
 
     if (pass2.value.trim() === "") {
@@ -251,38 +257,59 @@ setupPasswordToggle('toggle-confirm', 'confirmPass', 'icon-confirm');
    INDICADOR DE FUERZA DE CONTRASEÑA
 ============================================================ */
 
-function calcularFuerza(pwd) {
-    let score = 0;
-    if (pwd.length >= 8)                    score++;
-    if (pwd.length >= 12)                   score++;
-    if (/[A-Z]/.test(pwd))                  score++;
-    if (/[0-9]/.test(pwd))                  score++;
-    if (/[^A-Za-z0-9]/.test(pwd))          score++;
-    return score; // 0-5
+const CRITERIOS = [
+    { id: 'req-len', test: p => p.length >= 8           },
+    { id: 'req-upp', test: p => /[A-Z]/.test(p)         },
+    { id: 'req-num', test: p => /[0-9]/.test(p)         },
+    { id: 'req-sym', test: p => /[^A-Za-z0-9]/.test(p) },
+];
+
+const NIVELES = [
+    { color: '#dc3545', label: 'Muy débil',  tip: 'Añade mayúsculas y números'   },
+    { color: '#fd7e14', label: 'Débil',       tip: 'Añade un símbolo (!@#…)'      },
+    { color: '#ffc107', label: 'Regular',     tip: 'Casi bien, añade más variedad' },
+    { color: '#20c997', label: 'Fuerte',      tip: '¡Buena contraseña!'            },
+    { color: '#198754', label: 'Muy fuerte',  tip: 'Contraseña excelente'          },
+];
+
+function evaluarPassword(pwd) {
+    const checks = CRITERIOS.map(c => c.test(pwd));
+    const cumplidos = checks.filter(Boolean).length;
+    // bonus si longitud >= 12
+    const bonus = pwd.length >= 12 ? 1 : 0;
+    const score = Math.min(cumplidos + bonus, NIVELES.length) - 1; // 0-4
+    return { checks, score: Math.max(score, 0), cumplidos };
 }
 
 pass1.addEventListener('input', () => {
-    const pwd   = pass1.value;
-    const wrap  = document.getElementById('strength-wrap');
-    const bar   = document.getElementById('strength-bar');
-    const label = document.getElementById('strength-label');
+    const pwd  = pass1.value;
+    const wrap = document.getElementById('strength-wrap');
+    if (!wrap) return;
 
     if (!pwd) { wrap.style.display = 'none'; return; }
     wrap.style.display = 'block';
 
-    const score = calcularFuerza(pwd);
-    const niveles = [
-        { pct: 20,  cls: 'bg-danger',  txt: 'Muy débil'  },
-        { pct: 40,  cls: 'bg-danger',  txt: 'Débil'      },
-        { pct: 60,  cls: 'bg-warning', txt: 'Regular'    },
-        { pct: 80,  cls: 'bg-info',    txt: 'Buena'      },
-        { pct: 100, cls: 'bg-success', txt: 'Muy fuerte' },
-    ];
-    const nivel = niveles[Math.min(score, 4)];
-    bar.style.width = nivel.pct + '%';
-    bar.className   = 'progress-bar ' + nivel.cls;
-    label.textContent = nivel.txt;
-    label.className   = 'small text-muted';
+    const { checks, score, cumplidos } = evaluarPassword(pwd);
+
+    // Segmentos de color
+    const segs   = [1, 2, 3, 4].map(n => document.getElementById('seg-' + n));
+    const activos = cumplidos === 0 ? 1 : cumplidos; // al menos 1 seg si hay algo escrito
+    const color   = NIVELES[score].color;
+    segs.forEach((seg, i) => {
+        seg.style.background = i < activos ? color : 'var(--c-border)';
+    });
+
+    // Etiqueta y tip
+    document.getElementById('strength-label').textContent = NIVELES[score].label;
+    document.getElementById('strength-label').style.color = color;
+    document.getElementById('strength-tip').textContent   = NIVELES[score].tip;
+
+    // Checklist de requisitos
+    CRITERIOS.forEach((c, i) => {
+        const li = document.getElementById(c.id);
+        if (!li) return;
+        li.classList.toggle('ok', checks[i]);
+    });
 });
 
 

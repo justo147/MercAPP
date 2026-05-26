@@ -168,10 +168,12 @@ class Product
      * @param string $q Texto de búsqueda opcional.
      * @return array Lista de productos con imágenes.
      */
-    public function getByUserPaginated(int $userId, int $limit, int $offset, string $q = ""): array
+    public function getByUserPaginated(int $userId, int $limit, int $offset, string $q = "", array $estados = ['activo', 'pausado', 'vendido']): array
     {
         try {
-            $sql = "SELECT 
+            $placeholders = implode(',', array_fill(0, count($estados), '?'));
+
+            $sql = "SELECT
                         p.id,
                         p.usuario_id,
                         p.titulo,
@@ -187,25 +189,26 @@ class Product
                     JOIN Categorias c ON p.categoria_id = c.id
                     JOIN EstadoProducto ep ON p.estado_producto_id = ep.id
                     JOIN EstadoPublicacion epu ON p.estado_publicacion_id = epu.id
-                    WHERE p.usuario_id = :uid";
+                    WHERE p.usuario_id = ?
+                      AND epu.nombre IN ({$placeholders})";
 
             if (!empty($q)) {
-                $sql .= " AND p.titulo LIKE :q";
+                $sql .= " AND p.titulo LIKE ?";
             }
 
-            $sql .= " ORDER BY p.fecha_publicacion DESC
-                      LIMIT :limit OFFSET :offset";
+            $sql .= " ORDER BY p.fecha_publicacion DESC, p.id DESC LIMIT ? OFFSET ?";
+
+            $params = array_merge([$userId], $estados);
+            if (!empty($q)) $params[] = "%$q%";
 
             $stmt = $this->conn->prepare($sql);
 
-            $stmt->bindValue(":uid", $userId, PDO::PARAM_INT);
-            $stmt->bindValue(":limit", $limit, PDO::PARAM_INT);
-            $stmt->bindValue(":offset", $offset, PDO::PARAM_INT);
-
-            if (!empty($q)) {
-                $stmt->bindValue(":q", "%$q%", PDO::PARAM_STR);
+            $pos = 1;
+            foreach ($params as $val) {
+                $stmt->bindValue($pos++, $val);
             }
-
+            $stmt->bindValue($pos++, $limit,  PDO::PARAM_INT);
+            $stmt->bindValue($pos,   $offset, PDO::PARAM_INT);
             $stmt->execute();
 
             $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -385,25 +388,26 @@ class Product
      * @param string $q Búsqueda opcional.
      * @return int Número de productos.
      */
-    public function countByUser(int $userId, string $q = ""): int
+    public function countByUser(int $userId, string $q = "", array $estados = ['activo', 'pausado', 'vendido']): int
     {
         try {
-            $sql = "SELECT COUNT(*) 
-                    FROM Productos 
-                    WHERE usuario_id = :uid";
+            $placeholders = implode(',', array_fill(0, count($estados), '?'));
+
+            $sql = "SELECT COUNT(*)
+                    FROM Productos p
+                    JOIN EstadoPublicacion epu ON p.estado_publicacion_id = epu.id
+                    WHERE p.usuario_id = ?
+                      AND epu.nombre IN ({$placeholders})";
 
             if (!empty($q)) {
-                $sql .= " AND titulo LIKE :q";
+                $sql .= " AND p.titulo LIKE ?";
             }
+
+            $params = array_merge([$userId], $estados);
+            if (!empty($q)) $params[] = "%$q%";
 
             $stmt = $this->conn->prepare($sql);
-            $stmt->bindValue(":uid", $userId, PDO::PARAM_INT);
-
-            if (!empty($q)) {
-                $stmt->bindValue(":q", "%$q%", PDO::PARAM_STR);
-            }
-
-            $stmt->execute();
+            $stmt->execute($params);
             return (int) $stmt->fetchColumn();
         } catch (PDOException $e) {
             error_log("Error en Product::countByUser → " . $e->getMessage());
@@ -744,8 +748,10 @@ class Product
         return $this->cambiarEstadoPublicacion($productoId, 'activo');
     }
 
-    public function getProductsFromFollowing($userId, $limit, $offset, $q)
+    public function getProductsFromFollowing($userId, $limit, $offset, $q, int $dias = 30)
     {
+        $sqlDias = $dias > 0 ? "AND p.fecha_publicacion >= DATE_SUB(NOW(), INTERVAL ? DAY)" : "";
+
         $sql = "SELECT
                 p.id, p.titulo, p.descripcion, p.precio, p.fecha_publicacion,
                 p.tipo_transaccion,
@@ -753,7 +759,7 @@ class Product
                 u.nombre AS usuario_nombre, u.apellidos AS usuario_apellidos,
                 (
                     SELECT CONCAT(
-                        '[', 
+                        '[',
                         GROUP_CONCAT(
                             CONCAT('{\"url\":\"', ip.url, '\"}')
                         ),
@@ -768,28 +774,25 @@ class Product
             WHERE s.seguidor_id = ?
               AND p.estado_publicacion_id = 1
               AND (p.titulo LIKE ? OR p.descripcion LIKE ?)
+              {$sqlDias}
             ORDER BY p.fecha_publicacion DESC
             LIMIT ? OFFSET ?";
 
-        $stmt = $this->conn->prepare($sql);
-
+        $stmt   = $this->conn->prepare($sql);
         $search = "%$q%";
-
-        // Forzar tipos enteros
-        $limit = (int) $limit;
+        $limit  = (int) $limit;
         $offset = (int) $offset;
 
-        $stmt->bindValue(1, $userId, PDO::PARAM_INT);
-        $stmt->bindValue(2, $search, PDO::PARAM_STR);
-        $stmt->bindValue(3, $search, PDO::PARAM_STR);
-        $stmt->bindValue(4, $limit, PDO::PARAM_INT);
-        $stmt->bindValue(5, $offset, PDO::PARAM_INT);
-
+        $pos    = 1;
+        $stmt->bindValue($pos++, $userId, PDO::PARAM_INT);
+        $stmt->bindValue($pos++, $search, PDO::PARAM_STR);
+        $stmt->bindValue($pos++, $search, PDO::PARAM_STR);
+        if ($dias > 0) $stmt->bindValue($pos++, $dias, PDO::PARAM_INT);
+        $stmt->bindValue($pos++, $limit,  PDO::PARAM_INT);
+        $stmt->bindValue($pos,   $offset, PDO::PARAM_INT);
         $stmt->execute();
 
         $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        // Convertir el JSON de imágenes a array real
         foreach ($productos as &$p) {
             $p['imagenes'] = json_decode($p['imagenes'], true) ?? [];
         }
@@ -797,24 +800,28 @@ class Product
         return $productos;
     }
 
-
-
-
-
-    public function countProductsFromFollowing($userId, $q)
+    public function countProductsFromFollowing($userId, $q, int $dias = 30)
     {
+        $sqlDias = $dias > 0 ? "AND p.fecha_publicacion >= DATE_SUB(NOW(), INTERVAL ? DAY)" : "";
+
         $sql = "SELECT COUNT(*)
             FROM Productos p
             JOIN Seguidores s ON s.seguido_id = p.usuario_id
             WHERE s.seguidor_id = ?
-              AND (p.titulo LIKE ? OR p.descripcion LIKE ?)";
+              AND p.estado_publicacion_id = 1
+              AND (p.titulo LIKE ? OR p.descripcion LIKE ?)
+              {$sqlDias}";
 
-        $stmt = $this->conn->prepare($sql);
+        $stmt   = $this->conn->prepare($sql);
         $search = "%$q%";
-        $stmt->execute([$userId, $search, $search]);
+        $params = [$userId, $search, $search];
+        if ($dias > 0) $params[] = $dias;
 
+        $stmt->execute($params);
         return $stmt->fetchColumn();
     }
+
+
 
 
 }

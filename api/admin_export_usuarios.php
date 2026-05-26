@@ -13,7 +13,7 @@ $conn = $db->getConnection();
 
 $stmt = $conn->query(
     "SELECT id, nombre, email, fecha_registro, rol, estado
-     FROM Usuario
+     FROM usuario
      ORDER BY id ASC"
 );
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);

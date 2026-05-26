@@ -4,6 +4,11 @@
 
 {% block head_extra %}
 <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+<style>
+.req-item { color: var(--c-muted); transition: color .2s; }
+.req-item.ok { color: #198754; }
+.req-item.ok i::before { content: "\f26a"; } /* bi-check-circle-fill */
+</style>
 {% endblock %}
 
 {% block content %}
@@ -41,10 +46,22 @@
         </button>
       </div>
       <div class="mt-2" id="strength-wrap" style="display:none;">
-        <div class="progress" style="height:4px;">
-          <div id="strength-bar" class="progress-bar" role="progressbar" style="width:0%;"></div>
+        <div class="d-flex gap-1 mb-1">
+          <div class="strength-seg flex-fill rounded-pill" id="seg-1" style="height:5px;background:var(--c-border);transition:background .25s;"></div>
+          <div class="strength-seg flex-fill rounded-pill" id="seg-2" style="height:5px;background:var(--c-border);transition:background .25s;"></div>
+          <div class="strength-seg flex-fill rounded-pill" id="seg-3" style="height:5px;background:var(--c-border);transition:background .25s;"></div>
+          <div class="strength-seg flex-fill rounded-pill" id="seg-4" style="height:5px;background:var(--c-border);transition:background .25s;"></div>
         </div>
-        <small id="strength-label" class="text-muted"></small>
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <small id="strength-label" class="fw-semibold" style="font-size:.78rem;"></small>
+          <small id="strength-tip"   class="text-muted"  style="font-size:.75rem;"></small>
+        </div>
+        <ul class="list-unstyled mb-0" id="strength-reqs" style="font-size:.78rem;">
+          <li id="req-len"  class="req-item"><i class="bi bi-x-circle-fill me-1"></i>Mínimo 8 caracteres</li>
+          <li id="req-upp"  class="req-item"><i class="bi bi-x-circle-fill me-1"></i>Una letra mayúscula</li>
+          <li id="req-num"  class="req-item"><i class="bi bi-x-circle-fill me-1"></i>Un número</li>
+          <li id="req-sym"  class="req-item"><i class="bi bi-x-circle-fill me-1"></i>Un símbolo (!@#…)</li>
+        </ul>
       </div>
     </div>
 

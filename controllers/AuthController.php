@@ -2,6 +2,13 @@
 
 require_once __DIR__ . '/../core/Controller.php';
 
+function validarPasswordRobusta(string $pwd): bool {
+    return strlen($pwd) >= 8
+        && preg_match('/[A-Z]/', $pwd)
+        && preg_match('/[0-9]/', $pwd)
+        && preg_match('/[^A-Za-z0-9]/', $pwd);
+}
+
 class AuthController extends Controller
 {
     public function login(array $params = []): void
@@ -103,8 +110,8 @@ class AuthController extends Controller
             if (empty($_POST['name']) || empty($_POST['password']) || empty($_POST['confirmPass']) || empty($_POST['email'])) {
                 echo "<div class='alert alert-danger'>Todos los campos son obligatorios.</div>";
                 exit;
-            } elseif (strlen($_POST['password']) < 8) {
-                echo "<div class='alert alert-danger'>La contraseña debe tener al menos 8 caracteres.</div>";
+            } elseif (!validarPasswordRobusta($_POST['password'])) {
+                echo "<div class='alert alert-danger'>La contraseña debe tener al menos 8 caracteres, una mayúscula, un número y un símbolo.</div>";
                 exit;
             } elseif ($_POST['password'] !== $_POST['confirmPass']) {
                 echo "<div class='alert alert-danger'>Las contraseñas no coinciden.</div>";
@@ -131,7 +138,8 @@ class AuthController extends Controller
                 require __DIR__ . '/../config/mail_config.php';
                 require_once __DIR__ . '/../config/mail_templates.php';
 
-                $verifyUrl = "{$this->base}/verify-email?token={$verifyToken}&email=" . urlencode($_POST['email']);
+                $appUrl    = rtrim($_ENV['APP_URL'] ?? ('https://' . $_SERVER['HTTP_HOST'] . $this->base), '/');
+                $verifyUrl = "{$appUrl}/verify-email?token={$verifyToken}&email=" . urlencode($_POST['email']);
                 sendMail($_POST['email'], $_POST['name'], "Confirma tu cuenta en MercApp", mailVerificacion($_POST['name'], $verifyUrl));
 
                 echo "REGISTRO_EXITOSO";
@@ -203,19 +211,20 @@ class AuthController extends Controller
 
             if ($user) {
                 $token   = bin2hex(random_bytes(32));
-                $expires = date("Y-m-d H:i:s", time() + 3600);
+                $expires = date("Y-m-d H:i:s", time() + 86400); // 24 horas
                 $userModel->setResetToken($email, $token, $expires);
 
-                $resetLink     = "{$this->base}/reset-password?token={$token}&email=" . urlencode($email);
+                $appUrl    = rtrim($_ENV['APP_URL'] ?? ('https://' . $_SERVER['HTTP_HOST'] . $this->base), '/');
+                $resetLink = "{$appUrl}/reset-password?token={$token}&email=" . urlencode($email);
                 $nombreUsuario = $user['nombre'] ?? '';
 
                 require __DIR__ . '/../config/mail_config.php';
                 require_once __DIR__ . '/../config/mail_templates.php';
                 sendMail($email, $nombreUsuario, 'Recuperar contraseña — MercApp', mailRecuperarContrasena($nombreUsuario, $resetLink));
 
-                $mensaje = "Hemos enviado un enlace de recuperación a tu correo.";
+                $mensaje = "<div class='alert alert-success'><i class='bi bi-envelope-check-fill me-2'></i>Hemos enviado un enlace de recuperación a tu correo.</div>";
             } else {
-                $mensaje = "No existe ninguna cuenta con ese correo.";
+                $mensaje = "<div class='alert alert-danger'><i class='bi bi-exclamation-triangle-fill me-2'></i>No existe ninguna cuenta con ese correo.</div>";
             }
         }
 
@@ -234,20 +243,32 @@ class AuthController extends Controller
         $user      = $userModel->validateResetToken($email, $token);
 
         if (!$user) {
-            echo "El enlace no es válido o ha caducado.";
+            $this->render('forgot_pass.html.twig', [
+                'mensaje' => '<div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    El enlace no es válido o ha caducado.
+                    <a href="' . $this->base . '/forgot-password" class="alert-link ms-1">Solicitar uno nuevo</a>.
+                </div>',
+            ]);
             return;
         }
 
+        $success = false;
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (empty($_POST['password'])) {
-                $message = "<div class='alert alert-danger'>Todos los campos son obligatorios.</div>";
-            } elseif (strlen($_POST['password']) < 8) {
-                $message = "<div class='alert alert-danger'>La contraseña debe tener al menos 8 caracteres.</div>";
+                $message = "<div class='alert alert-danger'><i class='bi bi-exclamation-triangle-fill me-2'></i>Todos los campos son obligatorios.</div>";
+            } elseif (!validarPasswordRobusta($_POST['password'])) {
+                $message = "<div class='alert alert-danger'><i class='bi bi-exclamation-triangle-fill me-2'></i>La contraseña debe tener al menos 8 caracteres, una mayúscula, un número y un símbolo.</div>";
             } else {
                 $userModel->updatePassword($email, $_POST['password']);
-                $message = "<div class='alert alert-success d-flex flex-column align-items-start'>
-                    <p class='mb-2'>Contraseña actualizada correctamente.</p>
-                    <a href='{$this->base}/login' class='btn btn-primary'>Inicia sesión</a>
+                $success = true;
+                $message = "<div class='alert alert-success'>
+                    <i class='bi bi-check-circle-fill me-2'></i>
+                    <strong>Contraseña actualizada correctamente.</strong>
+                    <div class='mt-2'>
+                        <a href='{$this->base}/login' class='btn btn-primary btn-sm'>Iniciar sesión</a>
+                    </div>
                 </div>";
             }
         }
@@ -255,6 +276,7 @@ class AuthController extends Controller
         $this->render('reset_password.html.twig', [
             'message' => $message,
             'token'   => $token,
+            'success' => $success,
         ]);
     }
 }
